@@ -619,3 +619,46 @@ def test_telegram_notification(request):
     result = service.send_test_message()
     
     return JsonResponse(result)
+
+
+@tapnex_superuser_required
+def superuser_password_reset(request):
+    """Reset superuser password"""
+    
+    if request.method == 'POST':
+        current_password = request.POST.get('current_password')
+        new_password = request.POST.get('new_password')
+        confirm_password = request.POST.get('confirm_password')
+        
+        # Validate current password
+        if not request.user.check_password(current_password):
+            messages.error(request, 'Current password is incorrect.')
+            return render(request, 'authentication/superuser_password_reset.html', {'error': 'Current password is incorrect.'})
+        
+        # Validate new password
+        if len(new_password) < 8:
+            messages.error(request, 'New password must be at least 8 characters long.')
+            return render(request, 'authentication/superuser_password_reset.html', {'error': 'New password must be at least 8 characters long.'})
+        
+        # Validate password match
+        if new_password != confirm_password:
+            messages.error(request, 'New passwords do not match.')
+            return render(request, 'authentication/superuser_password_reset.html', {'error': 'New passwords do not match.'})
+        
+        # Update password
+        request.user.set_password(new_password)
+        request.user.save()
+        
+        # Update session to prevent logout
+        from django.contrib.auth import update_session_auth_hash
+        update_session_auth_hash(request, request.user)
+        
+        messages.success(request, '✅ Password changed successfully!')
+        return redirect('authentication:superuser_dashboard')
+    
+    response = render(request, 'authentication/superuser_password_reset.html')
+    # Disable all caching
+    response['Cache-Control'] = 'no-cache, no-store, must-revalidate, max-age=0, private'
+    response['Pragma'] = 'no-cache'
+    response['Expires'] = '0'
+    return response

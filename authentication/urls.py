@@ -65,4 +65,5 @@ urlpatterns = [
     path('tapnex/settings/', superuser_views.system_settings, name='system_settings'),
     path('tapnex/database/', superuser_views.database_browser, name='database_browser'),
     path('tapnex/test-telegram/', superuser_views.test_telegram_notification, name='test_telegram_notification'),
+    path('tapnex/password-reset/', superuser_views.superuser_password_reset, name='superuser_password_reset'),
 ]
