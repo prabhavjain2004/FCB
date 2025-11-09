@@ -1239,7 +1239,7 @@ def generate_slots_with_progress(request, game_id):
     import time
     
     game = get_object_or_404(Game, id=game_id)
-    days_ahead = int(request.GET.get('days', 7))
+    days_ahead = int(request.GET.get('days', 2))  # Changed from 7 to 2 days for Vercel timeout
     
     def slot_generation_progress():
         """Generator function that yields progress updates"""

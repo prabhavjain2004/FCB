@@ -861,7 +861,7 @@
 
             <!-- Warning Text -->
             <p class="text-xs text-gray-500 mt-4 text-center">
-              <i class="fas fa-info-circle mr-1"></i>Please don't close this window while slots are being generated
+              <i class="fas fa-info-circle mr-1"></i>Generating initial slots for next 2 days. Additional dates will be generated automatically when viewed.
             </p>
           </div>
         </div>
@@ -1308,7 +1308,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
     
     function generateSlotsWithProgress(gameId, gameName) {
-        const days = 7;  // Generate slots for 7 days
+        const days = 2;  // Generate slots for only 2 days (for Vercel timeout) - rest generated on-demand
         currentEventSource = new EventSource(`/booking/games/manage/api/generate-slots/${gameId}/?days=${days}`);
         
         currentEventSource.onmessage = function(event) {
@@ -1337,7 +1337,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 // Hide cancel button, show success button
                 cancelBtn.classList.add('hidden');
                 continueBtn.classList.remove('hidden');
-                progressStatus.textContent = `✨ ${data.slots_created} time slots generated successfully!`;
+                progressStatus.textContent = `✨ ${data.slots_created} slots created for next 2 days! More dates will generate automatically.`;
                 progressStatus.classList.add('text-green-600', 'font-semibold');
                 
                 // Redirect on button click

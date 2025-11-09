@@ -43,7 +43,7 @@ class GameSlotsAPI(APIView):
     """
     
     def get(self, request, game_id):
-        """Get slots for a specific date"""
+        """Get slots for a specific date with ON-DEMAND GENERATION"""
         
         # Get game
         game = get_object_or_404(Game, id=game_id, is_active=True)
@@ -60,6 +60,33 @@ class GameSlotsAPI(APIView):
                 )
         else:
             selected_date = timezone.now().date()
+        
+        # ====== ON-DEMAND SLOT GENERATION ======
+        # Check if slots exist for this date, if not, generate them NOW!
+        # This is FAST because we generate only 1 day at a time using bulk_create
+        existing_slots_count = GameSlot.objects.filter(
+            game=game,
+            date=selected_date
+        ).count()
+        
+        if existing_slots_count == 0:
+            # Check if this date is available for the game
+            weekday = selected_date.strftime('%A').lower()
+            
+            if weekday in game.available_days:
+                # Generate slots for this date (FAST - uses bulk_create)
+                from .slot_generator import SlotGenerator
+                try:
+                    created_count = SlotGenerator._generate_slots_for_date(game, selected_date)
+                    if created_count > 0:
+                        import logging
+                        logger = logging.getLogger(__name__)
+                        logger.info(f"ON-DEMAND: Generated {created_count} slots for {game.name} on {selected_date}")
+                except Exception as e:
+                    import logging
+                    logger = logging.getLogger(__name__)
+                    logger.error(f"ON-DEMAND: Error generating slots for {selected_date}: {str(e)}")
+        # ====== END ON-DEMAND GENERATION ======
         
         # Get slots with optimized queries
         slots = GameSlot.objects.filter(

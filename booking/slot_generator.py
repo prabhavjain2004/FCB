@@ -86,6 +86,7 @@ class SlotGenerator:
     def _generate_slots_for_date(game, target_date):
         """
         Generate slots for a specific date with enhanced validation
+        OPTIMIZED for fast generation using bulk_create (for on-demand generation)
         
         Args:
             game: Game instance
@@ -98,15 +99,27 @@ class SlotGenerator:
             logger.warning(f"Skipping slot generation for past date: {target_date}")
             return 0
         
-        slots_created = 0
-        current_time = game.opening_time
-        
         # Validate game schedule
         if game.opening_time >= game.closing_time:
             raise ValidationError(f"Invalid schedule for {game.name}: opening time must be before closing time")
         
         if game.slot_duration_minutes <= 0:
             raise ValidationError(f"Invalid slot duration for {game.name}: must be greater than 0")
+        
+        # Check if slots already exist for this date (avoid duplicate generation)
+        existing_slots = GameSlot.objects.filter(
+            game=game,
+            date=target_date
+        ).exists()
+        
+        if existing_slots:
+            logger.debug(f"Slots already exist for {game.name} on {target_date}")
+            return 0
+        
+        # OPTIMIZATION: Build all slots in memory first, then bulk_create
+        slots_to_create = []
+        availabilities_to_create = []
+        current_time = game.opening_time
         
         while current_time < game.closing_time:
             # Calculate end time for this slot
@@ -119,8 +132,66 @@ class SlotGenerator:
                 logger.debug(f"Slot {current_time}-{end_time} extends beyond closing time for {game.name}")
                 break
             
+            # Add slot to bulk list
+            slots_to_create.append(GameSlot(
+                game=game,
+                date=target_date,
+                start_time=current_time,
+                end_time=end_time,
+                is_custom=False,
+                is_active=True
+            ))
+            
+            # Move to next slot time
+            current_time = end_time
+        
+        # BULK CREATE - Much faster than individual creates!
+        if slots_to_create:
             try:
-                # Create slot if it doesn't already exist
+                created_slots = GameSlot.objects.bulk_create(slots_to_create, ignore_conflicts=True)
+                slots_created = len(created_slots)
+                
+                # Create availability tracking for all new slots
+                for slot in created_slots:
+                    availabilities_to_create.append(SlotAvailability(
+                        game_slot=slot,
+                        total_capacity=game.capacity,
+                        booked_spots=0,
+                        is_private_booked=False
+                    ))
+                
+                # Bulk create availabilities
+                if availabilities_to_create:
+                    SlotAvailability.objects.bulk_create(availabilities_to_create, ignore_conflicts=True)
+                
+                logger.info(f"Bulk created {slots_created} slots for {game.name} on {target_date}")
+                return slots_created
+                
+            except Exception as e:
+                logger.error(f"Error bulk creating slots for {game.name} on {target_date}: {e}")
+                # Fallback to slower method if bulk_create fails
+                return SlotGenerator._generate_slots_for_date_legacy(game, target_date)
+        
+        return 0
+    
+    @staticmethod
+    def _generate_slots_for_date_legacy(game, target_date):
+        """
+        Legacy slot generation method (slower but more reliable)
+        Used as fallback if bulk_create fails
+        """
+        slots_created = 0
+        current_time = game.opening_time
+        
+        while current_time < game.closing_time:
+            start_datetime = datetime.combine(target_date, current_time)
+            end_datetime = start_datetime + timedelta(minutes=game.slot_duration_minutes)
+            end_time = end_datetime.time()
+            
+            if end_time > game.closing_time:
+                break
+            
+            try:
                 slot, created = GameSlot.objects.get_or_create(
                     game=game,
                     date=target_date,
@@ -133,7 +204,6 @@ class SlotGenerator:
                 )
                 
                 if created:
-                    # Create availability tracking for new slot
                     SlotAvailability.objects.get_or_create(
                         game_slot=slot,
                         defaults={
@@ -143,13 +213,10 @@ class SlotGenerator:
                         }
                     )
                     slots_created += 1
-                    logger.debug(f"Created slot: {slot}")
                 
             except Exception as e:
-                logger.error(f"Error creating slot {current_time}-{end_time} for {game.name}: {e}")
-                # Continue with next slot instead of failing completely
+                logger.error(f"Error creating slot {current_time}-{end_time}: {e}")
                 
-            # Move to next slot time
             current_time = end_time
         
         return slots_created
