@@ -398,6 +398,16 @@
                         <span>Scan QR</span>
                     </a>
                     
+                    <!-- Logout Button - NEW -->
+                    <a href="{% url 'authentication:logout' %}" 
+                       style="display: flex !important; align-items: center; gap: 0.5rem; padding: 0.625rem 1.25rem; background: linear-gradient(135deg, #ef4444, #dc2626) !important; color: white !important; font-weight: 600; border-radius: 0.5rem; box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4); text-decoration: none !important; transition: all 0.3s ease; border: 1px solid rgba(248, 113, 113, 0.5); position: relative; z-index: 10; min-width: fit-content;"
+                       onmouseover="this.style.background='linear-gradient(135deg, #dc2626, #b91c1c)'; this.style.boxShadow='0 6px 20px rgba(220, 38, 38, 0.5)'; this.style.transform='translateY(-2px)';"
+                       onmouseout="this.style.background='linear-gradient(135deg, #ef4444, #dc2626)'; this.style.boxShadow='0 4px 12px rgba(239, 68, 68, 0.4)'; this.style.transform='translateY(0)';"
+                       title="Logout from Dashboard">
+                        <i class="bi bi-box-arrow-right" style="font-size: 1.1rem; display: inline-block;"></i>
+                        <span class="hidden lg:inline" style="display: inline-block; white-space: nowrap;">Logout</span>
+                    </a>
+                    
                     {% block header_actions %}{% endblock %}
                     
                     <!-- Profile Badge - Desktop & Mobile -->
