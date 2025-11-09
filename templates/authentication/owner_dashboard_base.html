@@ -160,35 +160,27 @@
               </div>
             </div>
 
-            <div class="flex items-center space-x-4">
-              <!-- Search Bar -->
-              <div class="hidden lg:block relative">
-                <input type="text" placeholder="Search..." class="w-64 px-4 py-2 pl-10 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500" />
-                <i class="fas fa-search absolute left-3 top-3 text-gray-400"></i>
-              </div>
+            <div class="flex items-center space-x-3">
+              <!-- Refresh/Sync Button -->
+              <button onclick="location.reload()" class="w-12 h-12 bg-gradient-to-br from-indigo-600 to-purple-600 rounded-full flex items-center justify-center text-white hover:from-indigo-700 hover:to-purple-700 transition-all duration-200 shadow-lg">
+                <i class="fas fa-sync-alt"></i>
+              </button>
 
-              <!-- Quick Logout Button (Mobile) -->
-              <a href="{% url 'authentication:logout' %}" class="md:hidden flex items-center px-3 py-2 rounded-lg bg-red-500 hover:bg-red-600 text-white transition-colors duration-200">
-                <i class="fas fa-sign-out-alt"></i>
-              </a>
-
-              <!-- User Profile Dropdown -->
+              <!-- User Profile Dropdown Button (L Button) -->
               <div class="relative">
-                <button id="profileDropdownBtn" class="flex items-center space-x-3 px-3 py-2 rounded-lg hover:bg-gray-100 transition-colors duration-200">
-                  <div class="w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-full flex items-center justify-center text-white font-semibold">{{ user.first_name|first|default:user.username|first }}</div>
-                  <div class="hidden md:block text-left">
-                    <p class="text-sm font-semibold text-gray-800">{{ user.get_full_name|default:user.username }}</p>
-                    <p class="text-xs text-gray-600">Cafe Owner</p>
-                  </div>
-                  <i class="fas fa-chevron-down text-gray-600 text-xs"></i>
+                <button id="profileDropdownBtn" class="w-12 h-12 bg-gradient-to-br from-indigo-600 to-purple-600 rounded-full flex items-center justify-center text-white font-bold text-lg hover:from-indigo-700 hover:to-purple-700 transition-all duration-200 shadow-lg">
+                  {{ user.first_name|first|default:user.username|first|upper }}
                 </button>
 
                 <!-- Dropdown Menu -->
-                <div id="profileDropdown" class="hidden absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg py-2 border border-gray-200 z-50">
-                  <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"><i class="fas fa-user mr-2"></i> Profile</a>
-                  <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"><i class="fas fa-cog mr-2"></i> Settings</a>
-                  <hr class="my-2" />
-                  <a href="{% url 'authentication:logout' %}" class="block px-4 py-2 text-sm text-red-600 hover:bg-red-50 font-semibold"><i class="fas fa-sign-out-alt mr-2"></i> Logout</a>
+                <div id="profileDropdown" class="hidden absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-xl py-2 border border-gray-200 z-50">
+                  <div class="px-4 py-3 border-b border-gray-200">
+                    <p class="text-sm font-semibold text-gray-800">{{ user.get_full_name|default:user.username }}</p>
+                    <p class="text-xs text-gray-600">{{ cafe_owner.cafe_name }}</p>
+                  </div>
+                  <a href="{% url 'authentication:logout' %}" class="flex items-center px-4 py-3 text-sm text-red-600 hover:bg-red-50 font-semibold transition-colors duration-200">
+                    <i class="fas fa-sign-out-alt mr-3"></i> Logout
+                  </a>
                 </div>
               </div>
             </div>
