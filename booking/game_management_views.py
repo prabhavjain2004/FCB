@@ -1286,20 +1286,36 @@ def generate_slots_with_progress(request, game_id):
 
 @cafe_owner_required
 def delete_game_with_slots(request, game_id):
-    """Delete a game and all its slots (used when cancelling slot generation)"""
+    """Delete a game and all its slots (with cascade to bookings)"""
     if request.method == 'POST':
         try:
             game = get_object_or_404(Game, id=game_id)
             game_name = game.name
             
-            # Delete game (cascades to slots automatically due to ForeignKey)
+            # Get statistics before deletion
+            total_slots = game.slots.count()
+            total_bookings = game.bookings.count()
+            active_bookings = game.bookings.filter(
+                status__in=['CONFIRMED', 'PENDING', 'IN_PROGRESS']
+            ).count()
+            
+            # Delete game (cascades to slots and bookings automatically due to ForeignKey)
             game.delete()
+            
+            message = f'Game "{game_name}" deleted successfully!'
+            if total_bookings > 0:
+                message += f' ({total_slots} slots and {total_bookings} bookings removed)'
+            else:
+                message += f' ({total_slots} slots removed)'
             
             return JsonResponse({
                 'success': True,
-                'message': f'Game "{game_name}" and all its slots have been deleted.'
+                'message': message,
+                'deleted_slots': total_slots,
+                'deleted_bookings': total_bookings
             })
         except Exception as e:
+            logger.error(f"Error deleting game {game_id}: {str(e)}")
             return JsonResponse({
                 'success': False,
                 'error': str(e)

@@ -132,6 +132,12 @@ class SlotGenerator:
                 logger.debug(f"Slot {current_time}-{end_time} extends beyond closing time for {game.name}")
                 break
             
+            # CRITICAL FIX: Check for time wraparound (when slot crosses midnight)
+            # If end_time < current_time, it means we've crossed into the next day
+            if end_time < current_time:
+                logger.debug(f"Slot {current_time}-{end_time} wraps around midnight, stopping generation for {game.name}")
+                break
+            
             # Add slot to bulk list
             slots_to_create.append(GameSlot(
                 game=game,
@@ -148,10 +154,12 @@ class SlotGenerator:
         # BULK CREATE - Much faster than individual creates!
         if slots_to_create:
             try:
-                created_slots = GameSlot.objects.bulk_create(slots_to_create, ignore_conflicts=True)
+                # Bulk create slots without ignore_conflicts to get IDs
+                created_slots = GameSlot.objects.bulk_create(slots_to_create)
                 slots_created = len(created_slots)
                 
                 # Create availability tracking for all new slots
+                # Note: bulk_create populates the ID field on the objects
                 for slot in created_slots:
                     availabilities_to_create.append(SlotAvailability(
                         game_slot=slot,
@@ -162,7 +170,7 @@ class SlotGenerator:
                 
                 # Bulk create availabilities
                 if availabilities_to_create:
-                    SlotAvailability.objects.bulk_create(availabilities_to_create, ignore_conflicts=True)
+                    SlotAvailability.objects.bulk_create(availabilities_to_create)
                 
                 logger.info(f"Bulk created {slots_created} slots for {game.name} on {target_date}")
                 return slots_created
@@ -189,6 +197,11 @@ class SlotGenerator:
             end_time = end_datetime.time()
             
             if end_time > game.closing_time:
+                break
+            
+            # CRITICAL FIX: Check for time wraparound (when slot crosses midnight)
+            if end_time < current_time:
+                logger.debug(f"Slot {current_time}-{end_time} wraps around midnight, stopping generation")
                 break
             
             try:

@@ -16,6 +16,12 @@
       "dest": "gaming_cafe/wsgi.py"
     }
   ],
+  "crons": [
+    {
+      "path": "/api/cron/cleanup-old-slots",
+      "schedule": "0 2 * * 2"
+    }
+  ],
   "env": {
     "PYTHONUNBUFFERED": "1",
     "VERCEL": "1"

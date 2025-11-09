@@ -806,6 +806,9 @@
                     <a href="{% url 'booking:game_management:game_detail' game.id %}" class="btn btn-secondary flex items-center gap-2 px-6 py-3 rounded-xl font-semibold transition-all hover:scale-105" style="background: rgba(59, 130, 246, 0.15); border: 2px solid rgba(59, 130, 246, 0.3); color: #93c5fd;">
                         <i class="bi bi-eye"></i> View Details
                     </a>
+                    <button type="button" id="deleteGameBtn" class="btn btn-danger flex items-center gap-2 px-6 py-3 rounded-xl font-semibold transition-all hover:scale-105" style="background: rgba(220, 38, 38, 0.15); border: 2px solid rgba(220, 38, 38, 0.4); color: #fca5a5;">
+                        <i class="bi bi-trash3"></i> Delete Game
+                    </button>
                     {% endif %}
                 </div>
                 <button type="submit" id="submitBtn" class="btn btn-primary flex items-center gap-2 px-8 py-4 rounded-xl font-bold text-lg transition-all hover:scale-105 shadow-lg" style="background: linear-gradient(135deg, #667eea, #a855f7); border: none; color: white;">
@@ -1445,5 +1448,73 @@ document.getElementById('imageInput').addEventListener('change', function(e) {
         reader.readAsDataURL(file);
     }
 });
+
+{% if game %}
+// Delete game button handler
+const deleteGameBtn = document.getElementById('deleteGameBtn');
+if (deleteGameBtn) {
+    deleteGameBtn.addEventListener('click', function() {
+        const gameName = "{{ game.name|escapejs }}";
+        const gameId = "{{ game.id }}";
+        const slotsCount = {{ active_slots_count|default:0 }};
+        
+        // Build detailed warning message
+        let warningMessage = `⚠️ DELETE GAME: "${gameName}"\n\n`;
+        warningMessage += `This will permanently delete:\n`;
+        warningMessage += `• The game itself\n`;
+        warningMessage += `• All ${slotsCount} time slots\n`;
+        warningMessage += `• All associated bookings (if any)\n\n`;
+        warningMessage += `⚠️ THIS ACTION CANNOT BE UNDONE!\n\n`;
+        warningMessage += `Are you absolutely sure you want to delete this game?`;
+        
+        if (confirm(warningMessage)) {
+            // Double confirmation for extra safety
+            if (confirm(`🔴 FINAL WARNING!\n\nYou are about to permanently delete "${gameName}".\n\nType "DELETE" in the next prompt to confirm.`)) {
+                const userConfirm = prompt('Type "DELETE" to confirm deletion:');
+                
+                if (userConfirm === 'DELETE') {
+                    // Show loading state
+                    deleteGameBtn.disabled = true;
+                    deleteGameBtn.innerHTML = '<i class="bi bi-hourglass-split animate-spin"></i> Deleting...';
+                    deleteGameBtn.style.opacity = '0.6';
+                    
+                    // Send delete request
+                    fetch(`/booking/games/manage/${gameId}/delete-with-slots/`, {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+                            'Content-Type': 'application/json',
+                        }
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            // Show success message with details
+                            alert(`✅ ${data.message}`);
+                            // Redirect to dashboard
+                            window.location.href = '{% url "booking:game_management:dashboard" %}';
+                        } else {
+                            alert(`❌ Error: ${data.error}`);
+                            // Re-enable button
+                            deleteGameBtn.disabled = false;
+                            deleteGameBtn.innerHTML = '<i class="bi bi-trash3"></i> Delete Game';
+                            deleteGameBtn.style.opacity = '1';
+                        }
+                    })
+                    .catch(error => {
+                        alert(`❌ Error deleting game: ${error}`);
+                        // Re-enable button
+                        deleteGameBtn.disabled = false;
+                        deleteGameBtn.innerHTML = '<i class="bi bi-trash3"></i> Delete Game';
+                        deleteGameBtn.style.opacity = '1';
+                    });
+                } else {
+                    alert('❌ Deletion cancelled. You must type "DELETE" exactly to confirm.');
+                }
+            }
+        }
+    });
+}
+{% endif %}
 </script>
 {% endblock %}
