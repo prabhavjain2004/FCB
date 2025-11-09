@@ -1,0 +1,524 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Revenue Reports - TapNex Dashboard{% endblock %}
+
+{% block extra_head %}
+<!-- Load Chart.js synchronously -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gaming-primary">
+    <!-- Header -->
+    <div class="bg-gaming-secondary border-b border-gaming-accent">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center py-6">
+                <div>
+                    <h1 class="text-3xl font-gaming font-bold text-white">Revenue Reports</h1>
+                    <p class="text-gray-400 mt-1">Detailed financial analytics and reporting</p>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <a href="{% url 'authentication:tapnex_dashboard' %}" class="bg-gaming-accent hover:bg-opacity-80 text-white px-4 py-2 rounded-lg transition-colors">
+                        Back to Dashboard
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Date Range Filter -->
+        <div class="bg-gaming-secondary border border-gaming-accent rounded-xl p-6 mb-8">
+            <h3 class="text-lg font-semibold text-white mb-4">Report Filters</h3>
+            <form method="get" class="flex flex-wrap items-end gap-4">
+                <div>
+                    <label for="start_date" class="block text-sm font-medium text-gray-300 mb-1">Start Date</label>
+                    <input type="date" id="start_date" name="start_date" value="{{ start_date|date:'Y-m-d' }}" 
+                           class="px-3 py-2 bg-gaming-primary border border-gaming-accent rounded-lg text-white focus:ring-2 focus:ring-gaming-highlight focus:border-transparent">
+                </div>
+                <div>
+                    <label for="end_date" class="block text-sm font-medium text-gray-300 mb-1">End Date</label>
+                    <input type="date" id="end_date" name="end_date" value="{{ end_date|date:'Y-m-d' }}" 
+                           class="px-3 py-2 bg-gaming-primary border border-gaming-accent rounded-lg text-white focus:ring-2 focus:ring-gaming-highlight focus:border-transparent">
+                </div>
+                <div>
+                    <label for="report_type" class="block text-sm font-medium text-gray-300 mb-1">Report Type</label>
+                    <select id="report_type" name="report_type" class="px-3 py-2 bg-gaming-primary border border-gaming-accent rounded-lg text-white focus:ring-2 focus:ring-gaming-highlight focus:border-transparent">
+                        <option value="daily" {% if report_type == 'daily' %}selected{% endif %}>Daily</option>
+                        <option value="weekly" {% if report_type == 'weekly' %}selected{% endif %}>Weekly</option>
+                        <option value="monthly" {% if report_type == 'monthly' %}selected{% endif %}>Monthly</option>
+                    </select>
+                </div>
+                <button type="submit" class="px-6 py-2 bg-gaming-highlight hover:bg-opacity-90 text-white rounded-lg transition-colors">
+                    Generate Report
+                </button>
+                
+                <!-- Download Buttons -->
+                <div class="flex gap-2 ml-auto">
+                    <button type="submit" name="export" value="csv" class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors flex items-center gap-2">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                        </svg>
+                        CSV
+                    </button>
+                    <button type="submit" name="export" value="excel" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors flex items-center gap-2">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                        </svg>
+                        Excel
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Summary Cards - TapNex Earnings -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+            <!-- Total TapNex Revenue -->
+            <div class="bg-gaming-secondary border border-gaming-accent rounded-xl p-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm font-medium text-gray-400">Total TapNex Revenue</p>
+                        <p class="text-3xl font-bold text-gaming-highlight mt-2">₹{{ revenue_analytics.totals.tapnex_total_revenue|floatformat:2 }}</p>
+                        <p class="text-sm text-gray-500 mt-1">Commission + Platform Fee</p>
+                    </div>
+                    <div class="p-3 bg-gaming-highlight/20 rounded-lg">
+                        <svg class="w-8 h-8 text-gaming-highlight" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Total Bookings -->
+            <div class="bg-gaming-secondary border border-gaming-accent rounded-xl p-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm font-medium text-gray-400">Total Bookings</p>
+                        <p class="text-3xl font-bold text-white mt-2">{{ revenue_analytics.totals.total_bookings }}</p>
+                        <p class="text-sm text-gray-500 mt-1">Confirmed bookings</p>
+                    </div>
+                    <div class="p-3 bg-blue-900/20 rounded-lg">
+                        <svg class="w-8 h-8 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Average Revenue per Booking -->
+            <div class="bg-gaming-secondary border border-gaming-accent rounded-xl p-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm font-medium text-gray-400">Avg. TapNex Revenue</p>
+                        <p class="text-3xl font-bold text-white mt-2">₹{{ revenue_analytics.totals.avg_revenue_per_booking|floatformat:2 }}</p>
+                        <p class="text-sm text-gray-500 mt-1">Per booking</p>
+                    </div>
+                    <div class="p-3 bg-purple-900/20 rounded-lg">
+                        <svg class="w-8 h-8 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Revenue Breakdown Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <!-- Total Commission -->
+            <div class="bg-gaming-secondary border border-gaming-accent rounded-xl p-6">
+                <div class="flex items-center">
+                    <div class="p-2 bg-orange-900/20 rounded-lg">
+                        <svg class="w-6 h-6 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
+                        </svg>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-sm font-medium text-gray-400">Total Commission</p>
+                        <p class="text-2xl font-bold text-white">₹{{ revenue_analytics.totals.total_commission|floatformat:2 }}</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Total Platform Fee -->
+            <div class="bg-gaming-secondary border border-gaming-accent rounded-xl p-6">
+                <div class="flex items-center">
+                    <div class="p-2 bg-cyan-900/20 rounded-lg">
+                        <svg class="w-6 h-6 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                        </svg>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-sm font-medium text-gray-400">Total Platform Fee</p>
+                        <p class="text-2xl font-bold text-white">₹{{ revenue_analytics.totals.total_platform_fee|floatformat:2 }}</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Current Commission Rate -->
+            <div class="bg-gaming-secondary border border-gaming-accent rounded-xl p-6">
+                <div class="flex items-center">
+                    <div class="p-2 bg-yellow-900/20 rounded-lg">
+                        <svg class="w-6 h-6 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                        </svg>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-sm font-medium text-gray-400">Commission Rate</p>
+                        <p class="text-2xl font-bold text-white">{{ revenue_analytics.settings.current_commission_rate }}%</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Monthly Growth -->
+            <div class="bg-gaming-secondary border border-gaming-accent rounded-xl p-6">
+                <div class="flex items-center">
+                    <div class="p-2 {% if growth_rate >= 0 %}bg-green-900/20{% else %}bg-red-900/20{% endif %} rounded-lg">
+                        <svg class="w-6 h-6 {% if growth_rate >= 0 %}text-green-400{% else %}text-red-400{% endif %}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
+                        </svg>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-sm font-medium text-gray-400">Monthly Growth</p>
+                        <p class="text-2xl font-bold {% if growth_rate >= 0 %}text-green-400{% else %}text-red-400{% endif %}">{{ growth_rate|floatformat:1 }}%</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+            <!-- Daily TapNex Revenue Trend -->
+            <div class="bg-gaming-secondary border border-gaming-accent rounded-xl p-6">
+                <h3 class="text-lg font-semibold text-white mb-4">Daily TapNex Revenue Trend</h3>
+                <p class="text-sm text-gray-400 mb-4">Commission + Platform Fee earnings over time</p>
+                <canvas id="dailyRevenueChart" width="400" height="200"></canvas>
+            </div>
+
+            <!-- Commission vs Platform Fee -->
+            <div class="bg-gaming-secondary border border-gaming-accent rounded-xl p-6">
+                <h3 class="text-lg font-semibold text-white mb-4">Revenue Breakdown</h3>
+                <p class="text-sm text-gray-400 mb-4">Commission vs Platform Fee split</p>
+                <canvas id="commissionVsFeeChart" width="400" height="200"></canvas>
+            </div>
+        </div>
+
+        <!-- Top Games Chart -->
+        <div class="bg-gaming-secondary border border-gaming-accent rounded-xl p-6 mb-8">
+            <h3 class="text-lg font-semibold text-white mb-4">Top Games by TapNex Revenue</h3>
+            <p class="text-sm text-gray-400 mb-4">Games generating the most commission + platform fee</p>
+            <canvas id="gameRevenueChart" width="400" height="200"></canvas>
+        </div>
+
+        <!-- Booking Type TapNex Revenue Analysis -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+            <!-- Booking Type Breakdown -->
+            <div class="bg-gaming-secondary border border-gaming-accent rounded-xl p-6">
+                <h3 class="text-lg font-semibold text-white mb-4">TapNex Revenue by Booking Type</h3>
+                <div class="space-y-4">
+                    <div class="flex justify-between items-center">
+                        <div class="flex items-center">
+                            <div class="w-4 h-4 bg-blue-500 rounded mr-3"></div>
+                            <span class="text-gray-300">Private Bookings</span>
+                        </div>
+                        <div class="text-right">
+                            <p class="font-semibold text-white">{{ revenue_analytics.booking_breakdown.private_bookings }}</p>
+                            <p class="text-sm text-gaming-highlight">₹{{ revenue_analytics.booking_breakdown.private_tapnex_revenue|floatformat:2 }}</p>
+                        </div>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <div class="flex items-center">
+                            <div class="w-4 h-4 bg-green-500 rounded mr-3"></div>
+                            <span class="text-gray-300">Shared Bookings</span>
+                        </div>
+                        <div class="text-right">
+                            <p class="font-semibold text-white">{{ revenue_analytics.booking_breakdown.shared_bookings }}</p>
+                            <p class="text-sm text-gaming-highlight">₹{{ revenue_analytics.booking_breakdown.shared_tapnex_revenue|floatformat:2 }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Revenue Summary -->
+            <div class="bg-gaming-secondary border border-gaming-accent rounded-xl p-6">
+                <h3 class="text-lg font-semibold text-white mb-4">TapNex Revenue Summary</h3>
+                <div class="space-y-4">
+                    <div class="flex justify-between items-center">
+                        <span class="text-gray-300">Total TapNex Earnings</span>
+                        <span class="font-bold text-gaming-highlight text-xl">₹{{ revenue_analytics.totals.tapnex_total_revenue|floatformat:2 }}</span>
+                    </div>
+                    <hr class="border-gaming-accent">
+                    <div class="flex justify-between items-center">
+                        <span class="text-sm text-gray-400">Commission Earned</span>
+                        <span class="text-sm font-semibold text-white">₹{{ revenue_analytics.totals.total_commission|floatformat:2 }}</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-sm text-gray-400">Platform Fee Earned</span>
+                        <span class="text-sm font-semibold text-white">₹{{ revenue_analytics.totals.total_platform_fee|floatformat:2 }}</span>
+                    </div>
+                    <hr class="border-gaming-accent">
+                    <div class="flex justify-between items-center">
+                        <span class="text-xs text-gray-500">Current Commission Rate</span>
+                        <span class="text-xs text-gray-400">{{ revenue_analytics.settings.current_commission_rate }}%</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-xs text-gray-500">Current Platform Fee</span>
+                        <span class="text-xs text-gray-400">
+                            {% if revenue_analytics.settings.platform_fee_type == 'PERCENT' %}
+                                {{ revenue_analytics.settings.current_platform_fee }}%
+                            {% else %}
+                                ₹{{ revenue_analytics.settings.current_platform_fee }}
+                            {% endif %}
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Detailed Game TapNex Revenue Table -->
+        <div class="bg-gaming-secondary border border-gaming-accent rounded-xl overflow-hidden">
+            <div class="px-6 py-4 border-b border-gaming-accent">
+                <h3 class="text-lg font-semibold text-white">Detailed Game Performance (TapNex Revenue)</h3>
+                <p class="text-sm text-gray-400 mt-1">Commission + Platform Fee earned per game</p>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gaming-accent">
+                    <thead class="bg-gaming-primary">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Game</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Bookings</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">TapNex Revenue</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Commission</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Platform Fee</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Private</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Shared</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gaming-accent">
+                        {% for game_name, stats in game_breakdown %}
+                        <tr class="hover:bg-gaming-accent/10">
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-white">{{ game_name }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-300">{{ stats.bookings }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gaming-highlight font-semibold">₹{{ stats.tapnex_revenue|floatformat:2 }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-300">₹{{ stats.commission|floatformat:2 }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-300">₹{{ stats.platform_fee|floatformat:2 }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
+                                {{ stats.private_bookings }} (₹{{ stats.private_tapnex_revenue|floatformat:2 }})
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
+                                {{ stats.shared_bookings }} (₹{{ stats.shared_tapnex_revenue|floatformat:2 }})
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="7" class="px-6 py-4 text-center text-gray-400">No game data available for selected period</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Ensure Chart.js is loaded -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+<script>
+// Function to initialize charts
+function initializeCharts() {
+    // Parse chart data
+    const dailyChartData = {{ daily_chart_data|safe }};
+    const gameChartData = {{ game_chart_data|safe }};
+    const commissionVsFeeData = {{ commission_vs_fee_data|safe }};
+
+    console.log('Chart.js loaded:', typeof Chart !== 'undefined');
+    console.log('Daily Chart Data:', dailyChartData);
+    console.log('Game Chart Data:', gameChartData);
+    console.log('Commission vs Fee Data:', commissionVsFeeData);
+
+    // Check if Chart.js is loaded
+    if (typeof Chart === 'undefined') {
+        console.error('Chart.js failed to load. Retrying...');
+        setTimeout(initializeCharts, 500);
+        return;
+    }
+
+    // Daily TapNex Revenue Chart
+    const dailyCtx = document.getElementById('dailyRevenueChart').getContext('2d');
+const dailyChart = new Chart(dailyCtx, {
+    type: 'line',
+    data: {
+        labels: dailyChartData.labels,
+        datasets: [{
+            label: 'TapNex Revenue',
+            data: dailyChartData.tapnex_revenue,
+            borderColor: 'rgb(236, 72, 153)',
+            backgroundColor: 'rgba(236, 72, 153, 0.1)',
+            tension: 0.3,
+            fill: true
+        }, {
+            label: 'Commission',
+            data: dailyChartData.commission,
+            borderColor: 'rgb(251, 146, 60)',
+            backgroundColor: 'rgba(251, 146, 60, 0.1)',
+            tension: 0.3,
+            fill: false
+        }, {
+            label: 'Platform Fee',
+            data: dailyChartData.platform_fee,
+            borderColor: 'rgb(34, 211, 238)',
+            backgroundColor: 'rgba(34, 211, 238, 0.1)',
+            tension: 0.3,
+            fill: false
+        }]
+    },
+    options: {
+        responsive: true,
+        interaction: {
+            mode: 'index',
+            intersect: false,
+        },
+        scales: {
+            y: {
+                type: 'linear',
+                display: true,
+                position: 'left',
+                title: {
+                    display: true,
+                    text: 'Revenue (₹)',
+                    color: '#9ca3af'
+                },
+                ticks: {
+                    color: '#9ca3af'
+                },
+                grid: {
+                    color: 'rgba(75, 85, 99, 0.2)'
+                }
+            },
+            x: {
+                ticks: {
+                    color: '#9ca3af'
+                },
+                grid: {
+                    color: 'rgba(75, 85, 99, 0.2)'
+                }
+            }
+        },
+        plugins: {
+            legend: {
+                labels: {
+                    color: '#fff'
+                }
+            }
+        }
+    }
+});
+
+// Commission vs Platform Fee Pie Chart
+const commissionVsFeeCtx = document.getElementById('commissionVsFeeChart').getContext('2d');
+const commissionVsFeeChart = new Chart(commissionVsFeeCtx, {
+    type: 'doughnut',
+    data: {
+        labels: commissionVsFeeData.labels,
+        datasets: [{
+            data: commissionVsFeeData.data,
+            backgroundColor: [
+                'rgb(251, 146, 60)',
+                'rgb(34, 211, 238)'
+            ],
+            borderWidth: 2,
+            borderColor: '#1f2937'
+        }]
+    },
+    options: {
+        responsive: true,
+        plugins: {
+            legend: {
+                position: 'bottom',
+                labels: {
+                    color: '#fff',
+                    padding: 15
+                }
+            },
+            tooltip: {
+                callbacks: {
+                    label: function(context) {
+                        let label = context.label || '';
+                        if (label) {
+                            label += ': ';
+                        }
+                        label += '₹' + context.parsed.toFixed(2);
+                        return label;
+                    }
+                }
+            }
+        }
+    }
+});
+
+// Top Games by TapNex Revenue Chart
+const gameCtx = document.getElementById('gameRevenueChart').getContext('2d');
+const gameChart = new Chart(gameCtx, {
+    type: 'bar',
+    data: {
+        labels: gameChartData.labels,
+        datasets: [{
+            label: 'TapNex Revenue',
+            data: gameChartData.tapnex_revenue,
+            backgroundColor: 'rgba(236, 72, 153, 0.8)',
+            borderColor: 'rgb(236, 72, 153)',
+            borderWidth: 1
+        }]
+    },
+    options: {
+        responsive: true,
+        indexAxis: 'y',
+        scales: {
+            x: {
+                title: {
+                    display: true,
+                    text: 'TapNex Revenue (₹)',
+                    color: '#9ca3af'
+                },
+                ticks: {
+                    color: '#9ca3af'
+                },
+                grid: {
+                    color: 'rgba(75, 85, 99, 0.2)'
+                }
+            },
+            y: {
+                ticks: {
+                    color: '#9ca3af'
+                },
+                grid: {
+                    color: 'rgba(75, 85, 99, 0.2)'
+                }
+            }
+        },
+        plugins: {
+            legend: {
+                display: false
+            },
+            tooltip: {
+                callbacks: {
+                    label: function(context) {
+                        return 'TapNex Revenue: ₹' + context.parsed.x.toFixed(2);
+                    }
+                }
+            }
+        }
+    }
+});
+}
+
+// Wait for DOM to load, then initialize charts
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initializeCharts);
+} else {
+    // DOM already loaded
+    initializeCharts();
+}
+</script>
+{% endblock %}

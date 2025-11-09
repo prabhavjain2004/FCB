@@ -1,0 +1,572 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="TapNex Arena - Owner Dashboard">
+    <title>{% block title %}Owner Dashboard{% endblock %} - TapNex Arena</title>
+    
+    <!-- Modern Design System -->
+    <link rel="stylesheet" href="{% static 'css/design-system-v2.css' %}">
+    <link rel="stylesheet" href="{% static 'css/animations.css' %}">
+    <link rel="stylesheet" href="{% static 'css/forge-custom.css' %}">
+    <link rel="stylesheet" href="{% static 'css/output.css' %}">
+    <link rel="stylesheet" href="{% static 'css/mobile-variables.css' %}">
+    <link rel="stylesheet" href="{% static 'css/responsive-mobile.css' %}">
+    <link rel="stylesheet" href="{% static 'css/owner-dashboard.css' %}">
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Orbitron:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="{% static 'images/tapnex_logo.png' %}">
+    
+    <!-- Theme Color -->
+    <meta name="theme-color" content="#111827">
+    
+    <style>
+        /* Owner Dashboard Specific Styles */
+        body {
+            background: #111827;
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+            overflow-y: auto;
+            position: relative;
+        }
+        
+        html {
+            overflow-x: hidden;
+            overflow-y: auto;
+        }
+        
+        /* Content Area */
+        .owner-content {
+            min-height: 100vh;
+            padding-top: 5rem;
+            padding-bottom: 2rem;
+            overflow-x: hidden;
+            overflow-y: visible;
+            width: 100%;
+            position: relative;
+        }
+        
+        /* Top Bar */
+        .owner-topbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4rem;
+            background: rgba(17, 24, 39, 0.98);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            z-index: 999;
+            display: flex;
+            align-items: center;
+            padding: 0 1rem;
+        }
+        
+        @media (min-width: 640px) {
+            .owner-topbar {
+                padding: 0 1.5rem;
+            }
+        }
+        
+        @media (min-width: 1024px) {
+            .owner-topbar {
+                padding: 0 3rem;
+            }
+        }
+        
+        /* Card Styles */
+        .owner-card {
+            background: rgba(30, 41, 59, 0.5);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 1.5rem;
+            padding: 1.5rem;
+            transition: all 0.3s ease;
+        }
+        
+        .owner-card:hover {
+            border-color: rgba(102, 126, 234, 0.3);
+            transform: translateY(-2px);
+        }
+        
+        /* Stat Card */
+        .stat-card {
+            background: rgba(30, 41, 59, 0.5);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 1.25rem;
+            padding: 1.75rem 1.5rem;
+            transition: all 0.3s ease;
+            min-height: 160px;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-4px);
+            border-color: rgba(102, 126, 234, 0.5);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.2);
+        }
+        
+        /* Gradient Text */
+        .gradient-text {
+            background: linear-gradient(135deg, #00f5ff, #b537f2);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        /* Mobile Optimizations */
+        @media (max-width: 768px) {
+            .owner-topbar {
+                padding: 0 1rem;
+            }
+            
+            .owner-content {
+                padding: 1rem;
+                padding-top: 5rem;
+            }
+            
+            .owner-card {
+                padding: 1rem;
+                border-radius: 1rem;
+            }
+            
+            .stat-card {
+                padding: 1rem;
+            }
+        }
+        
+        /* Prevent body overflow */
+        body {
+            overflow-x: hidden;
+            width: 100%;
+        }
+        
+        html {
+            overflow-x: hidden;
+        }
+        
+        /* Override mobile-first grid styles for owner dashboard */
+        @media (min-width: 640px) {
+            .owner-content .grid.sm\:grid-cols-2 {
+                grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+            }
+        }
+        
+        @media (min-width: 1024px) {
+            .owner-content .grid.lg\:grid-cols-3 {
+                grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+            }
+        }
+        
+
+        
+        /* Logo and brand styling */
+        .logo-text {
+            color: white !important;
+            font-weight: 600;
+        }
+        
+        .logo-text .gradient-part {
+            background: linear-gradient(135deg, #e94560, #00d4aa);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        /* Hamburger Menu Styles */
+        .hamburger-icon {
+            width: 20px;
+            height: 16px;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        
+        .hamburger-line {
+            width: 100%;
+            height: 2px;
+            background: white;
+            border-radius: 2px;
+            transition: all 0.3s ease;
+        }
+        
+        .mobile-menu-toggle:hover .hamburger-line {
+            background: linear-gradient(135deg, #e94560, #00d4aa);
+        }
+        
+        .mobile-menu-toggle.active {
+            opacity: 0;
+            pointer-events: none;
+        }
+        
+        .mobile-menu-toggle {
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        .mobile-menu-toggle:active {
+            transform: scale(0.95);
+        }
+        
+        /* Mobile Menu */
+        .mobile-menu {
+            transition: transform 0.3s ease;
+        }
+        
+        .mobile-menu-close {
+            cursor: pointer;
+            z-index: 10;
+        }
+        
+        .mobile-menu-close i {
+            display: block;
+        }
+        
+        @media (max-width: 640px) {
+            .mobile-menu {
+                max-width: 85vw;
+            }
+        }
+        
+        .mobile-menu .overflow-y-auto {
+            scrollbar-width: thin;
+            scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
+        }
+        
+        .mobile-menu .overflow-y-auto::-webkit-scrollbar {
+            width: 4px;
+        }
+        
+        .mobile-menu .overflow-y-auto::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        
+        .mobile-menu .overflow-y-auto::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 2px;
+        }
+        
+        .mobile-menu .overflow-y-auto::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+        
+        /* Desktop Navigation - CRITICAL FIX */
+        .desktop-nav {
+            display: none !important;
+        }
+        
+        @media (min-width: 768px) {
+            .desktop-nav {
+                display: flex !important;
+                visibility: visible !important;
+                opacity: 1 !important;
+            }
+            
+            .mobile-menu,
+            .mobile-menu-overlay {
+                display: none !important;
+            }
+            
+            .mobile-menu-toggle {
+                display: none !important;
+            }
+        }
+        
+        @media (max-width: 767px) {
+            .desktop-nav {
+                display: none !important;
+            }
+            
+            .mobile-menu-toggle {
+                display: flex !important;
+            }
+        }
+        
+        /* Navigation Button Styles */
+        .nav-btn {
+            display: inline-flex !important;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            border-radius: 0.75rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: rgba(255, 255, 255, 0.9) !important;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            transition: all 0.2s ease;
+            text-decoration: none;
+            white-space: nowrap;
+            visibility: visible !important;
+            opacity: 1 !important;
+        }
+        
+        .nav-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(102, 126, 234, 0.5);
+            color: white !important;
+            transform: translateY(-1px);
+        }
+        
+        .nav-btn-active {
+            background: linear-gradient(135deg, #667eea, #764ba2) !important;
+            border-color: transparent !important;
+            color: white !important;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+        
+        .nav-btn i {
+            font-size: 1rem;
+            display: inline-block !important;
+        }
+        
+        .nav-btn span {
+            display: inline-block !important;
+        }
+    </style>
+    
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <!-- Top Bar -->
+    <div class="owner-topbar">
+        <div class="flex items-center justify-between w-full max-w-[1600px] mx-auto">
+            <!-- Left: Logo & Brand Name -->
+            <div class="flex items-center gap-3">
+                <img src="{% static 'images/tapnex_logo.png' %}" alt="TapNex Arena" class="h-8 w-auto" style="max-height: 32px;">
+                <span class="logo-text text-xl font-semibold">
+                    TapNex<span class="gradient-part">Arena</span>
+                </span>
+            </div>
+            
+            <!-- Right: Navigation & Actions -->
+            <div class="flex items-center gap-4 lg:gap-6">
+                <!-- Desktop Navigation -->
+                <nav class="desktop-nav hidden md:flex items-center gap-2">
+                    <a href="{% url 'authentication:owner_overview' %}" 
+                       class="nav-btn {% if request.resolver_match.url_name == 'owner_overview' %}nav-btn-active{% endif %}">
+                        <i class="bi bi-speedometer2"></i>
+                        <span>Overview</span>
+                    </a>
+                    <a href="{% url 'authentication:owner_bookings' %}" 
+                       class="nav-btn {% if request.resolver_match.url_name == 'owner_bookings' %}nav-btn-active{% endif %}">
+                        <i class="bi bi-calendar-check"></i>
+                        <span>Bookings</span>
+                    </a>
+                    <a href="{% url 'authentication:owner_games' %}" 
+                       class="nav-btn {% if request.resolver_match.url_name == 'owner_games' %}nav-btn-active{% endif %}">
+                        <i class="bi bi-controller"></i>
+                        <span>Games</span>
+                    </a>
+                    <a href="{% url 'authentication:owner_customers' %}" 
+                       class="nav-btn {% if request.resolver_match.url_name == 'owner_customers' %}nav-btn-active{% endif %}">
+                        <i class="bi bi-people"></i>
+                        <span>Customers</span>
+                    </a>
+                    <a href="{% url 'authentication:owner_revenue' %}" 
+                       class="nav-btn {% if request.resolver_match.url_name == 'owner_revenue' %}nav-btn-active{% endif %}">
+                        <i class="bi bi-currency-rupee"></i>
+                        <span>Revenue</span>
+                    </a>
+                    <a href="{% url 'authentication:owner_reports' %}" 
+                       class="nav-btn {% if request.resolver_match.url_name == 'owner_reports' %}nav-btn-active{% endif %}">
+                        <i class="bi bi-graph-up"></i>
+                        <span>Reports</span>
+                    </a>
+                </nav>
+                
+                <!-- Actions & User -->
+                <div class="flex items-center gap-3">
+                    <!-- QR Scanner Button - Prominent Action -->
+                    <a href="{% url 'booking:qr_scanner' %}" 
+                       class="hidden md:flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white rounded-lg font-semibold transition-all shadow-lg hover:shadow-xl"
+                       title="Scan QR Code">
+                        <i class="bi bi-qr-code-scan text-lg"></i>
+                        <span>Scan QR</span>
+                    </a>
+                    
+                    {% block header_actions %}{% endblock %}
+                    
+                    <!-- Profile Badge - Desktop & Mobile -->
+                    <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-gradient-to-br from-indigo-600 to-purple-600 flex items-center justify-center text-white font-bold text-sm flex-shrink-0 shadow-lg cursor-pointer hover:shadow-xl transition-all" title="{{ user.get_full_name|default:user.username }}">
+                        {{ user.first_name.0|default:user.username.0|upper }}
+                    </div>
+                    
+                    <!-- Mobile Menu Toggle -->
+                    <button class="md:hidden mobile-menu-toggle relative w-10 h-10 flex items-center justify-center rounded-lg hover:bg-white/10 transition-all duration-200" aria-label="Toggle menu">
+                        <div class="hamburger-icon">
+                            <span class="hamburger-line"></span>
+                            <span class="hamburger-line"></span>
+                            <span class="hamburger-line"></span>
+                        </div>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Mobile Menu -->
+    <div class="mobile-menu fixed top-0 right-0 w-full max-w-xs transform translate-x-full transition-transform duration-300 md:hidden" style="height: 100vh; height: 100dvh; z-index: 1000;">
+        <div class="flex flex-col h-full bg-gradient-to-b from-gray-900 via-gray-900 to-gray-950 backdrop-blur-xl shadow-2xl">
+            <!-- Mobile Menu Header -->
+            <div class="flex items-center justify-between px-5 border-b border-white/10" style="height: 4rem;">
+                <span class="text-white font-bold text-lg">Menu</span>
+                <button class="mobile-menu-close w-9 h-9 flex items-center justify-center rounded-lg hover:bg-white/10 transition-all duration-200" aria-label="Close menu">
+                    <i class="bi bi-x-lg text-lg text-white"></i>
+                </button>
+            </div>
+
+            <!-- Mobile Menu Content -->
+            <div class="flex-1 overflow-y-auto px-4 py-5">
+                <!-- User Info Card -->
+                <div class="bg-gradient-to-br from-indigo-600/20 to-purple-600/20 rounded-xl p-4 mb-5 border border-white/10">
+                    <div class="flex items-center gap-3">
+                        <div class="w-12 h-12 rounded-full bg-gradient-to-br from-indigo-600 to-purple-600 flex items-center justify-center text-white font-bold text-base flex-shrink-0 shadow-lg">
+                            {{ user.first_name.0|default:user.username.0|upper }}
+                        </div>
+                        <div class="min-w-0 flex-1">
+                            <p class="text-white font-semibold text-base truncate">
+                                {{ user.get_full_name|default:user.username }}
+                            </p>
+                            <p class="text-gray-400 text-xs truncate">{{ user.email }}</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Mobile Navigation Links -->
+                <nav class="space-y-1.5">
+                    <a href="{% url 'authentication:owner_overview' %}" 
+                       class="flex items-center gap-3 text-gray-300 hover:text-white hover:bg-white/10 px-4 py-3.5 rounded-xl transition-all font-medium {% if request.resolver_match.url_name == 'owner_overview' %}bg-white/10 text-white{% endif %}">
+                        <i class="bi bi-speedometer2 text-lg text-indigo-400"></i>
+                        <span>Overview</span>
+                    </a>
+                    <a href="{% url 'authentication:owner_bookings' %}" 
+                       class="flex items-center gap-3 text-gray-300 hover:text-white hover:bg-white/10 px-4 py-3.5 rounded-xl transition-all font-medium {% if request.resolver_match.url_name == 'owner_bookings' %}bg-white/10 text-white{% endif %}">
+                        <i class="bi bi-calendar-check text-lg text-blue-400"></i>
+                        <span>Bookings</span>
+                    </a>
+                    <a href="{% url 'authentication:owner_games' %}" 
+                       class="flex items-center gap-3 text-gray-300 hover:text-white hover:bg-white/10 px-4 py-3.5 rounded-xl transition-all font-medium {% if request.resolver_match.url_name == 'owner_games' %}bg-white/10 text-white{% endif %}">
+                        <i class="bi bi-controller text-lg text-purple-400"></i>
+                        <span>Games</span>
+                    </a>
+                    <a href="{% url 'authentication:owner_customers' %}" 
+                       class="flex items-center gap-3 text-gray-300 hover:text-white hover:bg-white/10 px-4 py-3.5 rounded-xl transition-all font-medium {% if request.resolver_match.url_name == 'owner_customers' %}bg-white/10 text-white{% endif %}">
+                        <i class="bi bi-people text-lg text-pink-400"></i>
+                        <span>Customers</span>
+                    </a>
+                    <a href="{% url 'authentication:owner_revenue' %}" 
+                       class="flex items-center gap-3 text-gray-300 hover:text-white hover:bg-white/10 px-4 py-3.5 rounded-xl transition-all font-medium {% if request.resolver_match.url_name == 'owner_revenue' %}bg-white/10 text-white{% endif %}">
+                        <i class="bi bi-currency-rupee text-lg text-green-400"></i>
+                        <span>Revenue</span>
+                    </a>
+                    <a href="{% url 'authentication:owner_reports' %}" 
+                       class="flex items-center gap-3 text-gray-300 hover:text-white hover:bg-white/10 px-4 py-3.5 rounded-xl transition-all font-medium {% if request.resolver_match.url_name == 'owner_reports' %}bg-white/10 text-white{% endif %}">
+                        <i class="bi bi-graph-up text-lg text-orange-400"></i>
+                        <span>Reports</span>
+                    </a>
+                    
+                    <!-- QR Scanner - Prominent in Mobile Menu -->
+                    <a href="{% url 'booking:qr_scanner' %}" 
+                       class="flex items-center gap-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white hover:from-indigo-700 hover:to-purple-700 px-4 py-3.5 rounded-xl transition-all font-semibold shadow-lg {% if request.resolver_match.url_name == 'qr_scanner' %}ring-2 ring-white/30{% endif %}">
+                        <i class="bi bi-qr-code-scan text-lg"></i>
+                        <span>Scan QR Code</span>
+                    </a>
+                </nav>
+                
+                <!-- Logout Button -->
+                <div class="mt-5 pt-5 border-t border-white/10">
+                    <a href="{% url 'authentication:logout' %}" class="flex items-center justify-center gap-2 text-red-400 hover:text-red-300 hover:bg-red-500/10 px-4 py-3.5 rounded-xl transition-all font-medium">
+                        <i class="bi bi-box-arrow-right text-lg"></i>
+                        <span>Logout</span>
+                    </a>
+                </div>
+            </div>
+            
+            <!-- Footer -->
+            <div class="px-5 py-4 border-t border-white/10 bg-black/20">
+                <p class="text-gray-500 text-xs text-center">
+                    © 2025 TapNex Arena
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mobile Menu Overlay -->
+    <div class="mobile-menu-overlay fixed inset-0 bg-black/50 backdrop-blur-sm hidden md:hidden" style="z-index: 998;"></div>
+    
+    <!-- Main Content -->
+    <main class="owner-content">
+        <div class="max-w-[1600px] mx-auto w-full px-4 sm:px-6 lg:px-8 py-4 sm:py-6">
+            {% if messages %}
+                {% for message in messages %}
+                <div class="alert alert-{% if message.tags == 'error' %}error{% elif message.tags == 'success' %}success{% elif message.tags == 'warning' %}warning{% else %}info{% endif %} mb-6 animate-fade-in-down">
+                    <div class="flex items-center gap-3">
+                        <i class="bi bi-{% if message.tags == 'error' %}exclamation-circle{% elif message.tags == 'success' %}check-circle{% elif message.tags == 'warning' %}exclamation-triangle{% else %}info-circle{% endif %} text-xl"></i>
+                        <div class="flex-1">{{ message }}</div>
+                    </div>
+                </div>
+                {% endfor %}
+            {% endif %}
+            
+            {% block content %}{% endblock %}
+        </div>
+    </main>
+    
+    <script>
+        // Mobile Menu Toggle
+        const mobileMenuToggle = document.querySelector('.mobile-menu-toggle');
+        const mobileMenuClose = document.querySelector('.mobile-menu-close');
+        const mobileMenu = document.querySelector('.mobile-menu');
+        const mobileMenuOverlay = document.querySelector('.mobile-menu-overlay');
+        
+        function openMobileMenu() {
+            mobileMenu.classList.remove('translate-x-full');
+            mobileMenuOverlay.classList.remove('hidden');
+            mobileMenuToggle.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+        
+        function closeMobileMenu() {
+            mobileMenu.classList.add('translate-x-full');
+            mobileMenuOverlay.classList.add('hidden');
+            mobileMenuToggle.classList.remove('active');
+            document.body.style.overflow = '';
+        }
+        
+        if (mobileMenuToggle) {
+            mobileMenuToggle.addEventListener('click', openMobileMenu);
+        }
+        
+        if (mobileMenuClose) {
+            mobileMenuClose.addEventListener('click', closeMobileMenu);
+        }
+        
+        if (mobileMenuOverlay) {
+            mobileMenuOverlay.addEventListener('click', closeMobileMenu);
+        }
+        
+        // Close on escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && !mobileMenu.classList.contains('translate-x-full')) {
+                closeMobileMenu();
+            }
+        });
+    </script>
+    
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

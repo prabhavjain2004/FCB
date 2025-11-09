@@ -1,0 +1,452 @@
+/**
+ * TapNex Arena - Mobile-Specific CSS Variables
+ * Easy customization for mobile responsive behavior
+ */
+
+:root {
+    /* ============================================
+     MOBILE BREAKPOINTS
+     ============================================ */
+    --mobile-small: 375px;
+    --mobile: 640px;
+    --tablet: 768px;
+    --desktop: 1024px;
+    --desktop-large: 1280px;
+
+    /* ============================================
+     MOBILE SPACING
+     ============================================ */
+    --mobile-padding: 1rem;
+    --mobile-gap: 1rem;
+    --mobile-section-padding: 2rem;
+
+    --tablet-padding: 2rem;
+    --tablet-gap: 1.5rem;
+    --tablet-section-padding: 3rem;
+
+    /* ============================================
+     MOBILE TYPOGRAPHY
+     ============================================ */
+    --mobile-base-font-size: 14px;
+    --tablet-base-font-size: 15px;
+    --desktop-base-font-size: 16px;
+
+    --mobile-h1: 2rem;
+    /* 32px */
+    --mobile-h2: 1.75rem;
+    /* 28px */
+    --mobile-h3: 1.5rem;
+    /* 24px */
+    --mobile-h4: 1.25rem;
+    /* 20px */
+    --mobile-h5: 1.125rem;
+    /* 18px */
+    --mobile-h6: 1rem;
+    /* 16px */
+
+    --tablet-h1: 2.5rem;
+    /* 40px */
+    --tablet-h2: 2.25rem;
+    /* 36px */
+    --tablet-h3: 2rem;
+    /* 32px */
+    --tablet-h4: 1.5rem;
+    /* 24px */
+    --tablet-h5: 1.25rem;
+    /* 20px */
+    --tablet-h6: 1.125rem;
+    /* 18px */
+
+    /* ============================================
+     MOBILE TOUCH TARGETS
+     ============================================ */
+    --touch-target-min: 44px;
+    /* iOS recommended */
+    --touch-target-comfortable: 48px;
+    --touch-target-large: 56px;
+
+    /* ============================================
+     MOBILE NAVIGATION
+     ============================================ */
+    --mobile-nav-height: 3.5rem;
+    --tablet-nav-height: 4rem;
+    --desktop-nav-height: 4rem;
+
+    --mobile-menu-width: 85vw;
+    --mobile-menu-max-width: 320px;
+
+    /* ============================================
+     MOBILE COMPONENTS
+     ============================================ */
+    --mobile-card-padding: 1rem;
+    --mobile-button-padding: 0.75rem 1.25rem;
+    --mobile-input-padding: 0.75rem;
+    --mobile-input-font-size: 16px;
+    /* Prevents iOS zoom */
+
+    --tablet-card-padding: 1.5rem;
+    --tablet-button-padding: 0.875rem 1.5rem;
+    --tablet-input-padding: 0.875rem;
+
+    /* ============================================
+     MOBILE ANIMATIONS
+     ============================================ */
+    --mobile-transition-duration: 0.2s;
+    --mobile-animation-duration: 0.3s;
+
+    /* ============================================
+     MOBILE Z-INDEX
+     ============================================ */
+    --mobile-menu-z: 50;
+    --mobile-overlay-z: 40;
+    --mobile-fixed-nav-z: 50;
+
+    /* ============================================
+     MOBILE SAFE AREAS (iOS)
+     ============================================ */
+    --safe-area-inset-top: env(safe-area-inset-top, 0);
+    --safe-area-inset-right: env(safe-area-inset-right, 0);
+    --safe-area-inset-bottom: env(safe-area-inset-bottom, 0);
+    --safe-area-inset-left: env(safe-area-inset-left, 0);
+
+    /* ============================================
+     MOBILE VIEWPORT HEIGHT
+     ============================================ */
+    --vh: 1vh;
+    /* Updated by JavaScript */
+
+    /* ============================================
+     MOBILE PERFORMANCE
+     ============================================ */
+    --mobile-blur-amount: 10px;
+    /* Reduced for performance */
+    --desktop-blur-amount: 20px;
+
+    /* ============================================
+     MOBILE COLORS (Optional overrides)
+     ============================================ */
+    --mobile-bg-opacity: 0.95;
+    --mobile-glass-opacity: 0.8;
+}
+
+/* ============================================
+   MOBILE-SPECIFIC UTILITY CLASSES
+   ============================================ */
+
+/* Container with mobile padding */
+.container-mobile {
+    padding-left: var(--mobile-padding);
+    padding-right: var(--mobile-padding);
+}
+
+@media (min-width: 768px) {
+    .container-mobile {
+        padding-left: var(--tablet-padding);
+        padding-right: var(--tablet-padding);
+    }
+}
+
+/* Touch-friendly elements */
+.touch-target {
+    min-height: var(--touch-target-min);
+    min-width: var(--touch-target-min);
+}
+
+.touch-target-comfortable {
+    min-height: var(--touch-target-comfortable);
+    min-width: var(--touch-target-comfortable);
+}
+
+.touch-target-large {
+    min-height: var(--touch-target-large);
+    min-width: var(--touch-target-large);
+}
+
+/* Safe area padding */
+.safe-area-padding {
+    padding-top: var(--safe-area-inset-top);
+    padding-right: var(--safe-area-inset-right);
+    padding-bottom: var(--safe-area-inset-bottom);
+    padding-left: var(--safe-area-inset-left);
+}
+
+/* Full viewport height (mobile-safe) */
+.full-vh {
+    height: calc(var(--vh, 1vh) * 100);
+}
+
+/* Mobile-optimized glass effect */
+.glass-mobile {
+    background: rgba(30, 41, 59, var(--mobile-glass-opacity));
+    backdrop-filter: blur(var(--mobile-blur-amount));
+    -webkit-backdrop-filter: blur(var(--mobile-blur-amount));
+}
+
+@media (min-width: 1024px) {
+    .glass-mobile {
+        backdrop-filter: blur(var(--desktop-blur-amount));
+        -webkit-backdrop-filter: blur(var(--desktop-blur-amount));
+    }
+}
+
+/* ============================================
+   MOBILE GRID SYSTEM
+   ============================================ */
+
+/* Responsive grid that stacks on mobile */
+.grid-responsive {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--mobile-gap);
+}
+
+@media (min-width: 640px) {
+    .grid-responsive {
+        grid-template-columns: repeat(2, 1fr);
+        gap: var(--tablet-gap);
+    }
+}
+
+@media (min-width: 1024px) {
+    .grid-responsive {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+/* ============================================
+   MOBILE FLEX UTILITIES
+   ============================================ */
+
+/* Stack on mobile, row on desktop */
+.flex-responsive {
+    display: flex;
+    flex-direction: column;
+    gap: var(--mobile-gap);
+}
+
+@media (min-width: 768px) {
+    .flex-responsive {
+        flex-direction: row;
+        gap: var(--tablet-gap);
+    }
+}
+
+/* ============================================
+   MOBILE SECTION SPACING
+   ============================================ */
+
+.section-mobile {
+    padding-top: var(--mobile-section-padding);
+    padding-bottom: var(--mobile-section-padding);
+}
+
+@media (min-width: 768px) {
+    .section-mobile {
+        padding-top: var(--tablet-section-padding);
+        padding-bottom: var(--tablet-section-padding);
+    }
+}
+
+@media (min-width: 1024px) {
+    .section-mobile {
+        padding-top: 4rem;
+        padding-bottom: 4rem;
+    }
+}
+
+/* ============================================
+   MOBILE CARD COMPONENT
+   ============================================ */
+
+.card-mobile {
+    padding: var(--mobile-card-padding);
+    border-radius: 1rem;
+}
+
+@media (min-width: 768px) {
+    .card-mobile {
+        padding: var(--tablet-card-padding);
+        border-radius: 1.5rem;
+    }
+}
+
+/* ============================================
+   MOBILE BUTTON COMPONENT
+   ============================================ */
+
+.btn-mobile {
+    padding: var(--mobile-button-padding);
+    font-size: 0.9375rem;
+    min-height: var(--touch-target-min);
+}
+
+@media (min-width: 768px) {
+    .btn-mobile {
+        padding: var(--tablet-button-padding);
+        font-size: 1rem;
+    }
+}
+
+/* ============================================
+   MOBILE FORM INPUTS
+   ============================================ */
+
+.input-mobile {
+    padding: var(--mobile-input-padding);
+    font-size: var(--mobile-input-font-size);
+    min-height: var(--touch-target-min);
+}
+
+@media (min-width: 768px) {
+    .input-mobile {
+        padding: var(--tablet-input-padding);
+    }
+}
+
+/* ============================================
+   MOBILE MODAL
+   ============================================ */
+
+.modal-mobile {
+    margin: 0.5rem;
+    max-width: calc(100% - 1rem);
+    border-radius: 1rem;
+}
+
+@media (min-width: 768px) {
+    .modal-mobile {
+        margin: 1.5rem auto;
+        max-width: 600px;
+        border-radius: 1.5rem;
+    }
+}
+
+/* ============================================
+   MOBILE NAVIGATION HEIGHT OFFSET
+   ============================================ */
+
+.nav-offset-mobile {
+    padding-top: var(--mobile-nav-height);
+}
+
+@media (min-width: 768px) {
+    .nav-offset-mobile {
+        padding-top: var(--tablet-nav-height);
+    }
+}
+
+@media (min-width: 1024px) {
+    .nav-offset-mobile {
+        padding-top: var(--desktop-nav-height);
+    }
+}
+
+/* ============================================
+   MOBILE SCROLLBAR STYLING
+   ============================================ */
+
+/* Hide scrollbar on mobile for cleaner look */
+@media (max-width: 767px) {
+    .hide-scrollbar-mobile {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+    }
+
+    .hide-scrollbar-mobile::-webkit-scrollbar {
+        display: none;
+    }
+}
+
+/* ============================================
+   MOBILE TEXT UTILITIES
+   ============================================ */
+
+.text-mobile-sm {
+    font-size: 0.8125rem;
+}
+
+.text-mobile-base {
+    font-size: 0.875rem;
+}
+
+.text-mobile-lg {
+    font-size: 1rem;
+}
+
+@media (min-width: 768px) {
+    .text-mobile-sm {
+        font-size: 0.875rem;
+    }
+
+    .text-mobile-base {
+        font-size: 1rem;
+    }
+
+    .text-mobile-lg {
+        font-size: 1.125rem;
+    }
+}
+
+/* ============================================
+   MOBILE ASPECT RATIOS
+   ============================================ */
+
+.aspect-mobile-square {
+    aspect-ratio: 1 / 1;
+}
+
+.aspect-mobile-video {
+    aspect-ratio: 16 / 9;
+}
+
+.aspect-mobile-portrait {
+    aspect-ratio: 3 / 4;
+}
+
+/* ============================================
+   MOBILE OVERFLOW HANDLING
+   ============================================ */
+
+.overflow-mobile-auto {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+/* ============================================
+   MOBILE STICKY ELEMENTS
+   ============================================ */
+
+.sticky-mobile {
+    position: sticky;
+    top: var(--mobile-nav-height);
+    z-index: 10;
+}
+
+@media (min-width: 768px) {
+    .sticky-mobile {
+        top: var(--tablet-nav-height);
+    }
+}
+
+/* ============================================
+   MOBILE LOADING STATES
+   ============================================ */
+
+.skeleton-mobile {
+    background: linear-gradient(90deg,
+            rgba(255, 255, 255, 0.05) 25%,
+            rgba(255, 255, 255, 0.1) 50%,
+            rgba(255, 255, 255, 0.05) 75%);
+    background-size: 200% 100%;
+    animation: skeleton-loading 1.5s ease-in-out infinite;
+}
+
+@keyframes skeleton-loading {
+    0% {
+        background-position: 200% 0;
+    }
+
+    100% {
+        background-position: -200% 0;
+    }
+}

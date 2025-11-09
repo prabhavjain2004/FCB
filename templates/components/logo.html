@@ -1,0 +1,71 @@
+{% load static %}
+
+{# Forge Gaming Cafe Logo Component #}
+{# Usage: {% include 'components/logo.html' with variant='full' size='md' link='/' animated=True %} #}
+
+{% with variant=variant|default:'full' size=size|default:'md' link=link animated=animated class=class %}
+
+<{% if link %}a href="{{ link }}"{% else %}div{% endif %} 
+   class="logo logo--{{ size }} logo--{{ variant }} {% if animated %}logo--animated{% endif %} {{ class }}"
+   {% if link %}aria-label="Forge Gaming Cafe - Home"{% endif %}>
+   
+   {# Logo Image - Using Forge Gaming logo #}
+   <img src="{% static 'images/forge_logo.png' %}" 
+        alt="Forge Gaming Cafe Logo" 
+        class="logo__image"
+        onerror="this.src='{% static 'images/tapnex_logo.png' %}'"
+        loading="lazy">
+   
+   {# Logo Text #}
+   {% if variant == 'full' or variant == 'text-only' %}
+       <span class="logo-text" style="background: linear-gradient(135deg, #e94560, #00d4aa); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;">Arena</span>
+   {% endif %}
+   
+</{% if link %}a{% else %}div{% endif %}>
+
+{% endwith %}
+
+{# Fallback for missing logo image #}
+<style>
+.logo__image {
+    max-width: 100% !important;
+    max-height: 80px !important;
+    height: auto !important;
+    width: auto !important;
+    display: inline-block !important;
+    object-fit: contain !important;
+}
+
+.logo__image[src*="tapnex_logo.png"] {
+    /* Specific styling for TN logo */
+    filter: brightness(1.1);
+}
+
+/* Ensure logo text is always visible */
+.logo__text {
+    display: inline-block !important;
+    white-space: nowrap;
+}
+
+/* Fallback SVG logo if image fails to load */
+.logo__image:not([src]),
+.logo__image[src=""] {
+    display: none !important;
+}
+
+.logo__image:not([src]) + .logo__text::before,
+.logo__image[src=""] + .logo__text::before {
+    content: "F";
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    background: linear-gradient(135deg, #e94560, #00d4aa);
+    color: white;
+    font-weight: bold;
+    border-radius: 0.5rem;
+    margin-right: 0.5rem;
+    font-size: 1.5rem;
+}
+</style>

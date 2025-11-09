@@ -1,0 +1,337 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}System Analytics - TapNex Dashboard{% endblock %}
+
+{% block extra_head %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gaming-primary">
+    <!-- Header -->
+    <div class="bg-gaming-secondary border-b border-gaming-accent">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center py-6">
+                <div>
+                    <h1 class="text-3xl font-gaming font-bold text-white">System Analytics</h1>
+                    <p class="text-gray-400 mt-1">Platform-wide insights and performance metrics</p>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <a href="{% url 'authentication:tapnex_dashboard' %}" class="bg-gaming-accent hover:bg-opacity-80 text-white px-4 py-2 rounded-lg transition-colors">
+                        Back to Dashboard
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- System Overview Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <div class="bg-gaming-secondary border border-gaming-accent rounded-xl p-6">
+                <div class="flex items-center">
+                    <div class="p-2 bg-blue-900/20 rounded-lg">
+                        <svg class="w-6 h-6 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"></path>
+                        </svg>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-sm font-medium text-gray-400">Total Users</p>
+                        <p class="text-2xl font-bold text-white">{{ system_stats.total_users }}</p>
+                        <p class="text-sm text-gray-500">{{ system_stats.total_customers }} customers</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-gaming-secondary border border-gaming-accent rounded-xl p-6">
+                <div class="flex items-center">
+                    <div class="p-2 bg-green-900/20 rounded-lg">
+                        <svg class="w-6 h-6 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
+                        </svg>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-sm font-medium text-gray-400">Active Games</p>
+                        <p class="text-2xl font-bold text-white">{{ system_stats.total_games }}</p>
+                        <p class="text-sm text-gray-500">Available for booking</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-gaming-secondary border border-gaming-accent rounded-xl p-6">
+                <div class="flex items-center">
+                    <div class="p-2 bg-purple-900/20 rounded-lg">
+                        <svg class="w-6 h-6 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                        </svg>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-sm font-medium text-gray-400">Total Bookings</p>
+                        <p class="text-2xl font-bold text-white">{{ system_stats.total_bookings }}</p>
+                        <p class="text-sm text-gray-500">{{ system_stats.confirmed_bookings }} confirmed</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-gaming-secondary border border-gaming-accent rounded-xl p-6">
+                <div class="flex items-center">
+                    <div class="p-2 bg-yellow-900/20 rounded-lg">
+                        <svg class="w-6 h-6 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                        </svg>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-sm font-medium text-gray-400">Conversion Rate</p>
+                        <p class="text-2xl font-bold text-white">{{ system_stats.conversion_rate|floatformat:1 }}%</p>
+                        <p class="text-sm text-gray-500">Booking success rate</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts Section -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+            <!-- Monthly Revenue Trend -->
+            <div class="bg-gaming-secondary border border-gaming-accent rounded-xl p-6">
+                <h3 class="text-lg font-semibold text-white mb-4">Monthly Revenue Trend (Last 12 Months)</h3>
+                <canvas id="monthlyRevenueChart" width="400" height="200"></canvas>
+            </div>
+
+            <!-- Booking Type Distribution -->
+            <div class="bg-gaming-secondary border border-gaming-accent rounded-xl p-6">
+                <h3 class="text-lg font-semibold text-white mb-4">Booking Type Distribution</h3>
+                <canvas id="bookingTypeChart" width="400" height="200"></canvas>
+            </div>
+        </div>
+
+        <!-- Booking Type Analysis -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+            <!-- Booking Statistics -->
+            <div class="bg-gaming-secondary border border-gaming-accent rounded-xl p-6">
+                <h3 class="text-lg font-semibold text-white mb-4">Booking Statistics</h3>
+                <div class="space-y-4">
+                    <div class="flex justify-between items-center">
+                        <div class="flex items-center">
+                            <div class="w-4 h-4 bg-blue-500 rounded mr-3"></div>
+                            <span class="text-gray-300">Private Bookings</span>
+                        </div>
+                        <div class="text-right">
+                            <p class="font-semibold text-white">{{ booking_type_stats.private }}</p>
+                            <p class="text-sm text-gray-400">
+                                {% if system_stats.total_bookings > 0 %}
+                                    {% widthratio booking_type_stats.private 1 system_stats.total_bookings %}%
+                                {% else %}
+                                    0%
+                                {% endif %}
+                            </p>
+                        </div>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <div class="flex items-center">
+                            <div class="w-4 h-4 bg-green-500 rounded mr-3"></div>
+                            <span class="text-gray-300">Shared Bookings</span>
+                        </div>
+                        <div class="text-right">
+                            <p class="font-semibold text-white">{{ booking_type_stats.shared }}</p>
+                            <p class="text-sm text-gray-400">
+                                {% if system_stats.total_bookings > 0 %}
+                                    {% widthratio booking_type_stats.shared 1 system_stats.total_bookings %}%
+                                {% else %}
+                                    0%
+                                {% endif %}
+                            </p>
+                        </div>
+                    </div>
+                    <hr class="border-gaming-accent">
+                    <div class="flex justify-between items-center">
+                        <span class="font-semibold text-white">Total Bookings</span>
+                        <span class="font-bold text-white">{{ system_stats.total_bookings }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- System Health -->
+            <div class="bg-gaming-secondary border border-gaming-accent rounded-xl p-6">
+                <h3 class="text-lg font-semibold text-white mb-4">System Health</h3>
+                <div class="space-y-4">
+                    <div class="flex justify-between items-center">
+                        <span class="text-gray-300">Platform Status</span>
+                        <span class="px-2 py-1 text-xs font-medium rounded-full bg-green-900/30 text-green-400">
+                            Operational
+                        </span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-gray-300">Database Status</span>
+                        <span class="px-2 py-1 text-xs font-medium rounded-full bg-green-900/30 text-green-400">
+                            Healthy
+                        </span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-gray-300">Payment Gateway</span>
+                        <span class="px-2 py-1 text-xs font-medium rounded-full bg-green-900/30 text-green-400">
+                            Connected
+                        </span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-gray-300">Real-time Updates</span>
+                        <span class="px-2 py-1 text-xs font-medium rounded-full bg-green-900/30 text-green-400">
+                            Active
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Peak Hours Analysis -->
+        <div class="bg-gaming-secondary border border-gaming-accent rounded-xl overflow-hidden mb-8">
+            <div class="px-6 py-4 border-b border-gaming-accent">
+                <h3 class="text-lg font-semibold text-white">Peak Hours Analysis (Last 30 Days)</h3>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gaming-accent">
+                    <thead class="bg-gaming-primary">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Hour</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Bookings</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Activity Level</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gaming-accent">
+                        {% for hour_data in peak_hours %}
+                        <tr class="hover:bg-gaming-accent/10">
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-white">
+                                {{ hour_data.hour }}:00 - {{ hour_data.hour|add:1 }}:00
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
+                                {{ hour_data.booking_count }}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
+                                <div class="flex items-center">
+                                    <div class="w-16 bg-gaming-accent rounded-full h-2 mr-2">
+                                        <div class="bg-gaming-highlight h-2 rounded-full" style="width: {% if hour_data.booking_count > 0 %}{% widthratio hour_data.booking_count 10 100 %}{% else %}0{% endif %}%"></div>
+                                    </div>
+                                    <span class="text-xs">
+                                        {% if hour_data.booking_count >= 8 %}High
+                                        {% elif hour_data.booking_count >= 4 %}Medium
+                                        {% elif hour_data.booking_count >= 1 %}Low
+                                        {% else %}None{% endif %}
+                                    </span>
+                                </div>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="3" class="px-6 py-4 text-center text-gray-400">No booking data available</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Monthly Trends Table -->
+        <div class="bg-gaming-secondary border border-gaming-accent rounded-xl overflow-hidden">
+            <div class="px-6 py-4 border-b border-gaming-accent">
+                <h3 class="text-lg font-semibold text-white">Monthly Revenue Breakdown</h3>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gaming-accent">
+                    <thead class="bg-gaming-primary">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Month</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Revenue</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Growth</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gaming-accent">
+                        {% for trend in monthly_trends %}
+                        <tr class="hover:bg-gaming-accent/10">
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-white">
+                                {{ trend.month }}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gaming-highlight font-semibold">
+                                ₹{{ trend.revenue }}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm">
+                                {% if trend.growth %}
+                                    <span class="{% if trend.growth > 0 %}text-green-400{% elif trend.growth < 0 %}text-red-400{% else %}text-gray-400{% endif %}">
+                                        {{ trend.growth|floatformat:1 }}%
+                                    </span>
+                                {% else %}
+                                    <span class="text-gray-500">-</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="3" class="px-6 py-4 text-center text-gray-400">No revenue data available</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Monthly Revenue Chart
+const monthlyCtx = document.getElementById('monthlyRevenueChart').getContext('2d');
+const monthlyChart = new Chart(monthlyCtx, {
+    type: 'line',
+    data: {
+        labels: {{ monthly_chart_data|safe }}.labels,
+        datasets: [{
+            label: 'Monthly Revenue',
+            data: {{ monthly_chart_data|safe }}.revenue,
+            borderColor: 'rgb(59, 130, 246)',
+            backgroundColor: 'rgba(59, 130, 246, 0.1)',
+            tension: 0.1,
+            fill: true
+        }]
+    },
+    options: {
+        responsive: true,
+        plugins: {
+            legend: {
+                display: false
+            }
+        },
+        scales: {
+            y: {
+                beginAtZero: true,
+                title: {
+                    display: true,
+                    text: 'Revenue ($)'
+                }
+            }
+        }
+    }
+});
+
+// Booking Type Chart
+const bookingTypeCtx = document.getElementById('bookingTypeChart').getContext('2d');
+const bookingTypeChart = new Chart(bookingTypeCtx, {
+    type: 'doughnut',
+    data: {
+        labels: {{ booking_type_chart_data|safe }}.labels,
+        datasets: [{
+            data: {{ booking_type_chart_data|safe }}.data,
+            backgroundColor: [
+                'rgb(59, 130, 246)',
+                'rgb(16, 185, 129)'
+            ]
+        }]
+    },
+    options: {
+        responsive: true,
+        plugins: {
+            legend: {
+                position: 'bottom'
+            }
+        }
+    }
+});
+</script>
+{% endblock %}

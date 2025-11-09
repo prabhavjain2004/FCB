@@ -1,0 +1,380 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Privacy Policy - TapNex Gaming Cafe{% endblock %}
+
+{% block extra_css %}
+<style>
+    .privacy-hero {
+        background: linear-gradient(135deg, #111827 0%, #1a202e 100%);
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .privacy-hero::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: 
+            radial-gradient(circle at 20% 50%, rgba(168, 237, 234, 0.1) 0%, transparent 50%),
+            radial-gradient(circle at 80% 80%, rgba(254, 214, 227, 0.1) 0%, transparent 50%);
+    }
+    
+    .privacy-section {
+        background: var(--glass-bg);
+        backdrop-filter: blur(20px);
+        border: 1px solid var(--glass-border);
+        border-radius: 1rem;
+        padding: 2rem;
+        margin-bottom: 1.5rem;
+        transition: all 0.3s ease;
+    }
+    
+    .privacy-section:hover {
+        border-color: rgba(168, 237, 234, 0.4);
+        transform: translateX(5px);
+    }
+    
+    .privacy-icon {
+        width: 3rem;
+        height: 3rem;
+        background: linear-gradient(135deg, #e94560, #00d4aa);
+        border-radius: 0.75rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        margin-right: 1rem;
+    }
+    
+    .data-badge {
+        display: inline-block;
+        padding: 0.5rem 1rem;
+        background: rgba(168, 237, 234, 0.2);
+        border: 1px solid rgba(168, 237, 234, 0.4);
+        border-radius: 2rem;
+        color: #ffffff;
+        font-size: 0.875rem;
+        margin-right: 0.5rem;
+        margin-bottom: 0.5rem;
+        font-weight: 500;
+        transition: all 0.3s ease;
+    }
+
+    .data-badge:hover {
+        background: rgba(168, 237, 234, 0.3);
+        border-color: rgba(168, 237, 234, 0.6);
+    }
+
+    .info-card {
+        background: rgba(168, 237, 234, 0.1);
+        border: 1px solid rgba(168, 237, 234, 0.3);
+        border-radius: 0.75rem;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+        transition: all 0.3s ease;
+    }
+
+    .info-card:hover {
+        border-color: rgba(168, 237, 234, 0.5);
+        background: rgba(168, 237, 234, 0.15);
+    }
+    
+    .text-readable {
+        color: #e5e5e5 !important;
+    }
+
+    .text-light-gray {
+        color: #e5e5e5 !important;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="privacy-hero py-20">
+    <div class="container">
+        <div class="text-center" style="position: relative; z-index: 1;">
+            <div class="mb-6">
+                <div class="inline-flex items-center justify-center w-20 h-20 rounded-full"
+                     style="background: rgba(168, 237, 234, 0.2); backdrop-filter: blur(10px); border: 2px solid rgba(168, 237, 234, 0.4);">
+                    <i class="bi bi-shield-lock text-cyan" style="font-size: 2.5rem;"></i>
+                </div>
+            </div>
+            <h1 class="display-3 fw-bold text-white mb-4" data-scroll-reveal>Privacy Policy</h1>
+            <p class="lead text-white mb-3" style="opacity: 0.9;" data-scroll-reveal data-scroll-delay="100">
+                How we protect and handle your data
+            </p>
+            <p class="text-white" style="opacity: 0.8; font-size: 0.875rem;" data-scroll-reveal data-scroll-delay="150">
+                Last Updated: November 1, 2025
+            </p>
+        </div>
+    </div>
+</section>
+
+<!-- Main Content -->
+<section class="py-5 bg-dark">
+    <div class="container py-5">
+        <div class="row justify-content-center">
+            <div class="col-lg-10">
+                <!-- Introduction -->
+                <div class="privacy-section" data-scroll-reveal>
+                    <div class="d-flex align-items-start">
+                        <div class="privacy-icon">
+                            <i class="bi bi-info-circle text-white" style="font-size: 1.5rem;"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-white mb-4">Introduction</h3>
+                            <p class="text-readable">
+                                TapNex Gaming Cafe is committed to protecting your privacy. This Privacy Policy explains how we collect, use, disclose, and safeguard your personal information when you use our booking platform at <span class="gradient-text fw-semibold">forge.tapnex.tech</span>.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Information We Collect -->
+                <div class="privacy-section" data-scroll-reveal>
+                    <div class="d-flex align-items-start">
+                        <div class="privacy-icon">
+                            <i class="bi bi-collection text-white" style="font-size: 1.5rem;"></i>
+                        </div>
+                        <div class="flex-grow-1">
+                            <h3 class="text-white mb-4">Information We Collect</h3>
+                            
+                            <h5 class="text-cyan mb-3">Personal Information</h5>
+                            <p class="text-readable mb-3">We collect the following information when you use our services:</p>
+                            <div class="mb-4">
+                                <span class="data-badge">Name</span>
+                                <span class="data-badge">Email Address</span>
+                                <span class="data-badge">Phone Number</span>
+                                <span class="data-badge">Google Account Info</span>
+                            </div>
+                            
+                            <h5 class="text-cyan mb-3">Booking Information</h5>
+                            <div class="mb-4">
+                                <span class="data-badge">Game Selection</span>
+                                <span class="data-badge">Time Slots</span>
+                                <span class="data-badge">Booking Preferences</span>
+                                <span class="data-badge">Payment History</span>
+                            </div>
+                            
+                            <h5 class="text-cyan mb-3">Automatically Collected</h5>
+                            <div>
+                                <span class="data-badge">IP Address</span>
+                                <span class="data-badge">Browser Type</span>
+                                <span class="data-badge">Device Information</span>
+                                <span class="data-badge">Usage Data</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- How We Use Your Information -->
+                <div class="privacy-section" data-scroll-reveal>
+                    <div class="d-flex align-items-start">
+                        <div class="privacy-icon">
+                            <i class="bi bi-gear text-white" style="font-size: 1.5rem;"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-white mb-4">How We Use Your Information</h3>
+                            <p class="text-readable mb-3">We use your information for the following purposes:</p>
+                            <ul class="list-unstyled">
+                                <li class="mb-3 text-readable">
+                                    <i class="bi bi-check-circle text-cyan me-2"></i>
+                                    <strong class="text-white">Booking Management:</strong> Process and manage your gaming slot reservations
+                                </li>
+                                <li class="mb-3 text-readable">
+                                    <i class="bi bi-check-circle text-cyan me-2"></i>
+                                    <strong class="text-white">Communication:</strong> Send booking confirmations, updates, and notifications
+                                </li>
+                                <li class="mb-3 text-readable">
+                                    <i class="bi bi-check-circle text-cyan me-2"></i>
+                                    <strong class="text-white">Payment Processing:</strong> Securely process payments via Razorpay
+                                </li>
+                                <li class="mb-3 text-readable">
+                                    <i class="bi bi-check-circle text-cyan me-2"></i>
+                                    <strong class="text-white">Service Improvement:</strong> Analyze usage to enhance our platform
+                                </li>
+                                <li class="mb-3 text-readable">
+                                    <i class="bi bi-check-circle text-cyan me-2"></i>
+                                    <strong class="text-white">Customer Support:</strong> Provide assistance and resolve issues
+                                </li>
+                                <li class="mb-0 text-readable">
+                                    <i class="bi bi-check-circle text-cyan me-2"></i>
+                                    <strong class="text-white">Legal Compliance:</strong> Meet legal and regulatory requirements
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Information Sharing -->
+                <div class="privacy-section" data-scroll-reveal>
+                    <div class="d-flex align-items-start">
+                        <div class="privacy-icon">
+                            <i class="bi bi-share text-white" style="font-size: 1.5rem;"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-white mb-4">Information Sharing</h3>
+                            <p class="text-readable mb-3">We may share your information with:</p>
+                            <ul class="list-unstyled">
+                                <li class="mb-3 text-readable">
+                                    <i class="bi bi-arrow-right text-cyan me-2"></i>
+                                    <strong class="text-white">Payment Processors:</strong> Razorpay for secure payment processing
+                                </li>
+                                <li class="mb-3 text-readable">
+                                    <i class="bi bi-arrow-right text-cyan me-2"></i>
+                                    <strong class="text-white">Authentication Services:</strong> Google OAuth for account creation
+                                </li>
+                                <li class="mb-3 text-readable">
+                                    <i class="bi bi-arrow-right text-cyan me-2"></i>
+                                    <strong class="text-white">Notification Services:</strong> Telegram for booking alerts
+                                </li>
+                                <li class="mb-0 text-readable">
+                                    <i class="bi bi-arrow-right text-cyan me-2"></i>
+                                    <strong class="text-white">Legal Requirements:</strong> When required by law or legal process
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Data Security -->
+                <div class="privacy-section" data-scroll-reveal>
+                    <div class="d-flex align-items-start">
+                        <div class="privacy-icon">
+                            <i class="bi bi-shield-check text-white" style="font-size: 1.5rem;"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-white mb-4">Data Security</h3>
+                            <p class="text-readable mb-3">
+                                We implement industry-standard security measures to protect your information:
+                            </p>
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <div class="info-card">
+                                        <i class="bi bi-lock text-cyan d-block mb-2" style="font-size: 2rem;"></i>
+                                        <h6 class="text-white mb-2">Encryption</h6>
+                                        <p class="text-readable mb-0" style="font-size: 0.875rem;">
+                                            SSL/TLS encryption for data transmission
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="info-card">
+                                        <i class="bi bi-database-lock text-cyan d-block mb-2" style="font-size: 2rem;"></i>
+                                        <h6 class="text-white mb-2">Secure Storage</h6>
+                                        <p class="text-readable mb-0" style="font-size: 0.875rem;">
+                                            Protected database with access controls
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="info-card">
+                                        <i class="bi bi-fingerprint text-cyan d-block mb-2" style="font-size: 2rem;"></i>
+                                        <h6 class="text-white mb-2">Authentication</h6>
+                                        <p class="text-readable mb-0" style="font-size: 0.875rem;">
+                                            Secure Google OAuth integration
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="info-card">
+                                        <i class="bi bi-eye-slash text-cyan d-block mb-2" style="font-size: 2rem;"></i>
+                                        <h6 class="text-white mb-2">Privacy First</h6>
+                                        <p class="text-readable mb-0" style="font-size: 0.875rem;">
+                                            No sharing without consent
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Your Rights -->
+                <div class="privacy-section" data-scroll-reveal>
+                    <div class="d-flex align-items-start">
+                        <div class="privacy-icon">
+                            <i class="bi bi-person-check text-white" style="font-size: 1.5rem;"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-white mb-4">Your Rights</h3>
+                            <p class="text-readable mb-3">You have the following rights regarding your data:</p>
+                            <ul class="list-unstyled">
+                                <li class="mb-3 text-readable">
+                                    <i class="bi bi-eye text-cyan me-2"></i>
+                                    <strong class="text-white">Access:</strong> Request a copy of your personal data
+                                </li>
+                                <li class="mb-3 text-readable">
+                                    <i class="bi bi-pencil text-cyan me-2"></i>
+                                    <strong class="text-white">Correction:</strong> Update or correct inaccurate information
+                                </li>
+                                <li class="mb-3 text-readable">
+                                    <i class="bi bi-trash text-cyan me-2"></i>
+                                    <strong class="text-white">Deletion:</strong> Request deletion of your data (subject to legal requirements)
+                                </li>
+                                <li class="mb-0 text-readable">
+                                    <i class="bi bi-hand-thumbs-down text-cyan me-2"></i>
+                                    <strong class="text-white">Opt-Out:</strong> Unsubscribe from marketing communications
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Cookies -->
+                <div class="privacy-section" data-scroll-reveal>
+                    <div class="d-flex align-items-start">
+                        <div class="privacy-icon">
+                            <i class="bi bi-cookie text-white" style="font-size: 1.5rem;"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-white mb-4">Cookies & Tracking</h3>
+                            <p class="text-readable">
+                                We use cookies and similar technologies to improve your experience. These include session cookies for authentication and functionality cookies for preferences. You can control cookie settings through your browser.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Contact -->
+                <div class="privacy-section" data-scroll-reveal>
+                    <div class="d-flex align-items-start">
+                        <div class="privacy-icon">
+                            <i class="bi bi-envelope text-white" style="font-size: 1.5rem;"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-white mb-4">Contact Us</h3>
+                            <p class="text-readable mb-4">
+                                For privacy-related questions or to exercise your rights, contact us:
+                            </p>
+                            <div class="p-4 rounded" style="background: linear-gradient(135deg, rgba(79, 172, 254, 0.1), rgba(0, 242, 254, 0.1)); border: 1px solid rgba(79, 172, 254, 0.3);">
+                                <h5 class="text-white mb-3">TapNex Technologies</h5>
+                                <p class="mb-2">
+                                    <i class="bi bi-envelope text-cyan me-2"></i>
+                                    <a href="mailto:info@tapnex.tech" class="text-cyan text-decoration-none hover-glow">info@tapnex.tech</a>
+                                </p>
+                                <p class="mb-0">
+                                    <i class="bi bi-globe text-cyan me-2"></i>
+                                    <a href="https://forge.tapnex.tech" class="text-cyan text-decoration-none hover-glow">forge.tapnex.tech</a>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Back to Home -->
+                <div class="text-center mt-5">
+                    <a href="{% url 'home' %}" class="btn btn-outline-primary btn-lg">
+                        <i class="bi bi-arrow-left me-2"></i>Back to Home
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

@@ -1,0 +1,43 @@
+{% comment %}
+TapNex Arena Icon Component
+Usage: {% include 'components/icon.html' with name='controller' size='md' class='icon--hover-glow' %}
+
+Parameters:
+- name: Icon name from the SVG sprite (required)
+- size: xs, sm, md, lg, xl, 2xl, 3xl (default: md)
+- class: Additional CSS classes
+- color: Icon color variant (primary, accent-cyan, accent-orange, etc.)
+- animation: spin, pulse, bounce, hover-scale, hover-glow
+- aria_label: Accessibility label (if not provided, icon is decorative)
+- title: Tooltip text
+{% endcomment %}
+
+{% load static %}
+
+{% with size=size|default:'md' %}
+{% with icon_classes='icon icon--'|add:size %}
+{% if color %}
+  {% with icon_classes=icon_classes|add:' icon--'|add:color %}{% endwith %}
+{% endif %}
+{% if animation %}
+  {% with icon_classes=icon_classes|add:' icon--'|add:animation %}{% endwith %}
+{% endif %}
+{% if class %}
+  {% with icon_classes=icon_classes|add:' '|add:class %}{% endwith %}
+{% endif %}
+
+<svg class="{{ icon_classes }}"
+     {% if aria_label %}
+       role="img" 
+       aria-label="{{ aria_label }}"
+     {% else %}
+       aria-hidden="true"
+     {% endif %}
+     {% if title %}
+       title="{{ title }}"
+     {% endif %}>
+  <use href="{% static 'images/icons/gaming-icons.svg' %}#icon-{{ name }}"></use>
+</svg>
+
+{% endwith %}
+{% endwith %}

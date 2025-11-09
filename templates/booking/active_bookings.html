@@ -1,0 +1,218 @@
+{% extends 'authentication/owner_base.html' %}
+{% load static %}
+
+{% block title %}Active Bookings - Today{% endblock %}
+{% block page_title %}Active Bookings{% endblock %}
+{% block page_subtitle %}{{ today|date:"F d, Y" }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    .hero-bg {
+        position: absolute;
+        inset: 0;
+        overflow: hidden;
+        z-index: 0;
+        pointer-events: none;
+    }
+    
+    .gradient-orb {
+        position: absolute;
+        border-radius: 50%;
+        filter: blur(100px);
+        opacity: 0.2;
+        animation: floatOrb 20s ease-in-out infinite;
+    }
+    
+    .orb-1 {
+        width: 400px;
+        height: 400px;
+        background: radial-gradient(circle, rgba(102, 126, 234, 0.4) 0%, transparent 70%);
+        top: -100px;
+        right: -100px;
+    }
+    
+    .orb-2 {
+        width: 350px;
+        height: 350px;
+        background: radial-gradient(circle, rgba(168, 85, 247, 0.3) 0%, transparent 70%);
+        bottom: -80px;
+        left: -80px;
+        animation-delay: 7s;
+    }
+    
+    @keyframes floatOrb {
+        0%, 100% { transform: translate(0, 0) scale(1); }
+        33% { transform: translate(20px, -20px) scale(1.05); }
+        66% { transform: translate(-20px, 20px) scale(0.95); }
+    }
+    
+    .grid-pattern {
+        background-image: 
+            linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+        background-size: 50px 50px;
+        position: absolute;
+        inset: 0;
+        z-index: 0;
+    }
+    
+    @media (max-width: 768px) {
+        .orb-1, .orb-2 {
+            width: 250px;
+            height: 250px;
+            filter: blur(60px);
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="relative">
+    <!-- Background Elements -->
+    <div class="hero-bg">
+        <div class="gradient-orb orb-1"></div>
+        <div class="gradient-orb orb-2"></div>
+        <div class="grid-pattern"></div>
+    </div>
+    
+    <!-- Quick Actions -->
+    <div class="flex gap-3 mb-6 relative z-10 animate-fade-in-up">
+        <a href="{% url 'booking:qr_scanner' %}" class="btn btn-primary">
+            <i class="bi bi-qr-code-scan"></i> QR Scanner
+        </a>
+        <a href="{% url 'authentication:owner_overview' %}" class="btn btn-secondary">
+            <i class="bi bi-arrow-left"></i> Back to Dashboard
+        </a>
+    </div>
+
+    <!-- Stats -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6 relative z-10">
+        <div class="stat-card animate-fade-in-up" style="animation-delay: 0.1s;">
+            <p class="text-gray-400 text-xs mb-1 font-medium">Total Bookings</p>
+            <h3 class="text-white text-3xl font-black" style="font-family: 'Orbitron', sans-serif;">{{ active_bookings.count }}</h3>
+        </div>
+        <div class="stat-card animate-fade-in-up" style="animation-delay: 0.2s; border-color: rgba(16, 185, 129, 0.5);">
+            <p class="text-gray-400 text-xs mb-1 font-medium">Verified</p>
+            <h3 class="text-green-400 text-3xl font-black" style="font-family: 'Orbitron', sans-serif;">{{ active_bookings|length }}</h3>
+        </div>
+        <div class="stat-card animate-fade-in-up" style="animation-delay: 0.3s; border-color: rgba(245, 158, 11, 0.5);">
+            <p class="text-gray-400 text-xs mb-1 font-medium">Pending Verification</p>
+            <h3 class="text-yellow-400 text-3xl font-black" style="font-family: 'Orbitron', sans-serif;">
+                {% widthratio active_bookings.count 1 1 as total_count %}
+                {{ total_count|add:"-1" }}
+            </h3>
+        </div>
+    </div>
+
+    <!-- Bookings List -->
+    {% if active_bookings %}
+    <div class="space-y-4 relative z-10">
+        {% for booking in active_bookings %}
+        <div class="owner-card animate-fade-in-up" style="animation-delay: 0.{{ forloop.counter }}s;">
+            <div class="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
+                <div class="flex-1 w-full">
+                    <div class="flex flex-wrap items-center gap-2 mb-3">
+                        <h3 class="text-white font-bold text-lg">
+                            {{ booking.customer.user.get_full_name|default:booking.customer.user.username }}
+                        </h3>
+                        {% if booking.is_verified %}
+                        <span class="px-2 py-1 text-xs font-bold rounded-full bg-green-500/20 text-green-400 border border-green-500/30">
+                            ✓ Verified
+                        </span>
+                        {% else %}
+                        <span class="px-2 py-1 text-xs font-bold rounded-full bg-yellow-500/20 text-yellow-400 border border-yellow-500/30">
+                            Not Verified
+                        </span>
+                        {% endif %}
+                        <span class="px-2 py-1 text-xs font-bold rounded-full bg-blue-500/20 text-blue-400 border border-blue-500/30">
+                            {{ booking.get_status_display }}
+                        </span>
+                    </div>
+                    
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                        <div>
+                            <div class="text-gray-400 text-xs">Game/Station</div>
+                            <div class="text-white font-semibold">
+                                {% if booking.game %}
+                                    {{ booking.game.name }}
+                                {% elif booking.gaming_station %}
+                                    {{ booking.gaming_station.name }}
+                                {% else %}
+                                    N/A
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div>
+                            <div class="text-gray-400 text-xs">Time</div>
+                            <div class="text-white">
+                                {{ booking.start_datetime|date:"g:i A" }} - {{ booking.end_datetime|date:"g:i A" }}
+                            </div>
+                        </div>
+                        <div>
+                            <div class="text-gray-400 text-xs">Contact</div>
+                            <div class="text-white">{{ booking.customer.phone|default:"N/A" }}</div>
+                        </div>
+                        <div>
+                            <div class="text-gray-400 text-xs">Amount</div>
+                            <div class="text-green-400 font-bold">₹{{ booking.total_amount }}</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="flex gap-2">
+                    {% if not booking.is_verified %}
+                    <a href="{% url 'booking:qr_scanner' %}" class="btn btn-primary">
+                        <i class="bi bi-qr-code-scan"></i> Scan QR
+                    </a>
+                    {% elif booking.status == 'IN_PROGRESS' %}
+                    <button onclick="completeBooking('{{ booking.id }}')" class="btn btn-secondary" style="background: rgba(16, 185, 129, 0.2); color: #34d399; border-color: rgba(16, 185, 129, 0.3);">
+                        <i class="bi bi-check-circle"></i> Mark Complete
+                    </button>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="owner-card text-center py-12 relative z-10 animate-fade-in-up">
+        <i class="bi bi-calendar-x text-gray-600 text-6xl mb-4"></i>
+        <h3 class="text-white font-bold text-lg mb-2">No Active Bookings</h3>
+        <p class="text-gray-400">There are no bookings for today.</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+async function completeBooking(bookingId) {
+    if (!confirm('Mark this booking as completed?')) return;
+    
+    try {
+        const response = await fetch(`/booking/complete/${bookingId}/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}'
+            }
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            alert('Booking marked as completed!');
+            location.reload();
+        } else {
+            alert('Error: ' + result.message);
+        }
+    } catch (error) {
+        alert('Network error. Please try again.');
+    }
+}
+
+// Auto-refresh every 60 seconds
+setInterval(() => {
+    location.reload();
+}, 60000);
+</script>
+{% endblock %}

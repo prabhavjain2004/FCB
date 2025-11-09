@@ -1,0 +1,822 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block title %}
+  Booking Confirmed! - TapNex Gaming Cafe
+{% endblock %}
+
+{% block extra_css %}
+  <style>
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    @keyframes bounceIn {
+      0%,
+      20%,
+      40%,
+      60%,
+      80% {
+        animation-timing-function: cubic-bezier(0.215, 0.61, 0.355, 1);
+      }
+      0% {
+        opacity: 0;
+        transform: scale3d(0.3, 0.3, 0.3);
+      }
+      20% {
+        transform: scale3d(1.1, 1.1, 1.1);
+      }
+      40% {
+        transform: scale3d(0.9, 0.9, 0.9);
+      }
+      60% {
+        opacity: 1;
+        transform: scale3d(1.03, 1.03, 1.03);
+      }
+      80% {
+        transform: scale3d(0.97, 0.97, 0.97);
+      }
+      100% {
+        opacity: 1;
+        transform: scale3d(1, 1, 1);
+      }
+    }
+    
+    @keyframes pulse {
+      0% {
+        transform: scale(1);
+      }
+      50% {
+        transform: scale(1.05);
+      }
+      100% {
+        transform: scale(1);
+      }
+    }
+
+    @keyframes float {
+        0%, 100% { transform: translateY(0px); }
+        50% { transform: translateY(-10px); }
+    }
+    
+    .float-animation {
+        animation: float 3s ease-in-out infinite;
+    }
+
+    @keyframes shimmer {
+        0% { background-position: -1000px 0; }
+        100% { background-position: 1000px 0; }
+    }
+    
+    .shimmer-effect {
+        background: linear-gradient(
+            90deg,
+            rgba(255, 255, 255, 0) 0%,
+            rgba(255, 255, 255, 0.1) 50%,
+            rgba(255, 255, 255, 0) 100%
+        );
+        background-size: 1000px 100%;
+        animation: shimmer 2s infinite;
+    }
+    
+    .animate-fade-in-up {
+      animation: fadeInUp 0.6s ease-out;
+    }
+    
+    .animate-bounce-in {
+      animation: bounceIn 1s ease-out;
+    }
+    
+    .animate-pulse-slow {
+      animation: pulse 2s infinite;
+    }
+    
+    .success-card {
+      background: rgba(30, 41, 59, 0.5);
+      backdrop-filter: blur(20px);
+      border-radius: 1.5rem;
+      padding: 2rem;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      text-align: center;
+    }
+    
+    .detail-card {
+      background: rgba(30, 41, 59, 0.5);
+      backdrop-filter: blur(20px);
+      border-radius: 1.5rem;
+      padding: 2rem;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .info-box {
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .info-box::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.05), transparent);
+        transition: left 0.5s ease;
+    }
+    
+    .info-box:hover::before {
+        left: 100%;
+    }
+
+    .card-glow {
+        position: relative;
+    }
+    
+    .card-glow::before {
+        content: '';
+        position: absolute;
+        inset: -2px;
+        border-radius: inherit;
+        padding: 2px;
+        background: linear-gradient(135deg, #667eea, #a855f7);
+        -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+        -webkit-mask-composite: xor;
+        mask-composite: exclude;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+    
+    .card-glow:hover::before {
+        opacity: 0.5;
+    }
+
+    .hero-bg {
+        position: absolute;
+        inset: 0;
+        overflow: hidden;
+        z-index: 0;
+        pointer-events: none;
+    }
+    
+    .gradient-orb {
+        position: absolute;
+        border-radius: 50%;
+        filter: blur(100px);
+        opacity: 0.3;
+        animation: floatOrb 20s ease-in-out infinite;
+    }
+    
+    .orb-1 {
+        width: 500px;
+        height: 500px;
+        background: radial-gradient(circle, rgba(102, 126, 234, 0.4) 0%, transparent 70%);
+        top: -150px;
+        right: -150px;
+        animation-delay: 0s;
+    }
+    
+    .orb-2 {
+        width: 400px;
+        height: 400px;
+        background: radial-gradient(circle, rgba(168, 85, 247, 0.3) 0%, transparent 70%);
+        bottom: -100px;
+        left: -100px;
+        animation-delay: 7s;
+    }
+    
+    @keyframes floatOrb {
+        0%, 100% { transform: translate(0, 0) scale(1); }
+        33% { transform: translate(30px, -30px) scale(1.1); }
+        66% { transform: translate(-30px, 30px) scale(0.9); }
+    }
+
+    .grid-pattern {
+        background-image: 
+            linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+        background-size: 50px 50px;
+        position: absolute;
+        inset: 0;
+        z-index: 0;
+    }
+    
+    .confetti {
+      position: absolute;
+      width: 10px;
+      height: 10px;
+      background: #e94560;
+      animation: confetti-fall 3s linear infinite;
+    }
+    
+    @keyframes confetti-fall {
+      0% {
+        transform: translateY(-100vh) rotate(0deg);
+        opacity: 1;
+      }
+      100% {
+        transform: translateY(100vh) rotate(720deg);
+        opacity: 0;
+      }
+    }
+    
+    .notification-toast {
+      position: fixed;
+      top: 1rem;
+      right: 1rem;
+      background: #10b981;
+      color: white;
+      padding: 1rem 1.5rem;
+      border-radius: 0.5rem;
+      z-index: 50;
+      animation: slideInRight 0.5s ease-out;
+    }
+    
+    @keyframes slideInRight {
+      from {
+        transform: translateX(100%);
+        opacity: 0;
+      }
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
+    
+    .hidden {
+      display: none;
+    }
+
+    .qr-code-container {
+        background: white;
+        padding: 1.5rem;
+        border-radius: 1rem;
+        display: inline-block;
+    }
+
+    .qr-code-container img {
+        display: block;
+        max-width: 280px;
+        height: auto;
+    }
+
+    /* Button z-index fix */
+    button, .btn, a.btn, a[class*="btn"] {
+        position: relative;
+        z-index: 10;
+    }
+
+    /* Mobile Optimizations */
+    @media (max-width: 768px) {
+        /* Slow down all animations on mobile */
+        .float-animation {
+            animation: float 8s cubic-bezier(0.4, 0, 0.6, 1) infinite !important;
+        }
+
+        .animate-pulse-slow {
+            animation: pulse 4.5s cubic-bezier(0.4, 0, 0.6, 1) infinite !important;
+        }
+
+        .gradient-orb {
+            animation: floatOrb 40s cubic-bezier(0.4, 0, 0.6, 1) infinite !important;
+        }
+
+        .shimmer-effect {
+            animation: shimmer 4s cubic-bezier(0.4, 0, 0.6, 1) infinite !important;
+        }
+
+        .confetti {
+            animation: confetti-fall 5s cubic-bezier(0.4, 0, 0.6, 1) infinite !important;
+        }
+
+        /* Reduce animation intensity on mobile */
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-5px); }
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.03); }
+            100% { transform: scale(1); }
+        }
+
+        .success-card {
+            padding: 1.5rem;
+        }
+
+        .success-card h1 {
+            font-size: 2rem !important;
+        }
+
+        .success-card p {
+            font-size: 1rem;
+        }
+
+        .detail-card {
+            padding: 1.25rem;
+        }
+
+        .detail-card h2 {
+            font-size: 1.25rem !important;
+        }
+
+        .qr-code-container {
+            padding: 1rem;
+            max-width: 100%;
+        }
+
+        .qr-code-container img {
+            max-width: 220px;
+            width: 100%;
+        }
+
+        .info-box {
+            padding: 0.875rem !important;
+        }
+
+        .info-box .icon-box {
+            width: 2.5rem !important;
+            height: 2.5rem !important;
+        }
+
+        .info-box .text-2xl {
+            font-size: 1.125rem !important;
+        }
+
+        .info-box span {
+            font-size: 0.75rem !important;
+        }
+
+        .booking-id {
+            font-size: 0.75rem !important;
+        }
+
+        .game-name {
+            font-size: 0.95rem !important;
+        }
+
+        .date-text {
+            font-size: 0.875rem !important;
+        }
+
+        .time-text {
+            font-size: 0.75rem !important;
+        }
+
+        .amount-text {
+            font-size: 1.5rem !important;
+        }
+
+        /* How to Enter section mobile optimization */
+        .step-item {
+            padding: 1rem !important;
+        }
+
+        .step-item h3 {
+            font-size: 0.95rem !important;
+        }
+
+        .step-item p {
+            font-size: 0.8rem !important;
+            line-height: 1.4;
+        }
+
+        .step-item .w-10 {
+            width: 2.25rem;
+            height: 2.25rem;
+            font-size: 0.875rem;
+        }
+
+        /* Button optimizations */
+        .px-8 {
+            padding-left: 1.5rem !important;
+            padding-right: 1.5rem !important;
+        }
+
+        .py-4 {
+            padding-top: 0.875rem !important;
+            padding-bottom: 0.875rem !important;
+        }
+
+        /* Contact section mobile */
+        .grid-cols-1.md\\:grid-cols-3 {
+            gap: 1rem;
+        }
+
+        .grid-cols-1.md\\:grid-cols-3 > div {
+            padding: 0.875rem !important;
+        }
+
+        .grid-cols-1.md\\:grid-cols-3 p {
+            font-size: 0.875rem;
+        }
+    }
+
+    @media print {
+        body * {
+            visibility: hidden;
+        }
+        #qrCodeSection, #qrCodeSection * {
+            visibility: visible;
+        }
+        #qrCodeSection {
+            position: absolute;
+            left: 0;
+            top: 0;
+        }
+    }
+  </style>
+{% endblock %}
+
+{% block content %}
+  <div class="min-h-screen relative overflow-hidden py-12" style="background: #111827;">
+    <!-- Animated Background -->
+    <div class="hero-bg">
+        <div class="gradient-orb orb-1"></div>
+        <div class="gradient-orb orb-2"></div>
+        <div class="grid-pattern"></div>
+    </div>
+
+    <!-- Confetti Animation -->
+    <div id="confetti-container" class="absolute inset-0 pointer-events-none z-20"></div>
+
+    <!-- Success Content -->
+    <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <!-- Success Icon and Message -->
+      <div class="success-card animate-bounce-in mb-8">
+        <div class="text-6xl mb-6 float-animation">🎉</div>
+        <h1 class="text-4xl sm:text-5xl font-black text-white mb-4" style="font-family: 'Orbitron', sans-serif;">
+            <span style="background: linear-gradient(135deg, #00f5ff, #b537f2, #ff006e); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">Payment Successful!</span>
+        </h1>
+        <p class="text-xl text-gray-300 mb-6">Your gaming session has been confirmed. Show your QR code at the venue for entry!</p>
+        <div class="inline-flex items-center space-x-2 bg-green-500/20 border border-green-400/30 rounded-full px-6 py-3">
+          <div class="w-3 h-3 bg-green-400 rounded-full animate-pulse-slow"></div>
+          <span class="text-green-300 font-medium">Confirmed & Paid</span>
+        </div>
+      </div>
+
+      <!-- Main Content Grid -->
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
+        
+        <!-- Left Column - QR Code (Most Important!) -->
+        <div class="lg:col-span-1">
+            <div class="detail-card card-glow animate-fade-in-up" style="animation-delay: 0.2s;" id="qrCodeSection">
+                <div class="flex items-center gap-3 mb-6">
+                    <div class="w-10 h-10 rounded-xl flex items-center justify-center" style="background: linear-gradient(135deg, #667eea, #a855f7);">
+                        <i class="bi bi-qr-code text-white text-xl"></i>
+                    </div>
+                    <h2 class="text-2xl font-black text-white">Your Entry Pass</h2>
+                </div>
+
+                <div class="text-center mb-6">
+                    <div id="qr-loading" class="p-6 rounded-xl mb-4" style="background: rgba(102, 126, 234, 0.1); border: 1px solid rgba(102, 126, 234, 0.3);">
+                        <div class="animate-spin w-8 h-8 border-4 border-indigo-500 border-t-transparent rounded-full mx-auto mb-3"></div>
+                        <p class="text-indigo-300 font-medium">Generating QR Code...</p>
+                    </div>
+                    
+                    <div id="qr-container" class="hidden">
+                        <div class="qr-code-container mx-auto mb-4">
+                            <div id="qr-canvas"></div>
+                        </div>
+                        <p class="text-gray-300 text-sm mb-4">Show this QR code at the venue for entry</p>
+                        
+                        <!-- QR Actions -->
+                        <div class="space-y-3">
+                            <button onclick="downloadQR()" class="w-full font-semibold py-3 rounded-lg transition-all" style="background: linear-gradient(135deg, #667eea, #a855f7); color: white;">
+                                <i class="bi bi-download mr-2"></i>Download QR Code
+                            </button>
+                            <button onclick="window.print()" class="w-full font-semibold py-3 rounded-lg transition-all" style="background: rgba(255, 255, 255, 0.1); color: white; border: 1px solid rgba(255, 255, 255, 0.2);">
+                                <i class="bi bi-printer mr-2"></i>Print QR Code
+                            </button>
+                        </div>
+
+                        <!-- Important Notice -->
+                        <div class="mt-6 p-4 rounded-xl" style="background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3);">
+                            <div class="flex items-start gap-3">
+                                <i class="bi bi-exclamation-triangle-fill text-red-400 text-xl flex-shrink-0"></i>
+                                <div class="text-left">
+                                    <p class="text-red-300 font-semibold text-sm mb-1">Single Use Only</p>
+                                    <p class="text-red-200 text-xs">This QR code can only be scanned once. Do not share it with others.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div id="qr-error" class="hidden p-6 rounded-xl" style="background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3);">
+                        <i class="bi bi-exclamation-triangle-fill text-red-400 text-4xl mb-3"></i>
+                        <p class="text-red-300 font-medium">Unable to generate QR code</p>
+                        <p class="text-red-200 text-sm mt-2">Please check your bookings page for your QR code.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Column - Booking Details & Instructions -->
+        <div class="lg:col-span-2 space-y-8">
+            <!-- Booking Details -->
+            <div class="detail-card animate-fade-in-up" style="animation-delay: 0.3s;">
+                <div class="flex items-center gap-3 mb-6">
+                    <div class="w-10 h-10 rounded-xl flex items-center justify-center" style="background: linear-gradient(135deg, #667eea, #a855f7);">
+                        <i class="bi bi-controller text-white text-xl"></i>
+                    </div>
+                    <h2 class="text-2xl font-black text-white">Booking Details</h2>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="info-box rounded-2xl p-4" style="background: rgba(102, 126, 234, 0.1); border: 1px solid rgba(102, 126, 234, 0.2);">
+                        <div class="flex items-center gap-3 mb-3">
+                            <div class="w-12 h-12 rounded-xl flex items-center justify-center icon-box" style="background: rgba(102, 126, 234, 0.2);">
+                                <i class="bi bi-hash text-2xl" style="color: #818cf8;"></i>
+                            </div>
+                            <span class="text-sm font-semibold uppercase tracking-wide text-gray-400">Booking ID</span>
+                        </div>
+                        <p class="text-white font-bold text-base tracking-wide booking-id" style="font-family: 'Courier New', monospace; word-break: break-all;">#{{ booking.id }}</p>
+                    </div>
+
+                    <div class="info-box rounded-2xl p-4" style="background: rgba(168, 85, 247, 0.1); border: 1px solid rgba(168, 85, 247, 0.2);">
+                        <div class="flex items-center gap-3 mb-3">
+                            <div class="w-12 h-12 rounded-xl flex items-center justify-center icon-box" style="background: rgba(168, 85, 247, 0.2);">
+                                <i class="bi bi-controller text-2xl" style="color: #c084fc;"></i>
+                            </div>
+                            <span class="text-sm font-semibold uppercase tracking-wide text-gray-400">Game</span>
+                        </div>
+                        <p class="text-white font-bold text-lg game-name">{{ booking.game.name }}</p>
+                    </div>
+
+                    <div class="info-box rounded-2xl p-4" style="background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.2);">
+                        <div class="flex items-center gap-3 mb-3">
+                            <div class="w-12 h-12 rounded-xl flex items-center justify-center icon-box" style="background: rgba(16, 185, 129, 0.2);">
+                                <i class="bi bi-calendar-event text-2xl" style="color: #34d399;"></i>
+                            </div>
+                            <span class="text-sm font-semibold uppercase tracking-wide text-gray-400">Date & Time</span>
+                        </div>
+                        <p class="text-white font-bold text-base mb-1 date-text">{{ booking.game_slot.date|date:"M d, Y" }}</p>
+                        <p class="text-gray-300 text-sm time-text">{{ booking.game_slot.start_time|time:"h:i A" }} - {{ booking.game_slot.end_time|time:"h:i A" }}</p>
+                    </div>
+
+                    <div class="info-box rounded-2xl p-4" style="background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.2);">
+                        <div class="flex items-center gap-3 mb-3">
+                            <div class="w-12 h-12 rounded-xl flex items-center justify-center icon-box" style="background: rgba(245, 158, 11, 0.2);">
+                                <i class="bi bi-cash-coin text-2xl" style="color: #fbbf24;"></i>
+                            </div>
+                            <span class="text-sm font-semibold uppercase tracking-wide text-gray-400">Total Paid</span>
+                        </div>
+                        <p class="text-white font-black text-2xl amount-text" style="color: #fbbf24;">₹{{ booking.total_amount|floatformat:2 }}</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- What's Next -->
+            <div class="detail-card animate-fade-in-up" style="animation-delay: 0.4s;">
+                <div class="flex items-center gap-3 mb-6">
+                    <div class="w-10 h-10 rounded-xl flex items-center justify-center" style="background: linear-gradient(135deg, #667eea, #a855f7);">
+                        <i class="bi bi-list-check text-white text-xl"></i>
+                    </div>
+                    <h2 class="text-2xl font-black text-white">How to Enter</h2>
+                </div>
+
+                <div class="space-y-4">
+                    <div class="flex items-start space-x-4 p-4 rounded-xl step-item" style="background: rgba(102, 126, 234, 0.1); border: 1px solid rgba(102, 126, 234, 0.2);">
+                        <div class="w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-500 rounded-full flex items-center justify-center flex-shrink-0">
+                            <span class="text-white font-bold">1</span>
+                        </div>
+                        <div class="flex-1">
+                            <h3 class="text-white font-bold mb-1">Save Your QR Code</h3>
+                            <p class="text-gray-300 text-sm">Download or screenshot the QR code above for easy access at the venue.</p>
+                        </div>
+                    </div>
+
+                    <div class="flex items-start space-x-4 p-4 rounded-xl step-item" style="background: rgba(168, 85, 247, 0.1); border: 1px solid rgba(168, 85, 247, 0.2);">
+                        <div class="w-10 h-10 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center flex-shrink-0">
+                            <span class="text-white font-bold">2</span>
+                        </div>
+                        <div class="flex-1">
+                            <h3 class="text-white font-bold mb-1">Arrive on Time</h3>
+                            <p class="text-gray-300 text-sm">Please arrive 5-10 minutes before your session starts.</p>
+                        </div>
+                    </div>
+
+                    <div class="flex items-start space-x-4 p-4 rounded-xl step-item" style="background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.2);">
+                        <div class="w-10 h-10 bg-gradient-to-br from-green-500 to-emerald-500 rounded-full flex items-center justify-center flex-shrink-0">
+                            <span class="text-white font-bold">3</span>
+                        </div>
+                        <div class="flex-1">
+                            <h3 class="text-white font-bold mb-1">Show QR at Reception</h3>
+                            <p class="text-gray-300 text-sm">Our staff will scan your QR code to verify your booking and grant entry.</p>
+                        </div>
+                    </div>
+
+                    <div class="flex items-start space-x-4 p-4 rounded-xl step-item" style="background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.2);">
+                        <div class="w-10 h-10 bg-gradient-to-br from-yellow-500 to-orange-500 rounded-full flex items-center justify-center flex-shrink-0">
+                            <span class="text-white font-bold">4</span>
+                        </div>
+                        <div class="flex-1">
+                            <h3 class="text-white font-bold mb-1">Enjoy Your Session!</h3>
+                            <p class="text-gray-300 text-sm">Once verified, you'll be directed to your gaming station. Have fun!</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="flex flex-col sm:flex-row justify-center gap-4 animate-fade-in-up" style="animation-delay: 0.6s;">
+        <a href="{% url 'booking:my_bookings' %}" class="px-8 py-4 rounded-xl font-bold transition-all duration-200 transform hover:scale-105 text-center" style="background: linear-gradient(135deg, #667eea, #764ba2); color: white;">
+          <div class="flex items-center justify-center space-x-2">
+            <i class="bi bi-calendar-check text-xl"></i>
+            <span>View My Bookings</span>
+          </div>
+        </a>
+
+        <a href="{% url 'booking:game_detail' game_id=booking.game.id %}" class="px-8 py-4 rounded-xl font-bold transition-all duration-200 text-center" style="background: rgba(255, 255, 255, 0.1); color: white; border: 1px solid rgba(255, 255, 255, 0.2);">
+          <div class="flex items-center justify-center space-x-2">
+            <i class="bi bi-plus-circle text-xl"></i>
+            <span>Book Another Session</span>
+          </div>
+        </a>
+
+        <a href="{% url 'authentication:customer_dashboard' %}" class="px-8 py-4 rounded-xl font-bold transition-all duration-200 text-center" style="background: rgba(255, 255, 255, 0.1); color: white; border: 1px solid rgba(255, 255, 255, 0.2);">
+          <div class="flex items-center justify-center space-x-2">
+            <i class="bi bi-house text-xl"></i>
+            <span>Back to Dashboard</span>
+          </div>
+        </a>
+      </div>
+
+      <!-- Contact Information -->
+      <div class="detail-card mt-8 animate-fade-in-up" style="animation-delay: 0.8s;">
+        <div class="flex items-center gap-3 mb-6">
+            <div class="w-10 h-10 rounded-xl flex items-center justify-center" style="background: linear-gradient(135deg, #667eea, #a855f7);">
+                <i class="bi bi-headset text-white text-xl"></i>
+            </div>
+            <h2 class="text-2xl font-black text-white">Need Help?</h2>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div class="text-center p-4 rounded-xl" style="background: rgba(102, 126, 234, 0.1); border: 1px solid rgba(102, 126, 234, 0.2);">
+            <div class="w-12 h-12 mx-auto mb-3 rounded-full flex items-center justify-center" style="background: rgba(102, 126, 234, 0.2);">
+              <i class="bi bi-telephone-fill text-2xl" style="color: #818cf8;"></i>
+            </div>
+            <p class="text-white font-bold mb-1">Contact Support</p>
+            <p class="text-gray-400 text-sm">For assistance</p>
+          </div>
+          <div class="text-center p-4 rounded-xl" style="background: rgba(168, 85, 247, 0.1); border: 1px solid rgba(168, 85, 247, 0.2);">
+            <div class="w-12 h-12 mx-auto mb-3 rounded-full flex items-center justify-center" style="background: rgba(168, 85, 247, 0.2);">
+              <i class="bi bi-envelope-fill text-2xl" style="color: #c084fc;"></i>
+            </div>
+            <p class="text-white font-bold mb-1">info@tapnex.tech</p>
+            <p class="text-gray-400 text-sm">Email us</p>
+          </div>
+          <div class="text-center p-4 rounded-xl" style="background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.2);">
+            <div class="w-12 h-12 mx-auto mb-3 rounded-full flex items-center justify-center" style="background: rgba(16, 185, 129, 0.2);">
+              <i class="bi bi-geo-alt-fill text-2xl" style="color: #34d399;"></i>
+            </div>
+            <p class="text-white font-bold mb-1">Visit Our Cafe</p>
+            <p class="text-gray-400 text-sm">Find location</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+  </div>
+
+{% endblock %}
+
+{% block extra_js %}
+  <script>
+    let qrDataGlobal = null;
+    
+    document.addEventListener('DOMContentLoaded', function () {
+      // Generate QR code
+      generateQRCode();
+      
+      // Create confetti animation
+      createConfetti()
+    })
+    
+    function generateQRCode() {
+      const bookingId = '{{ booking.id }}';
+      const qrLoading = document.getElementById('qr-loading');
+      const qrContainer = document.getElementById('qr-container');
+      const qrError = document.getElementById('qr-error');
+      const canvas = document.getElementById('qr-canvas');
+      
+      // Check if QRCode library is loaded
+      if (typeof QRCode === 'undefined') {
+        setTimeout(() => generateQRCode(), 100);
+        return;
+      }
+      
+      fetch(`/booking/api/qr-data/${bookingId}/`)
+        .then(response => response.json())
+        .then(data => {
+          if (data.success && data.qr_data) {
+            qrDataGlobal = data.qr_data;
+            
+            // Clear canvas container and generate QR code
+            const container = document.getElementById('qr-canvas');
+            container.innerHTML = '';
+            
+            // Generate QR code using QRCode.js
+            new QRCode(container, {
+              text: data.qr_data,
+              width: 280,
+              height: 280,
+              colorDark: '#000000',
+              colorLight: '#ffffff',
+              correctLevel: QRCode.CorrectLevel.M
+            });
+            
+            qrLoading.classList.add('hidden');
+            qrContainer.classList.remove('hidden');
+          } else {
+            qrLoading.classList.add('hidden');
+            qrError.classList.remove('hidden');
+          }
+        })
+        .catch(error => {
+          qrLoading.classList.add('hidden');
+          qrError.classList.remove('hidden');
+        });
+    }
+    
+    function createConfetti() {
+      const container = document.getElementById('confetti-container')
+      const colors = ['#667eea', '#a855f7', '#00f5ff', '#ff006e', '#ffd700', '#10b981']
+    
+      for (let i = 0; i < 50; i++) {
+        setTimeout(() => {
+          const confetti = document.createElement('div')
+          confetti.className = 'confetti'
+          confetti.style.left = Math.random() * 100 + '%'
+          confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)]
+          confetti.style.animationDelay = Math.random() * 3 + 's'
+          confetti.style.animationDuration = Math.random() * 3 + 2 + 's'
+    
+          container.appendChild(confetti)
+    
+          // Remove confetti after animation
+          setTimeout(() => {
+            if (confetti.parentNode) {
+              confetti.parentNode.removeChild(confetti)
+            }
+          }, 5000)
+        }, i * 100)
+      }
+    }
+    
+
+
+    function downloadQR() {
+      const qrContainer = document.getElementById('qr-canvas');
+      if (qrContainer) {
+        // Find the canvas or image inside the QR container
+        const canvas = qrContainer.querySelector('canvas');
+        const img = qrContainer.querySelector('img');
+        
+        if (canvas) {
+          // Convert canvas to blob and download
+          canvas.toBlob(function(blob) {
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = 'booking_{{ booking.id }}_qr.png';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+            
+            // Show success message
+            const toast = document.getElementById('notification-toast');
+            toast.innerHTML = '<div class="flex items-center space-x-2"><i class="bi bi-check-circle-fill"></i><span>QR Code downloaded!</span></div>';
+            toast.classList.remove('hidden');
+            setTimeout(() => toast.classList.add('hidden'), 3000);
+          });
+        } else if (img) {
+          // Download image directly
+          const link = document.createElement('a');
+          link.href = img.src;
+          link.download = 'booking_{{ booking.id }}_qr.png';
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          
+          // Show success message
+          const toast = document.getElementById('notification-toast');
+          toast.innerHTML = '<div class="flex items-center space-x-2"><i class="bi bi-check-circle-fill"></i><span>QR Code downloaded!</span></div>';
+          toast.classList.remove('hidden');
+          setTimeout(() => toast.classList.add('hidden'), 3000);
+        }
+      }
+    }
+  </script>
+{% endblock %}

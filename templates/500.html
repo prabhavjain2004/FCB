@@ -1,0 +1,218 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>500 - Server Error | TapNex Arena</title>
+
+    <link rel="stylesheet" href="{% static 'css/design-system-v2.css' %}" />
+    <link rel="stylesheet" href="{% static 'css/animations.css' %}" />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Orbitron:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
+
+    <style>
+      body {
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg, #111827 0%, #1a202e 50%, #1f2937 100%);
+        position: relative;
+        overflow: hidden;
+      }
+      
+      .bg-pattern {
+        position: absolute;
+        inset: 0;
+        background-image: linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+        background-size: 50px 50px;
+        animation: patternMove 20s linear infinite;
+      }
+      
+      @keyframes patternMove {
+        0% {
+          transform: translate(0, 0);
+        }
+        100% {
+          transform: translate(50px, 50px);
+        }
+      }
+      
+      .error-code {
+        font-size: 10rem;
+        font-weight: 900;
+        font-family: 'Orbitron', sans-serif;
+        background: linear-gradient(135deg, #f59e0b 0%, #f97316 50%, #ea580c 100%);
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+        line-height: 1;
+        animation: errorPulse 2s ease-in-out infinite;
+      }
+      
+      @keyframes errorPulse {
+        0%,
+        100% {
+          opacity: 1;
+          transform: scale(1);
+        }
+        50% {
+          opacity: 0.8;
+          transform: scale(1.05);
+        }
+      }
+      
+      .floating-icon {
+        position: absolute;
+        font-size: 4rem;
+        opacity: 0.1;
+        animation: floatAnim 10s ease-in-out infinite;
+      }
+      
+      @keyframes floatAnim {
+        0%,
+        100% {
+          transform: translateY(0) rotate(0deg);
+        }
+        50% {
+          transform: translateY(-30px) rotate(10deg);
+        }
+      }
+      
+      .spark {
+        position: absolute;
+        width: 4px;
+        height: 4px;
+        background: #f59e0b;
+        border-radius: 50%;
+        animation: sparkFall 3s linear infinite;
+      }
+      
+      @keyframes sparkFall {
+        0% {
+          transform: translateY(-50px) scale(1);
+          opacity: 1;
+        }
+        100% {
+          transform: translateY(100vh) scale(0);
+          opacity: 0;
+        }
+      }
+
+      /* Mobile Animation Optimizations */
+      @media (max-width: 768px) {
+        @keyframes patternMove {
+          0% {
+            transform: translate(0, 0);
+          }
+          100% {
+            transform: translate(50px, 50px);
+          }
+        }
+
+        @keyframes errorPulse {
+          0%, 100% {
+            transform: scale(1);
+            opacity: 1;
+          }
+          50% {
+            transform: scale(1.02);
+            opacity: 0.9;
+          }
+        }
+
+        @keyframes floatAnim {
+          0%, 100% {
+            transform: translateY(0);
+          }
+          50% {
+            transform: translateY(-5px);
+          }
+        }
+
+        .bg-pattern {
+          animation: patternMove 30s cubic-bezier(0.4, 0, 0.6, 1) infinite !important;
+        }
+
+        .error-code {
+          animation: errorPulse 4.5s cubic-bezier(0.4, 0, 0.6, 1) infinite !important;
+        }
+
+        .error-icon {
+          animation: floatAnim 8s cubic-bezier(0.4, 0, 0.6, 1) infinite !important;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="bg-pattern"></div>
+
+    <div class="spark" style="left: 10%; animation-delay: 0s;"></div>
+    <div class="spark" style="left: 25%; animation-delay: 1s;"></div>
+    <div class="spark" style="left: 50%; animation-delay: 0.5s;"></div>
+    <div class="spark" style="left: 75%; animation-delay: 1.5s;"></div>
+    <div class="spark" style="left: 90%; animation-delay: 0.8s;"></div>
+
+    <i class="bi bi-server floating-icon" style="top: 10%; left: 10%; animation-delay: 0s;"></i>
+    <i class="bi bi-tools floating-icon" style="top: 20%; right: 15%; animation-delay: 2s;"></i>
+    <i class="bi bi-gear-fill floating-icon" style="bottom: 15%; left: 15%; animation-delay: 4s;"></i>
+    <i class="bi bi-bug-fill floating-icon" style="bottom: 20%; right: 10%; animation-delay: 6s;"></i>
+
+    <div style="position: relative; z-index: 10; text-align: center; max-width: 600px; padding: 2rem;">
+      <div class="error-code" style="margin-bottom: 2rem;">500</div>
+
+      <div style="margin-bottom: 2rem;" class="animate-float">
+                <i class="fas fa-exclamation-circle" style="font-size: 6rem; color: #e94560; margin-bottom: 2rem; display: block;"></i>
+      </div>
+
+      <h1 style="font-size: 2.25rem; font-weight: 700; color: white; margin-bottom: 1rem;">Server Error</h1>
+      <p style="font-size: 1.25rem; color: #9ca3af; margin-bottom: 2rem;">Oops! Something went wrong on our end. We're working to fix it!</p>
+
+      <div class="glass-strong" style="border-radius: 1rem; padding: 1.5rem; margin-bottom: 2rem;">
+        <div style="display: flex; align-items: flex-start; gap: 0.75rem; text-align: left;">
+          <i class="bi bi-info-circle-fill" style="color: #e94560; font-size: 1.25rem; flex-shrink: 0; margin-top: 0.25rem;"></i>
+          <div>
+            <p style="color: white; font-weight: 600; margin-bottom: 0.5rem;">What happened?</p>
+            <p style="color: #9ca3af; font-size: 0.875rem; margin-bottom: 0.5rem;">Our servers encountered an unexpected error while processing your request. Don't worry, our team has been automatically notified and is working to fix the issue.</p>
+            <p style="color: #9ca3af; font-size: 0.875rem;">
+              <strong>What you can do:</strong>
+            </p>
+            <ul style="color: #9ca3af; font-size: 0.875rem; list-style: disc; padding-left: 1.25rem;">
+              <li>Wait a few minutes and try again</li>
+              <li>Go back to the homepage</li>
+              <li>Contact us if the problem persists</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 1rem; margin-bottom: 2rem;">
+        <a href="{% url 'home' %}" class="btn btn-primary btn-lg btn-ripple hover-glow">
+          <i class="bi bi-house-fill"></i>
+          Back to Home
+          <i class="bi bi-arrow-right" style="margin-left: 0.5rem;"></i>
+        </a>
+
+        <button onclick="location.reload()" class="btn btn-secondary btn-lg">
+          <i class="bi bi-arrow-clockwise"></i>
+          Try Again
+        </button>
+      </div>
+
+      <div>
+        <p style="color: #6b7280; font-size: 0.875rem; margin-bottom: 1rem;">Still having issues?</p>
+        <div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 1rem; font-size: 0.875rem;">
+          <a href="{% url 'contact' %}" style="color: #9ca3af;"><i class="bi bi-envelope"></i> Contact Support</a>
+          <a href="#" onclick="history.back(); return false;" style="color: #9ca3af;"><i class="bi bi-arrow-left"></i> Go Back</a>
+        </div>
+      </div>
+    </div>
+
+    <script src="{% static 'js/animations.js' %}"></script>
+  </body>
+</html>

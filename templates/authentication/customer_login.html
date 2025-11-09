@@ -1,0 +1,875 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}
+  Sign In - TapNex Arena
+{% endblock %}
+
+{% block content %}
+  <!-- Professional Background -->
+  <div class="login-page-wrapper">
+    <div class="min-h-screen flex flex-col justify-center py-12 sm:px-6 lg:px-8 relative z-10">
+      <div class="sm:mx-auto sm:w-full sm:max-w-md">
+        <!-- Header -->
+        <div class="text-center mb-8">
+          <div class="icon-wrapper mx-auto">
+            <div class="icon-container">
+              <i class="fas fa-user"></i>
+            </div>
+          </div>
+          <h2 class="page-title">Welcome Back</h2>
+          <p class="page-subtitle">Access your gaming profile and continue your journey</p>
+        </div>
+      </div>
+
+      <!-- Centered Form Container -->
+      <div class="flex justify-center px-4">
+        <div class="w-full max-w-md">
+          <div class="login-card">
+            <div class="card-shine"></div>
+
+            <!-- Messages -->
+            {% if messages %}
+              <div class="mb-6">
+                {% for message in messages %}
+                  <div class="alert-message {% if message.tags == 'error' %}
+                      alert-error
+                    {% else %}
+                      alert-success
+                    {% endif %}">
+                    <div class="alert-icon">
+                      <i class="fas {% if message.tags == 'error' %}
+                          fa-exclamation-circle
+                        {% else %}
+                          fa-check-circle
+                        {% endif %}">
+
+                      </i>
+                    </div>
+                    <p class="alert-text">{{ message }}</p>
+                  </div>
+                {% endfor %}
+              </div>
+            {% endif %}
+
+            <!-- Google OAuth Button -->
+            <div class="text-center mb-8">
+              <button onclick="handleGoogleLogin()" id="google-login-btn" class="google-btn">
+                <svg class="google-icon" viewBox="0 0 24 24">
+                  <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
+                  <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
+                  <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" />
+                  <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
+                </svg>
+                <span>Continue with Google</span>
+              </button>
+              
+              <p style="margin-top: 1rem; font-size: 0.8125rem; color: rgba(148, 163, 184, 0.8);">
+                Sign in or create your account with Google
+              </p>
+            </div>
+
+            <!-- Features Grid -->
+            <div class="features-grid">
+              <div class="feature-item">
+                <div class="feature-icon">
+                  <i class="fas fa-bolt"></i>
+                </div>
+                <div class="feature-content">
+                  <h4>Instant Booking</h4>
+                  <p>Reserve your gaming session in seconds</p>
+                </div>
+              </div>
+
+              <div class="feature-item">
+                <div class="feature-icon">
+                  <i class="fas fa-qrcode"></i>
+                </div>
+                <div class="feature-content">
+                  <h4>QR Entry Pass</h4>
+                  <p>Contactless check-in at the venue</p>
+                </div>
+              </div>
+
+              <div class="feature-item">
+                <div class="feature-icon">
+                  <i class="fas fa-shield-alt"></i>
+                </div>
+                <div class="feature-content">
+                  <h4>Secure Payments</h4>
+                  <p>Safe transactions with Razorpay</p>
+                </div>
+              </div>
+
+              <div class="feature-item">
+                <div class="feature-icon">
+                  <i class="fas fa-history"></i>
+                </div>
+                <div class="feature-content">
+                  <h4>Booking History</h4>
+                  <p>Track all your gaming sessions</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Trust Badge -->
+            <div class="trust-badge">
+              <i class="fas fa-lock"></i>
+              <span>Your data is secure and never shared</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Back to Home -->
+      <div class="back-home">
+        <a href="{% url 'home' %}" class="back-home-link">
+          <i class="fas fa-arrow-left"></i>
+          Back to Homepage
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Font Awesome CDN for Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+
+  <style>
+/* ============================================
+   CUSTOMER LOGIN PAGE STYLES
+   ============================================ */
+
+/* === BASE LAYOUT === */
+.login-page-wrapper {
+  position: relative;
+  min-h-screen;
+  overflow: hidden;
+  background: linear-gradient(180deg, #111827 0%, #111827 50%, #111827 100%);
+}
+
+/* === HEADER ICON === */
+.icon-wrapper {
+  position: relative;
+  width: 100px;
+  height: 100px;
+  margin-bottom: 2rem;
+  display: inline-block;
+}
+
+    .icon-container {
+      position: relative;
+      width: 100px;
+      height: 100px;
+      background: linear-gradient(135deg, #e94560 0%, #00d4aa 100%);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform 0.3s ease;
+    }.icon-wrapper:hover .icon-container {
+  transform: scale(1.05);
+}
+
+.icon-container i {
+  font-size: 2.5rem;
+  color: white;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+}
+
+/* === PAGE TITLES === */
+.page-title {
+  margin-top: 1.5rem;
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: white;
+  letter-spacing: -0.025em;
+  background: linear-gradient(135deg, #ffffff 0%, #e0e7ff 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 0.75rem;
+}
+
+.page-subtitle {
+  font-size: 0.9rem;
+  color: rgba(203, 213, 225, 0.8);
+  font-weight: 500;
+  letter-spacing: 0.025em;
+}
+
+/* === LOGIN CARD === */
+.login-card {
+  position: relative;
+  background: rgba(30, 41, 59, 0.7);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(148, 163, 184, 0.1);
+  border-radius: 1.5rem;
+  padding: 2.5rem;
+  overflow: hidden;
+}
+
+.card-shine {
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.03),
+    transparent
+  );
+  transition: left 0.6s ease;
+}
+
+.login-card:hover .card-shine {
+  left: 100%;
+}
+
+/* === ALERT MESSAGES === */
+.alert-message {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 1rem;
+  border-radius: 0.75rem;
+  margin-bottom: 1.5rem;
+  animation: slideDown 0.3s ease;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.alert-error {
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+.alert-success {
+  background: rgba(34, 197, 94, 0.1);
+  border: 1px solid rgba(34, 197, 94, 0.3);
+}
+
+.alert-icon {
+  flex-shrink: 0;
+  margin-top: 0.125rem;
+}
+
+.alert-error .alert-icon {
+  color: #f87171;
+}
+
+.alert-success .alert-icon {
+  color: #4ade80;
+}
+
+.alert-text {
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* === GOOGLE BUTTON === */
+.google-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  padding: 0.875rem 1rem;
+  background: white;
+  border: 1.5px solid rgba(71, 85, 105, 0.2);
+  border-radius: 0.75rem;
+  color: rgba(51, 65, 85, 0.9);
+  font-size: 0.9375rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.google-btn:hover:not(:disabled) {
+  background: rgba(248, 250, 252, 1);
+  border-color: rgba(99, 102, 241, 0.3);
+  transform: translateY(-2px);
+}
+
+.google-btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.google-icon {
+  width: 1.25rem;
+  height: 1.25rem;
+  flex-shrink: 0;
+}
+
+/* === DIVIDER === */
+.divider {
+  position: relative;
+  margin: 1.5rem 0;
+  text-align: center;
+}
+
+.divider::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: rgba(71, 85, 105, 0.3);
+}
+
+.divider-text {
+  position: relative;
+  display: inline-block;
+  padding: 0 1rem;
+  background: rgba(30, 41, 59, 0.7);
+  font-size: 0.8125rem;
+  color: rgba(148, 163, 184, 0.9);
+  font-weight: 500;
+}
+
+/* === FORM GROUPS === */
+.form-group {
+  margin-bottom: 1.5rem;
+}
+
+.form-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: rgba(226, 232, 240, 0.95);
+  letter-spacing: 0.01em;
+}
+
+.label-icon {
+  font-size: 0.875rem;
+  color: rgba(148, 163, 184, 0.7);
+}
+
+/* === INPUT WRAPPER === */
+.input-wrapper {
+  position: relative;
+}
+
+.form-input {
+  width: 100%;
+  padding: 0.875rem 1rem;
+  background: rgba(15, 23, 42, 0.6);
+  border: 1.5px solid rgba(71, 85, 105, 0.4);
+  border-radius: 0.75rem;
+  color: white;
+  font-size: 0.9375rem;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  outline: none;
+}
+
+.form-input:focus {
+  background: rgba(15, 23, 42, 0.8);
+  border-color: rgba(99, 102, 241, 0.6);
+  transform: translateY(-1px);
+}
+
+.form-input:hover:not(:focus) {
+  border-color: rgba(100, 116, 139, 0.6);
+  background: rgba(15, 23, 42, 0.7);
+}
+
+.form-input::placeholder {
+  color: rgba(148, 163, 184, 0.5);
+}
+
+.input-focus-ring {
+  position: absolute;
+  inset: -2px;
+  border-radius: 0.75rem;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  background: linear-gradient(135deg, #e94560, #00d4aa);
+  -webkit-mask: 
+    linear-gradient(#fff 0 0) content-box, 
+    linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  padding: 2px;
+}
+
+.form-input:focus ~ .input-focus-ring {
+  opacity: 0.3;
+}
+
+/* === PASSWORD TOGGLE === */
+.password-toggle-btn {
+  position: absolute;
+  right: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  padding: 0.5rem;
+  background: none;
+  border: none;
+  color: rgba(148, 163, 184, 0.7);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border-radius: 0.375rem;
+  z-index: 10;
+}
+
+.password-toggle-btn:hover {
+  color: rgba(226, 232, 240, 0.9);
+  background: rgba(255, 255, 255, 0.05);
+  transform: translateY(-50%) scale(1.1);
+}
+
+.password-toggle-btn:active {
+  transform: translateY(-50%) scale(0.95);
+}
+
+/* === FORM ERRORS === */
+.form-error {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  margin-top: 0.5rem;
+  font-size: 0.8125rem;
+  color: #f87171;
+  animation: shake 0.3s ease;
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-5px); }
+  75% { transform: translateX(5px); }
+}
+
+/* === SUBMIT BUTTON === */
+.submit-button {
+  position: relative;
+  width: 100%;
+  padding: 1rem 1.5rem;
+  background: linear-gradient(135deg, #e94560 0%, #00d4aa 100%);
+  border: none;
+  border-radius: 0.75rem;
+  color: white;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  overflow: hidden;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.submit-button:hover:not(:disabled) {
+  transform: translateY(-2px);
+}
+
+.submit-button:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.submit-button:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+  transform: none !important;
+}
+
+.submit-content,
+.submit-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.625rem;
+}
+
+.submit-loading.hidden {
+  display: none;
+}
+
+.button-shine {
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.2),
+    transparent
+  );
+}
+
+.submit-button:hover:not(:disabled) .button-shine {
+  animation: buttonShine 1s ease;
+}
+
+@keyframes buttonShine {
+  to {
+    left: 100%;
+  }
+}
+
+.spinner {
+  width: 1.25rem;
+  height: 1.25rem;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* === FEATURES GRID === */
+.features-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.feature-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 1rem;
+  background: rgba(15, 23, 42, 0.4);
+  border: 1px solid rgba(71, 85, 105, 0.3);
+  border-radius: 0.75rem;
+  transition: all 0.3s ease;
+}
+
+.feature-item:hover {
+  background: rgba(15, 23, 42, 0.6);
+  border-color: rgba(99, 102, 241, 0.4);
+  transform: translateY(-2px);
+}
+
+.feature-icon {
+  flex-shrink: 0;
+  width: 2.5rem;
+  height: 2.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, rgba(233, 69, 96, 0.2), rgba(0, 212, 170, 0.2));
+  border-radius: 0.5rem;
+  color: #00d4aa;
+  font-size: 1.125rem;
+}
+
+.feature-content h4 {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: rgba(226, 232, 240, 0.95);
+  margin-bottom: 0.25rem;
+}
+
+.feature-content p {
+  font-size: 0.75rem;
+  color: rgba(148, 163, 184, 0.8);
+  line-height: 1.4;
+}
+
+/* === TRUST BADGE === */
+.trust-badge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  background: rgba(34, 197, 94, 0.1);
+  border: 1px solid rgba(34, 197, 94, 0.3);
+  border-radius: 0.75rem;
+  color: rgba(134, 239, 172, 0.9);
+  font-size: 0.8125rem;
+  font-weight: 500;
+}
+
+.trust-badge i {
+  font-size: 0.875rem;
+}
+
+/* === BACK HOME LINK === */
+.back-home {
+  margin-top: 2.5rem;
+  text-align: center;
+}
+
+.back-home-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.25rem;
+  background: rgba(30, 41, 59, 0.4);
+  border: 1px solid rgba(71, 85, 105, 0.3);
+  border-radius: 0.75rem;
+  color: rgba(226, 232, 240, 0.9);
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.3s ease;
+}
+
+.back-home-link:hover {
+  background: rgba(51, 65, 85, 0.6);
+  color: white;
+  border-color: rgba(100, 116, 139, 0.5);
+  transform: translateX(-4px);
+}
+
+.back-home-link i {
+  transition: transform 0.3s ease;
+}
+
+.back-home-link:hover i {
+  transform: translateX(-4px);
+}
+
+/* === RESPONSIVE DESIGN === */
+@media (max-width: 640px) {
+  .login-card {
+    padding: 2rem 1.5rem;
+  }
+  
+  .page-title {
+    font-size: 2rem;
+  }
+  
+  .icon-wrapper,
+  .icon-container {
+    width: 80px;
+    height: 80px;
+  }
+  
+  .icon-container i {
+    font-size: 2rem;
+  }
+  
+  .features-grid {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+  }
+  
+  .feature-item {
+    padding: 0.875rem;
+  }
+  
+  .feature-icon {
+    width: 2.25rem;
+    height: 2.25rem;
+    font-size: 1rem;
+  }
+  
+  .trust-badge {
+    font-size: 0.75rem;
+    padding: 0.625rem 0.875rem;
+  }
+}
+
+/* === ACCESSIBILITY === */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+@media (prefers-contrast: high) {
+  .login-card {
+    border-width: 2px;
+    border-color: rgba(255, 255, 255, 0.3);
+  }
+  
+  .form-input {
+    border-width: 2px;
+  }
+  
+  .form-label {
+    font-weight: 700;
+  }
+}
+</style>
+
+  <script>
+// Google Login Handler
+function handleGoogleLogin() {
+  const button = document.getElementById('google-login-btn');
+  button.disabled = true;
+  button.style.opacity = '0.5';
+  button.style.cursor = 'not-allowed';
+  
+  // Preserve the 'next' parameter for redirect after Google login
+  const urlParams = new URLSearchParams(window.location.search);
+  const nextUrl = urlParams.get('next');
+  const googleLoginUrl = nextUrl ? `/accounts/google/login/?next=${encodeURIComponent(nextUrl)}` : '/accounts/google/login/?process=login';
+  
+  setTimeout(() => {
+    window.location.href = googleLoginUrl;
+  }, 500);
+}
+
+// Google Signup Handler (for signup link)
+function handleGoogleSignup(buttonElement) {
+  buttonElement.disabled = true;
+  buttonElement.style.opacity = '0.5';
+  buttonElement.style.cursor = 'not-allowed';
+  
+  // Preserve the 'next' parameter for redirect after Google signup
+  const urlParams = new URLSearchParams(window.location.search);
+  const nextUrl = urlParams.get('next');
+  const googleLoginUrl = nextUrl ? `/accounts/google/login/?next=${encodeURIComponent(nextUrl)}` : '/accounts/google/login/?process=login';
+  
+  setTimeout(() => {
+    window.location.href = googleLoginUrl;
+  }, 500);
+}
+
+// Password Toggle Function
+function togglePassword() {
+  const passwordInput = document.getElementById('id_password');
+  const toggleIcon = document.getElementById('toggleIcon');
+  
+  if (!passwordInput || !toggleIcon) return;
+
+  if (passwordInput.type === 'password') {
+    passwordInput.type = 'text';
+    toggleIcon.classList.remove('fa-eye');
+    toggleIcon.classList.add('fa-eye-slash');
+  } else {
+    passwordInput.type = 'password';
+    toggleIcon.classList.remove('fa-eye-slash');
+    toggleIcon.classList.add('fa-eye');
+  }
+}
+
+// Enhanced Form Submission Handling
+document.addEventListener('DOMContentLoaded', function() {
+  const form = document.getElementById('login-form');
+  const submitBtn = document.getElementById('submit-btn');
+  const submitText = document.getElementById('submit-text');
+  const submitLoading = document.getElementById('submit-loading');
+  const usernameInput = document.getElementById('id_username');
+  const passwordInput = document.getElementById('id_password');
+
+  // Form validation and submission
+  if (form && submitBtn) {
+    // Function to check if form is valid
+    function validateForm() {
+      const isValid = usernameInput.value.trim() && passwordInput.value.trim();
+      submitBtn.disabled = !isValid;
+      if (!isValid) {
+        submitBtn.style.opacity = '0.5';
+        submitBtn.style.cursor = 'not-allowed';
+      } else {
+        submitBtn.style.opacity = '1';
+        submitBtn.style.cursor = 'pointer';
+      }
+    }
+
+    // Initial validation check
+    validateForm();
+
+    // Validate on input
+    usernameInput.addEventListener('input', validateForm);
+    passwordInput.addEventListener('input', validateForm);
+
+    form.addEventListener('submit', function(e) {
+      // Basic client-side validation
+      if (!usernameInput.value.trim() || !passwordInput.value.trim()) {
+        e.preventDefault();
+        return;
+      }
+
+      // Disable button and grey it out
+      submitBtn.disabled = true;
+      submitBtn.style.opacity = '0.5';
+      submitBtn.style.cursor = 'not-allowed';
+    });
+  }
+
+  // Enhanced input focus effects
+  const inputs = document.querySelectorAll('.form-input');
+  inputs.forEach(input => {
+    // Add subtle animation on focus
+    input.addEventListener('focus', function() {
+      this.parentElement.style.transform = 'scale(1.005)';
+    });
+    
+    input.addEventListener('blur', function() {
+      this.parentElement.style.transform = 'scale(1)';
+    });
+  });
+
+  // Auto-focus first input
+  if (usernameInput && !usernameInput.value) {
+    setTimeout(() => usernameInput.focus(), 300);
+  }
+
+  // Auto-dismiss alert messages after 3 seconds
+  const alertMessages = document.querySelectorAll('.alert-message, .alert');
+  if (alertMessages.length > 0) {
+    alertMessages.forEach(alert => {
+      setTimeout(() => {
+        alert.style.opacity = '0';
+        alert.style.transform = 'translateY(-10px)';
+        setTimeout(() => {
+          alert.remove();
+        }, 300); // Wait for fade out animation
+      }, 3000); // 3 seconds delay
+    });
+  }
+});
+
+// Reset Google button state on page visibility change
+document.addEventListener('visibilitychange', function() {
+  if (!document.hidden) {
+    const button = document.getElementById('google-login-btn');
+    const loginText = document.getElementById('google-login-text');
+    const loadingSpinner = document.getElementById('google-loading');
+    
+    if (button && loadingSpinner && !loadingSpinner.classList.contains('hidden')) {
+      button.disabled = false;
+      loginText.classList.remove('hidden');
+      loadingSpinner.classList.add('hidden');
+    }
+  }
+});
+
+// Accessibility: Announce form errors to screen readers
+window.addEventListener('load', function() {
+  const errorMessages = document.querySelectorAll('.form-error');
+  if (errorMessages.length > 0) {
+    const announcement = document.createElement('div');
+    announcement.setAttribute('aria-live', 'polite');
+    announcement.setAttribute('aria-atomic', 'true');
+    announcement.style.position = 'absolute';
+    announcement.style.left = '-10000px';
+    announcement.textContent = 'Form has validation errors. Please check the highlighted fields.';
+    document.body.appendChild(announcement);
+    
+    setTimeout(() => {
+      document.body.removeChild(announcement);
+    }, 3000);
+  }
+});
+</script>
+{% endblock %}

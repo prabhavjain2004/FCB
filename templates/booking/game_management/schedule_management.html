@@ -1,0 +1,687 @@
+{% extends 'authentication/owner_base.html' %}
+{% load static %}
+
+{% block title %}Schedule Management{% endblock %}
+{% block page_title %}Schedule Management{% endblock %}
+{% block page_subtitle %}Manage game operating hours, days, and slot durations with real-time preview{% endblock %}
+
+{% block extra_css %}
+  <style>
+    .hero-bg {
+        position: absolute;
+        inset: 0;
+        overflow: hidden;
+        z-index: 0;
+        pointer-events: none;
+    }
+    
+    .gradient-orb {
+        position: absolute;
+        border-radius: 50%;
+        filter: blur(100px);
+        opacity: 0.2;
+        animation: floatOrb 20s ease-in-out infinite;
+    }
+    
+    .orb-1 {
+        width: 400px;
+        height: 400px;
+        background: radial-gradient(circle, rgba(102, 126, 234, 0.4) 0%, transparent 70%);
+        top: -100px;
+        right: -100px;
+    }
+    
+    .orb-2 {
+        width: 350px;
+        height: 350px;
+        background: radial-gradient(circle, rgba(168, 85, 247, 0.3) 0%, transparent 70%);
+        bottom: -80px;
+        left: -80px;
+        animation-delay: 7s;
+    }
+    
+    @keyframes floatOrb {
+        0%, 100% { transform: translate(0, 0) scale(1); }
+        33% { transform: translate(20px, -20px) scale(1.05); }
+        66% { transform: translate(-20px, 20px) scale(0.95); }
+    }
+    
+    .grid-pattern {
+        background-image: 
+            linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+        background-size: 50px 50px;
+        position: absolute;
+        inset: 0;
+        z-index: 0;
+    }
+    
+    .form-section {
+      background: rgba(30, 41, 59, 0.5);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 1.5rem;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+    
+    .game-card {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 0.75rem;
+      padding: 1rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    
+    .game-card:hover {
+      background: rgba(255, 255, 255, 0.08);
+      border-color: rgba(102, 126, 234, 0.3);
+    }
+    
+    .game-card.selected {
+      background: rgba(102, 126, 234, 0.2);
+      border-color: rgba(102, 126, 234, 0.5);
+      box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.2);
+    }
+    
+    .schedule-info {
+      font-size: 0.875rem;
+      color: #9ca3af;
+      margin-top: 0.5rem;
+    }
+    
+    .update-section {
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      padding-top: 1rem;
+      margin-top: 1rem;
+    }
+    
+    .checkbox-group {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 0.75rem;
+    }
+    
+    .checkbox-item {
+      display: flex;
+      align-items: center;
+    }
+    
+    .toggle-field {
+      display: flex;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+    
+    .field-group {
+      margin-left: 1.5rem;
+      margin-bottom: 1rem;
+      transition: all 0.2s;
+    }
+    
+    .field-group.disabled {
+      opacity: 0.5;
+      pointer-events: none;
+    }
+    
+    .preview-section {
+      background: linear-gradient(to right, rgba(59, 130, 246, 0.1), rgba(99, 102, 241, 0.1));
+      border-radius: 1rem;
+      padding: 1.5rem;
+      border: 1px solid rgba(59, 130, 246, 0.2);
+    }
+    
+    .preview-loading {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem 0;
+    }
+    
+    .slot-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1rem;
+    }
+    
+    .day-card {
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 0.75rem;
+      padding: 1rem;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    .slot-item {
+      background: rgba(255, 255, 255, 0.03);
+      border-radius: 0.5rem;
+      padding: 0.5rem 0.75rem;
+      font-size: 0.875rem;
+      color: #d1d5db;
+    }
+    
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+    
+    .stat-card {
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 0.75rem;
+      padding: 1rem;
+      text-align: center;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    .stat-value {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: #60a5fa;
+    }
+    
+    .stat-label {
+      font-size: 0.875rem;
+      color: #9ca3af;
+      margin-top: 0.25rem;
+    }
+    
+    .revenue-analysis {
+      background: rgba(16, 185, 129, 0.1);
+      border-radius: 0.75rem;
+      padding: 1rem;
+      border: 1px solid rgba(16, 185, 129, 0.2);
+      margin-top: 1rem;
+    }
+    
+    .booking-impact {
+      background: rgba(245, 158, 11, 0.1);
+      border-radius: 0.75rem;
+      padding: 1rem;
+      border: 1px solid rgba(245, 158, 11, 0.2);
+      margin-top: 1rem;
+    }
+    
+    .error-message {
+      background: rgba(239, 68, 68, 0.1);
+      border-radius: 0.75rem;
+      padding: 1rem;
+      border: 1px solid rgba(239, 68, 68, 0.2);
+      color: #fca5a5;
+    }
+    
+    .success-message {
+      background: rgba(16, 185, 129, 0.1);
+      border-radius: 0.75rem;
+      padding: 1rem;
+      border: 1px solid rgba(16, 185, 129, 0.2);
+      color: #6ee7b7;
+    }
+  </style>
+{% endblock %}
+
+{% block content %}
+<div class="relative">
+    <!-- Background Elements -->
+    <div class="hero-bg">
+        <div class="gradient-orb orb-1"></div>
+        <div class="gradient-orb orb-2"></div>
+        <div class="grid-pattern"></div>
+    </div>
+    
+    <div class="relative z-10">
+
+      <!-- Bulk Update Summary (if available) -->
+      {% if request.session.bulk_update_summary %}
+        <div class="success-message mb-6">
+          <div class="flex items-center">
+            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+            </svg>
+            <span class="font-medium">Bulk Update Completed Successfully</span>
+          </div>
+          <p class="mt-2">Updated {{ request.session.bulk_update_summary.updated_count }} games:
+            {{ request.session.bulk_update_summary.games|join:', ' }}</p>
+          {% if request.session.bulk_update_summary.preserve_bookings %}
+            <p class="text-sm mt-1">✓ Existing bookings have been preserved</p>
+          {% endif %}
+        </div>
+      {% endif %}
+
+      <form method="post" id="scheduleForm" class="space-y-6">
+        {% csrf_token %}
+
+        <!-- Game Selection Section -->
+        <div class="form-section">
+          <h2 class="text-xl font-semibold text-white mb-4">Select Games to Update</h2>
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {% for game in games %}
+              <div class="game-card" data-game-id="{{ game.id }}">
+                <div class="flex items-start">
+                  <input type="checkbox" name="games" value="{{ game.id }}" class="mt-1 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded game-checkbox" />
+                  <div class="ml-3 flex-1">
+                    <h3 class="font-medium text-white">{{ game.name }}</h3>
+                    <div class="schedule-info">
+                      <p>
+                        <strong>Hours:</strong> {{ game.opening_time|time:'H:i' }} - {{ game.closing_time|time:'H:i' }}
+                      </p>
+                      <p>
+                        <strong>Duration:</strong> {{ game.slot_duration_minutes }} minutes
+                      </p>
+                      <p>
+                        <strong>Days:</strong>
+                        {% for day in game.available_days %}
+                          {{ day|title }}{% if not forloop.last %}, {% endif %}
+                        {% endfor %}
+                      </p>
+                      <p>
+                        <strong>Type:</strong> {{ game.get_booking_type_display }}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            {% empty %}
+              <div class="col-span-full text-center py-8 text-gray-500">
+                <p>
+                  No active games found. <a href="{% url 'booking:game_management:game_create' %}" class="text-blue-600 hover:text-blue-800">Create your first game</a>
+                </p>
+              </div>
+            {% endfor %}
+          </div>
+        </div>
+
+        <!-- Schedule Update Options -->
+        <div class="form-section">
+          <h2 class="text-xl font-semibold text-white mb-4">Schedule Updates</h2>
+
+          <!-- Opening Time -->
+          <div class="toggle-field">
+            <input type="checkbox" id="update_opening_time" name="update_opening_time" class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded update-toggle" />
+            <label for="update_opening_time" class="ml-3 text-sm font-medium text-gray-300">Update Opening Time</label>
+          </div>
+          <div class="field-group disabled" id="opening_time_group">
+            <label for="opening_time" class="block text-sm font-medium text-gray-300 mb-2">New Opening Time</label>
+            <input type="time" id="opening_time" name="opening_time" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent schedule-input" disabled />
+          </div>
+
+          <!-- Closing Time -->
+          <div class="toggle-field">
+            <input type="checkbox" id="update_closing_time" name="update_closing_time" class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded update-toggle" />
+            <label for="update_closing_time" class="ml-3 text-sm font-medium text-gray-300">Update Closing Time</label>
+          </div>
+          <div class="field-group disabled" id="closing_time_group">
+            <label for="closing_time" class="block text-sm font-medium text-gray-300 mb-2">New Closing Time</label>
+            <input type="time" id="closing_time" name="closing_time" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent schedule-input" disabled />
+          </div>
+
+          <!-- Available Days -->
+          <div class="toggle-field">
+            <input type="checkbox" id="update_available_days" name="update_available_days" class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded update-toggle" />
+            <label for="update_available_days" class="ml-3 text-sm font-medium text-gray-300">Update Available Days</label>
+          </div>
+          <div class="field-group disabled" id="available_days_group">
+            <label class="block text-sm font-medium text-gray-300 mb-2">New Available Days</label>
+            <div class="checkbox-group">
+              {% for value, label in form.available_days.field.choices %}
+                <div class="checkbox-item">
+                  <input type="checkbox" id="day_{{ value }}" name="available_days" value="{{ value }}" class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded schedule-input" disabled />
+                  <label for="day_{{ value }}" class="ml-2 text-sm text-gray-300">{{ label }}</label>
+                </div>
+              {% endfor %}
+            </div>
+          </div>
+
+          <!-- Preserve Bookings -->
+          <div class="mt-6 p-4 bg-yellow-50 rounded-lg border border-yellow-200">
+            <div class="flex items-center">
+              <input type="checkbox" id="preserve_bookings" name="preserve_bookings" checked class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded" />
+              <label for="preserve_bookings" class="ml-3 text-sm font-medium text-gray-300">Preserve Existing Bookings</label>
+            </div>
+            <p class="mt-2 text-sm text-gray-400">When checked, existing bookings will be preserved during slot regeneration. Uncheck only if you want to completely rebuild the schedule.</p>
+          </div>
+        </div>
+
+        <!-- Real-time Preview Section -->
+        <div class="preview-section" id="previewSection" style="display: none;">
+          <h2 class="text-xl font-semibold text-white mb-4">Schedule Preview</h2>
+
+          <div id="previewContent">
+            <div class="preview-loading">
+              <svg class="animate-spin h-8 w-8 text-blue-600" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+              <span class="ml-2 text-gray-600">Generating preview...</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Form Actions -->
+        <div class="flex justify-end space-x-4">
+          <a href="{% url 'booking:game_management:dashboard' %}" class="px-6 py-3 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 font-medium">Cancel</a>
+          <button type="submit" id="submitBtn" class="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium disabled:opacity-50 disabled:cursor-not-allowed" disabled>Update Schedules</button>
+        </div>
+      </form>
+    </div>
+</div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('scheduleForm');
+    const gameCheckboxes = document.querySelectorAll('.game-checkbox');
+    const updateToggles = document.querySelectorAll('.update-toggle');
+    const scheduleInputs = document.querySelectorAll('.schedule-input');
+    const submitBtn = document.getElementById('submitBtn');
+    const previewSection = document.getElementById('previewSection');
+    const previewContent = document.getElementById('previewContent');
+    
+    let previewTimeout;
+    
+    // Handle game card selection
+    document.querySelectorAll('.game-card').forEach(card => {
+        card.addEventListener('click', function(e) {
+            if (e.target.type !== 'checkbox') {
+                const checkbox = this.querySelector('.game-checkbox');
+                checkbox.checked = !checkbox.checked;
+                updateGameCardState(this, checkbox.checked);
+                validateForm();
+                updatePreview();
+            }
+        });
+    });
+    
+    // Handle checkbox changes
+    gameCheckboxes.forEach(checkbox => {
+        checkbox.addEventListener('change', function() {
+            const card = this.closest('.game-card');
+            updateGameCardState(card, this.checked);
+            validateForm();
+            updatePreview();
+        });
+    });
+    
+    // Handle update toggles
+    updateToggles.forEach(toggle => {
+        toggle.addEventListener('change', function() {
+            const groupId = this.id.replace('update_', '') + '_group';
+            const group = document.getElementById(groupId);
+            const inputs = group.querySelectorAll('input');
+            
+            if (this.checked) {
+                group.classList.remove('disabled');
+                inputs.forEach(input => input.disabled = false);
+            } else {
+                group.classList.add('disabled');
+                inputs.forEach(input => input.disabled = true);
+            }
+            
+            validateForm();
+            updatePreview();
+        });
+    });
+    
+    // Handle schedule input changes
+    scheduleInputs.forEach(input => {
+        input.addEventListener('change', updatePreview);
+        input.addEventListener('input', function() {
+            clearTimeout(previewTimeout);
+            previewTimeout = setTimeout(updatePreview, 500);
+        });
+    });
+    
+    function updateGameCardState(card, selected) {
+        if (selected) {
+            card.classList.add('selected');
+        } else {
+            card.classList.remove('selected');
+        }
+    }
+    
+    function validateForm() {
+        const selectedGames = document.querySelectorAll('.game-checkbox:checked').length;
+        const selectedUpdates = document.querySelectorAll('.update-toggle:checked').length;
+        
+        const isValid = selectedGames > 0 && selectedUpdates > 0;
+        submitBtn.disabled = !isValid;
+        
+        if (isValid) {
+            submitBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+        } else {
+            submitBtn.classList.add('opacity-50', 'cursor-not-allowed');
+        }
+    }
+    
+    function updatePreview() {
+        const selectedGames = document.querySelectorAll('.game-checkbox:checked').length;
+        const selectedUpdates = document.querySelectorAll('.update-toggle:checked').length;
+        
+        if (selectedGames === 0 || selectedUpdates === 0) {
+            previewSection.style.display = 'none';
+            return;
+        }
+        
+        // Show preview section
+        previewSection.style.display = 'block';
+        
+        // Show loading state
+        previewContent.innerHTML = `
+            <div class="preview-loading">
+                <svg class="animate-spin h-8 w-8 text-blue-600" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                <span class="ml-2 text-gray-600">Generating preview...</span>
+            </div>
+        `;
+        
+        // Collect form data
+        const formData = new URLSearchParams();
+        
+        // Add schedule data if updates are selected
+        if (document.getElementById('update_opening_time').checked) {
+            const openingTime = document.getElementById('opening_time').value;
+            if (openingTime) formData.append('opening_time', openingTime);
+        }
+        
+        if (document.getElementById('update_closing_time').checked) {
+            const closingTime = document.getElementById('closing_time').value;
+            if (closingTime) formData.append('closing_time', closingTime);
+        }
+        
+        if (document.getElementById('update_available_days').checked) {
+            const selectedDays = document.querySelectorAll('input[name="available_days"]:checked');
+            selectedDays.forEach(day => {
+                formData.append('available_days[]', day.value);
+            });
+        }
+        
+        // Add default slot duration (60 minutes) for preview
+        formData.append('slot_duration_minutes', '60');
+        
+        // Make AJAX request for preview
+        fetch(`{% url 'booking:game_management:schedule_preview' %}?${formData.toString()}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    renderPreview(data);
+                } else {
+                    renderError(data.error);
+                }
+            })
+            .catch(error => {
+                renderError('Failed to generate preview: ' + error.message);
+            });
+    }
+    
+    function renderPreview(data) {
+        const stats = data.statistics;
+        const slots = data.preview_slots;
+        
+        let html = `
+            <!-- Statistics -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-value">${stats.total_slots_14_days}</div>
+                    <div class="stat-label">Total Slots (14 days)</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">${stats.average_slots_per_day}</div>
+                    <div class="stat-label">Avg Slots/Day</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">${stats.operating_days}</div>
+                    <div class="stat-label">Operating Days</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">${stats.operating_hours_per_day}h</div>
+                    <div class="stat-label">Hours/Day</div>
+                </div>
+            </div>
+        `;
+        
+        if (slots.length > 0) {
+            html += `
+                <h3 class="text-lg font-semibold text-gray-900 mb-4">Next 14 Days Preview</h3>
+                <div class="slot-grid">
+            `;
+            
+            slots.forEach(day => {
+                html += `
+                    <div class="day-card">
+                        <h4 class="font-medium text-gray-900 mb-2">${day.day_name}</h4>
+                        <p class="text-sm text-gray-600 mb-3">${day.date} (${day.slot_count} slots)</p>
+                        <div class="space-y-1">
+                `;
+                
+                day.slots.slice(0, 6).forEach(slot => {
+                    html += `<div class="slot-item">${slot.start_time} - ${slot.end_time}</div>`;
+                });
+                
+                if (day.slots.length > 6) {
+                    html += `<div class="text-xs text-gray-500">+${day.slots.length - 6} more slots</div>`;
+                }
+                
+                html += `
+                        </div>
+                    </div>
+                `;
+            });
+            
+            html += '</div>';
+        }
+        
+        // Add revenue analysis if available
+        if (data.revenue_analysis) {
+            html += `
+                <div class="revenue-analysis">
+                    <h4 class="font-medium text-green-800 mb-2">Revenue Analysis (Weekly)</h4>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+            `;
+            
+            if (data.revenue_analysis.private_only) {
+                const privateAnalysis = data.revenue_analysis.private_only;
+                html += `
+                    <div>
+                        <strong>Private Only:</strong><br>
+                        ₹${privateAnalysis.potential_revenue.toFixed(2)}/week<br>
+                        <span class="text-green-600">(${privateAnalysis.weekly_slots} slots × ₹${privateAnalysis.price_per_slot})</span>
+                    </div>
+                `;
+            }
+            
+            if (data.revenue_analysis.shared_only) {
+                const sharedAnalysis = data.revenue_analysis.shared_only;
+                html += `
+                    <div>
+                        <strong>Shared Only:</strong><br>
+                        ₹${sharedAnalysis.potential_revenue.toFixed(2)}/week<br>
+                        <span class="text-green-600">(${sharedAnalysis.weekly_slots} slots × ${sharedAnalysis.capacity_per_slot} spots × ₹${sharedAnalysis.price_per_spot})</span>
+                    </div>
+                `;
+            }
+            
+            if (data.revenue_analysis.mixed_50_50) {
+                const mixedAnalysis = data.revenue_analysis.mixed_50_50;
+                html += `
+                    <div>
+                        <strong>Mixed (50/50):</strong><br>
+                        ₹${mixedAnalysis.total_revenue.toFixed(2)}/week<br>
+                        <span class="text-green-600">(Private: ₹${mixedAnalysis.private_revenue.toFixed(2)} + Shared: ₹${mixedAnalysis.shared_revenue.toFixed(2)})</span>
+                    </div>
+                `;
+            }
+            
+            html += `
+                    </div>
+                </div>
+            `;
+        }
+        
+        // Add booking impact if available
+        if (data.booking_impact) {
+            html += `
+                <div class="booking-impact">
+                    <h4 class="font-medium text-yellow-800 mb-2">Booking Impact</h4>
+                    <p class="text-sm">${data.booking_impact.message}</p>
+                </div>
+            `;
+        }
+        
+        previewContent.innerHTML = html;
+    }
+    
+    function renderError(error) {
+        previewContent.innerHTML = `
+            <div class="error-message">
+                <div class="flex items-center">
+                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                    <span class="font-medium">Preview Error</span>
+                </div>
+                <p class="mt-2">${error}</p>
+            </div>
+        `;
+    }
+    
+    // Form submission
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        if (submitBtn.disabled) return;
+        
+        // Show loading state
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = `
+            <svg class="animate-spin h-5 w-5 mr-2 inline" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            Updating...
+        `;
+        
+        // Submit form
+        this.submit();
+    });
+    
+    // Clear session message after displaying
+    {% if request.session.bulk_update_summary %}
+    setTimeout(() => {
+        fetch('{% url "booking:game_management:schedule_management" %}', {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({clear_session: true})
+        });
+    }, 5000);
+    {% endif %}
+});
+</script>
+{% endblock %}

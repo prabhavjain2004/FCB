@@ -1,0 +1,599 @@
+{% extends 'authentication/owner_base.html' %}
+{% load static %}
+
+{% block title %}Overview{% endblock %}
+{% block page_title %}Overview{% endblock %}
+{% block page_subtitle %}Welcome back, {{ user.get_full_name|default:user.username }}!{% endblock %}
+
+<!-- Force cache invalidation -->
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+
+{% block header_actions %}
+<button id="refreshBtn" class="flex w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-indigo-600 hover:bg-indigo-700 items-center justify-center text-white transition-all flex-shrink-0">
+    <i class="bi bi-arrow-clockwise text-sm"></i>
+</button>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Ensure refresh button matches profile badge exactly */
+    #refreshBtn {
+        width: 2.25rem !important;
+        height: 2.25rem !important;
+        min-width: 2.25rem !important;
+        min-height: 2.25rem !important;
+        padding: 0 !important;
+        border: none !important;
+    }
+    
+    @media (min-width: 640px) {
+        #refreshBtn {
+            width: 2.5rem !important;
+            height: 2.5rem !important;
+            min-width: 2.5rem !important;
+            min-height: 2.5rem !important;
+        }
+    }
+    
+    /* Hero Background */
+    .hero-bg {
+        position: absolute;
+        inset: 0;
+        overflow: hidden;
+        z-index: 0;
+        pointer-events: none;
+        height: 100%;
+    }
+    
+    .gradient-orb {
+        position: absolute;
+        border-radius: 50%;
+        filter: blur(100px);
+        opacity: 0.2;
+        animation: floatOrb 20s ease-in-out infinite;
+    }
+    
+    .orb-1 {
+        width: 400px;
+        height: 400px;
+        background: radial-gradient(circle, rgba(102, 126, 234, 0.4) 0%, transparent 70%);
+        top: -100px;
+        right: -100px;
+    }
+    
+    .orb-2 {
+        width: 350px;
+        height: 350px;
+        background: radial-gradient(circle, rgba(168, 85, 247, 0.3) 0%, transparent 70%);
+        bottom: -80px;
+        left: -80px;
+        animation-delay: 7s;
+    }
+    
+    @keyframes floatOrb {
+        0%, 100% { transform: translate(0, 0) scale(1); }
+        33% { transform: translate(20px, -20px) scale(1.05); }
+        66% { transform: translate(-20px, 20px) scale(0.95); }
+    }
+    
+    .grid-pattern {
+        background-image: 
+            linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+        background-size: 50px 50px;
+        position: absolute;
+        inset: 0;
+        z-index: 0;
+    }
+    
+    /* Mobile Optimizations */
+    @media (max-width: 768px) {
+        .orb-1, .orb-2 {
+            width: 250px;
+            height: 250px;
+            filter: blur(60px);
+        }
+        
+        .stat-card {
+            padding: 1.25rem !important;
+        }
+        
+        .stat-card .text-3xl {
+            font-size: 1.75rem !important;
+        }
+    }
+    
+    /* Ensure proper spacing */
+    .stat-card {
+        min-height: 160px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        width: 100%;
+    }
+    
+    /* Desktop grid fixes */
+    @media (min-width: 1024px) {
+        .stat-card {
+            min-height: 180px;
+        }
+    }
+    
+    /* Better mobile stat cards */
+    @media (max-width: 640px) {
+        .stat-card {
+            min-height: 140px;
+        }
+        
+        .stat-card h3 {
+            font-size: 2rem !important;
+        }
+        
+        /* Consistent icon container size for all sections on mobile */
+        .stat-card .w-14,
+        .owner-card .w-14 {
+            width: 3rem !important;
+            height: 3rem !important;
+        }
+        
+        /* Consistent icon size for all sections on mobile */
+        .stat-card .text-2xl,
+        .owner-card .text-2xl {
+            font-size: 1.5rem !important;
+        }
+    }
+    
+    /* Prevent horizontal overflow */
+    .owner-content {
+        overflow-x: hidden;
+    }
+    
+    /* Ensure grid doesn't overflow */
+    .grid {
+        width: 100%;
+        max-width: 100%;
+    }
+    
+    /* Desktop layout improvements */
+    @media (min-width: 1024px) {
+        .relative.min-h-screen > .grid {
+            gap: 1.5rem;
+        }
+        
+        .owner-card {
+            padding: 2rem;
+        }
+    }
+    
+    @media (min-width: 1280px) {
+        .relative.min-h-screen > .grid {
+            gap: 2rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="relative">
+    <!-- Background Elements -->
+    <div class="hero-bg">
+        <div class="gradient-orb orb-1"></div>
+        <div class="gradient-orb orb-2"></div>
+        <div class="grid-pattern"></div>
+    </div>
+    
+    <!-- Stats Grid -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8 relative z-10">
+        <!-- Today's Revenue -->
+        <div class="stat-card animate-fade-in-up" style="animation-delay: 0.1s;">
+            <div class="flex flex-col h-full justify-between">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="w-14 h-14 rounded-xl flex items-center justify-center flex-shrink-0" style="background: linear-gradient(135deg, #10b981, #059669); box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);">
+                        <i class="bi bi-currency-rupee text-white text-2xl"></i>
+                    </div>
+                </div>
+                <div>
+                    <p class="text-gray-400 text-sm mb-2 font-medium">Today's Revenue</p>
+                    <h3 class="text-white text-3xl font-black mb-2 leading-none" style="font-family: 'Orbitron', sans-serif;">₹{{ todays_revenue|floatformat:2 }}</h3>
+                    <p class="text-xs {% if revenue_change >= 0 %}text-green-400{% else %}text-red-400{% endif %} font-semibold">
+                        <i class="bi bi-{% if revenue_change >= 0 %}arrow-up{% else %}arrow-down{% endif %}"></i>
+                        {{ revenue_change|floatformat:1 }}% vs yesterday
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Active Sessions -->
+        <div class="stat-card animate-fade-in-up" style="animation-delay: 0.2s;">
+            <div class="flex flex-col h-full justify-between">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="w-14 h-14 rounded-xl flex items-center justify-center flex-shrink-0" style="background: linear-gradient(135deg, #3b82f6, #2563eb); box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);">
+                        <i class="bi bi-controller text-white text-2xl"></i>
+                    </div>
+                </div>
+                <div>
+                    <p class="text-gray-400 text-sm mb-2 font-medium">Active Sessions</p>
+                    <h3 class="text-white text-3xl font-black mb-2 leading-none" style="font-family: 'Orbitron', sans-serif;">{{ active_sessions }}</h3>
+                    <p class="text-xs text-gray-500 font-medium">Currently playing</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Total Bookings Today -->
+        <div class="stat-card animate-fade-in-up" style="animation-delay: 0.3s;">
+            <div class="flex flex-col h-full justify-between">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="w-14 h-14 rounded-xl flex items-center justify-center flex-shrink-0" style="background: linear-gradient(135deg, #a855f7, #9333ea); box-shadow: 0 4px 12px rgba(168, 85, 247, 0.3);">
+                        <i class="bi bi-calendar-check text-white text-2xl"></i>
+                    </div>
+                </div>
+                <div>
+                    <p class="text-gray-400 text-sm mb-2 font-medium">Today's Bookings</p>
+                    <h3 class="text-white text-3xl font-black mb-2 leading-none" style="font-family: 'Orbitron', sans-serif;">{{ total_bookings_today }}</h3>
+                    <p class="text-xs text-gray-500 font-medium">Total bookings</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Available Stations -->
+        <div class="stat-card animate-fade-in-up" style="animation-delay: 0.4s;">
+            <div class="flex flex-col h-full justify-between">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="w-14 h-14 rounded-xl flex items-center justify-center flex-shrink-0" style="background: linear-gradient(135deg, #667eea, #764ba2); box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);">
+                        <i class="bi bi-pc-display text-white text-2xl"></i>
+                    </div>
+                </div>
+                <div>
+                    <p class="text-gray-400 text-sm mb-2 font-medium">Available Stations</p>
+                    <h3 class="text-white text-3xl font-black mb-2 leading-none" style="font-family: 'Orbitron', sans-serif;">{{ available_stations }}</h3>
+                    <p class="text-xs text-gray-500 font-medium">Ready to book</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pending Payments -->
+        <div class="stat-card animate-fade-in-up" style="animation-delay: 0.5s;">
+            <div class="flex flex-col h-full justify-between">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="w-14 h-14 rounded-xl flex items-center justify-center flex-shrink-0" style="background: linear-gradient(135deg, #f59e0b, #d97706); box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);">
+                        <i class="bi bi-clock-history text-white text-2xl"></i>
+                    </div>
+                </div>
+                <div>
+                    <p class="text-gray-400 text-sm mb-2 font-medium">Pending Payments</p>
+                    <h3 class="text-white text-3xl font-black mb-2 leading-none" style="font-family: 'Orbitron', sans-serif;">{{ pending_payments }}</h3>
+                    <p class="text-xs text-gray-500 font-medium">Awaiting payment</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Customers Today -->
+        <div class="stat-card animate-fade-in-up" style="animation-delay: 0.6s;">
+            <div class="flex flex-col h-full justify-between">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="w-14 h-14 rounded-xl flex items-center justify-center flex-shrink-0" style="background: linear-gradient(135deg, #ec4899, #db2777); box-shadow: 0 4px 12px rgba(236, 72, 153, 0.3);">
+                        <i class="bi bi-people text-white text-2xl"></i>
+                    </div>
+                </div>
+                <div>
+                    <p class="text-gray-400 text-sm mb-2 font-medium">Customers Today</p>
+                    <h3 class="text-white text-3xl font-black mb-2 leading-none" style="font-family: 'Orbitron', sans-serif;">{{ customers_today }}</h3>
+                    <p class="text-xs text-gray-500 font-medium">Unique visitors</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content Grid -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 relative z-10">
+        <!-- Today's Timeline -->
+        <div class="lg:col-span-2 owner-card animate-fade-in-up" style="animation-delay: 0.7s;">
+            <div class="flex flex-col items-start gap-3 mb-6">
+                <div class="w-14 h-14 rounded-xl flex items-center justify-center flex-shrink-0" style="background: linear-gradient(135deg, #667eea, #764ba2); box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);">
+                    <i class="bi bi-clock-history text-white text-2xl"></i>
+                </div>
+                <h3 class="text-xl font-bold text-white">Today's Timeline</h3>
+            </div>
+            <div class="space-y-3 max-h-[600px] overflow-y-auto overflow-x-auto custom-scrollbar">
+                {% for hour_data in timeline_data %}
+                    {% if hour_data.bookings %}
+                    <div class="border-l-4 border-indigo-500 pl-4 pr-4 py-3 rounded-r-lg min-w-max" style="background: rgba(255, 255, 255, 0.03);">
+                        <p class="text-sm font-bold text-white mb-2">{{ hour_data.time }}</p>
+                        {% for booking in hour_data.bookings %}
+                        <div class="mt-2 flex items-center gap-2 text-xs pr-4">
+                            <span class="px-2 py-1 rounded-full font-semibold whitespace-nowrap
+                                {% if booking.status == 'CONFIRMED' %}bg-green-500/20 text-green-400 border border-green-500/30
+                                {% elif booking.status == 'IN_PROGRESS' %}bg-blue-500/20 text-blue-400 border border-blue-500/30
+                                {% elif booking.status == 'COMPLETED' %}bg-purple-500/20 text-purple-400 border border-purple-500/30
+                                {% elif booking.status == 'CANCELLED' %}bg-red-500/20 text-red-400 border border-red-500/30
+                                {% elif booking.status == 'PENDING' %}bg-yellow-500/20 text-yellow-400 border border-yellow-500/30
+                                {% elif booking.status == 'EXPIRED' %}bg-orange-500/20 text-orange-400 border border-orange-500/30
+                                {% elif booking.status == 'NO_SHOW' %}bg-gray-500/20 text-gray-400 border border-gray-500/30
+                                {% else %}bg-gray-500/20 text-gray-400 border border-gray-500/30{% endif %}">
+                                {{ booking.status }}
+                            </span>
+                            {% if booking.payment_status == 'PAID' or booking.payment_status == 'PENDING' %}
+                            <span class="px-2 py-1 rounded-full font-medium whitespace-nowrap
+                                {% if booking.payment_status == 'PAID' %}bg-emerald-500/20 text-emerald-400 border border-emerald-500/30
+                                {% else %}bg-amber-500/20 text-amber-400 border border-amber-500/30{% endif %}">
+                                💳 {{ booking.payment_status }}
+                            </span>
+                            {% endif %}
+                            <span class="text-gray-300 whitespace-nowrap">{{ booking.game__name }} - {{ booking.customer__user__first_name }} {{ booking.customer__user__last_name }}</span>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                {% endfor %}
+                {% if not timeline_data or not timeline_data|length %}
+                <div class="text-center py-8">
+                    <i class="bi bi-calendar-x text-gray-600 text-4xl mb-3"></i>
+                    <p class="text-gray-400">No bookings scheduled for today</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Right Column -->
+        <div class="space-y-6">
+            <!-- QR Scanner Quick Action -->
+            <div class="owner-card animate-fade-in-up" style="animation-delay: 0.75s; background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(139, 92, 246, 0.1)); border: 1px solid rgba(99, 102, 241, 0.3);">
+                <div class="flex flex-col items-center text-center gap-4 py-4">
+                    <div class="w-20 h-20 rounded-2xl flex items-center justify-center flex-shrink-0" style="background: linear-gradient(135deg, #6366f1, #8b5cf6); box-shadow: 0 8px 20px rgba(99, 102, 241, 0.4);">
+                        <i class="bi bi-qr-code-scan text-white text-4xl"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-xl font-bold text-white mb-2">Verify Booking</h3>
+                        <p class="text-gray-400 text-sm mb-4">Scan customer QR code to verify check-in</p>
+                    </div>
+                    <a href="{% url 'booking:qr_scanner' %}" 
+                       class="w-full flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white rounded-xl font-semibold transition-all shadow-lg hover:shadow-xl hover:scale-105">
+                        <i class="bi bi-qr-code-scan text-lg"></i>
+                        <span>Open QR Scanner</span>
+                    </a>
+                    <a href="{% url 'booking:active_bookings' %}" 
+                       class="text-sm text-indigo-400 hover:text-indigo-300 transition-colors">
+                        View Active Bookings →
+                    </a>
+                </div>
+            </div>
+            
+            <!-- Alerts Panel -->
+            <div class="owner-card animate-fade-in-up" style="animation-delay: 0.8s;">
+                <div class="flex flex-col items-start gap-3 mb-4">
+                    <div class="w-14 h-14 rounded-xl flex items-center justify-center flex-shrink-0" style="background: linear-gradient(135deg, #f59e0b, #d97706); box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);">
+                        <i class="bi bi-bell text-white text-2xl"></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-white">Alerts</h3>
+                </div>
+                <div class="space-y-3">
+                    {% if alerts %}
+                        {% for alert in alerts %}
+                        <div class="flex items-start gap-3 p-3 rounded-lg
+                            {% if alert.type == 'danger' %}bg-red-500/10 border border-red-500/30
+                            {% elif alert.type == 'warning' %}bg-yellow-500/10 border border-yellow-500/30
+                            {% else %}bg-blue-500/10 border border-blue-500/30{% endif %}">
+                            <i class="bi {{ alert.icon }}
+                                {% if alert.type == 'danger' %}text-red-400
+                                {% elif alert.type == 'warning' %}text-yellow-400
+                                {% else %}text-blue-400{% endif %} text-lg mt-1"></i>
+                            <div class="flex-1">
+                                <p class="text-sm font-medium text-white">{{ alert.message }}</p>
+                                <p class="text-xs text-gray-400 mt-1">{{ alert.time }}</p>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="text-center py-6">
+                            <i class="bi bi-check-circle text-green-500 text-3xl mb-2"></i>
+                            <p class="text-sm text-gray-400">All clear! No alerts</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Upcoming Bookings -->
+            <div class="owner-card animate-fade-in-up" style="animation-delay: 0.9s;">
+                <div class="flex flex-col items-start gap-3 mb-4">
+                    <div class="w-14 h-14 rounded-xl flex items-center justify-center flex-shrink-0" style="background: linear-gradient(135deg, #10b981, #059669); box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);">
+                        <i class="bi bi-calendar-event text-white text-2xl"></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-white">Upcoming</h3>
+                </div>
+                <div class="space-y-3">
+                    {% if upcoming_bookings %}
+                        {% for booking in upcoming_bookings %}
+                        <div class="p-3 rounded-lg border border-white/10 hover:border-indigo-500/50 transition-all" style="background: rgba(255, 255, 255, 0.03);">
+                            <div class="flex items-center justify-between mb-2">
+                                <span class="font-bold text-sm text-white">{{ booking.game.name }}</span>
+                                <span class="text-xs text-gray-400">{{ booking.start_time|date:"h:i A" }}</span>
+                            </div>
+                            <p class="text-xs text-gray-300">
+                                {{ booking.customer.user.get_full_name|default:booking.customer.user.username }}
+                            </p>
+                            <p class="text-xs text-gray-500 mt-1">
+                                {{ booking.start_time|date:"M d, Y" }}
+                            </p>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="text-center py-6">
+                            <i class="bi bi-calendar-check text-gray-600 text-3xl mb-2"></i>
+                            <p class="text-sm text-gray-400">No upcoming bookings</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<style>
+    .custom-scrollbar {
+        scrollbar-width: thin;
+        scrollbar-color: rgba(102, 126, 234, 0.5) transparent;
+    }
+    
+    /* Vertical scrollbar */
+    .custom-scrollbar::-webkit-scrollbar {
+        width: 6px;
+        height: 6px;
+    }
+    
+    .custom-scrollbar::-webkit-scrollbar-track {
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 3px;
+    }
+    
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+        background: rgba(102, 126, 234, 0.5);
+        border-radius: 3px;
+    }
+    
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+        background: rgba(102, 126, 234, 0.7);
+    }
+    
+    /* Horizontal scrollbar */
+    .custom-scrollbar::-webkit-scrollbar-corner {
+        background: transparent;
+    }
+    
+    .pulse-update {
+        animation: pulseGlow 0.5s ease-in-out;
+    }
+    
+    @keyframes pulseGlow {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.7; transform: scale(1.02); }
+    }
+    
+    @keyframes spin {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+    }
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Real-time dashboard updates - refresh every 30 seconds
+    let autoRefreshInterval;
+    let isRefreshing = false;
+    
+    function refreshDashboard() {
+        if (isRefreshing) return;
+        
+        isRefreshing = true;
+        
+        // Fetch updated dashboard data
+        fetch(window.location.href, {
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => response.text())
+        .then(html => {
+            // Parse the response
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(html, 'text/html');
+            
+            // Update stats with animation
+            updateStatWithAnimation('todays_revenue', doc);
+            updateStatWithAnimation('active_sessions', doc);
+            updateStatWithAnimation('total_bookings_today', doc);
+            updateStatWithAnimation('available_stations', doc);
+            updateStatWithAnimation('pending_payments', doc);
+            updateStatWithAnimation('customers_today', doc);
+            
+            // Update timeline
+            const newTimeline = doc.querySelector('.space-y-3.max-h-96');
+            const currentTimeline = document.querySelector('.space-y-3.max-h-96');
+            if (newTimeline && currentTimeline) {
+                currentTimeline.innerHTML = newTimeline.innerHTML;
+            }
+            
+            // Update alerts
+            const newAlerts = doc.querySelector('.owner-card .space-y-3');
+            const currentAlerts = document.querySelectorAll('.owner-card .space-y-3')[0];
+            if (newAlerts && currentAlerts) {
+                currentAlerts.innerHTML = newAlerts.innerHTML;
+            }
+            
+            // Update upcoming bookings
+            const newUpcoming = doc.querySelectorAll('.owner-card .space-y-3')[1];
+            const currentUpcoming = document.querySelectorAll('.owner-card .space-y-3')[1];
+            if (newUpcoming && currentUpcoming) {
+                currentUpcoming.innerHTML = newUpcoming.innerHTML;
+            }
+            
+            console.log('Dashboard updated at ' + new Date().toLocaleTimeString());
+        })
+        .catch(error => {
+            console.error('Error refreshing dashboard:', error);
+        })
+        .finally(() => {
+            isRefreshing = false;
+        });
+    }
+    
+    function updateStatWithAnimation(statName, doc) {
+        // Find the stat element by looking for the specific text
+        const statCards = document.querySelectorAll('.stat-card h3');
+        const newStatCards = doc.querySelectorAll('.stat-card h3');
+        
+        statCards.forEach((card, index) => {
+            if (newStatCards[index]) {
+                const oldValue = card.textContent.trim();
+                const newValue = newStatCards[index].textContent.trim();
+                
+                if (oldValue !== newValue) {
+                    // Add pulse animation
+                    card.classList.add('pulse-update');
+                    card.textContent = newValue;
+                    
+                    // Remove animation class after it completes
+                    setTimeout(() => {
+                        card.classList.remove('pulse-update');
+                    }, 500);
+                }
+            }
+        });
+    }
+    
+    // Start auto-refresh (every 30 seconds)
+    autoRefreshInterval = setInterval(refreshDashboard, 30000);
+    
+    // Refresh when page becomes visible again
+    document.addEventListener('visibilitychange', function() {
+        if (!document.hidden) {
+            refreshDashboard();
+        }
+    });
+    
+    // Add manual refresh button functionality
+    const refreshButton = document.getElementById('refreshBtn');
+    if (refreshButton) {
+        refreshButton.onclick = function() {
+            const icon = this.querySelector('i');
+            icon.style.animation = 'spin 1s linear infinite';
+            refreshDashboard();
+            setTimeout(() => {
+                icon.style.animation = '';
+            }, 1000);
+        };
+    }
+    
+    // Cleanup on page unload
+    window.addEventListener('beforeunload', function() {
+        if (autoRefreshInterval) {
+            clearInterval(autoRefreshInterval);
+        }
+    });
+});
+</script>
+{% endblock %}

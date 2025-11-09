@@ -1,0 +1,149 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>403 - Access Forbidden | TapNex Gaming Cafe</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .gaming-gradient {
+            background: linear-gradient(135deg, #111827 0%, #1a202e 50%, #1f2937 100%);
+        }
+        .shake-animation {
+            animation: shake 0.5s ease-in-out infinite;
+        }
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
+        .glow {
+        }
+
+        /* Mobile Animation Optimizations */
+        @media (max-width: 768px) {
+            .shake-animation {
+                animation: shake 1s cubic-bezier(0.4, 0, 0.6, 1) infinite !important;
+            }
+
+            @keyframes shake {
+                0%, 100% { transform: translateX(0); }
+                25% { transform: translateX(-5px); }
+                75% { transform: translateX(5px); }
+            }
+        }
+    </style>
+</head>
+<body class="gaming-gradient min-h-screen flex items-center justify-center p-4">
+    <div class="text-center max-w-2xl mx-auto">
+        <!-- Animated 403 -->
+        <div class="mb-8">
+            <h1 class="text-9xl font-bold text-yellow-500 mb-4" style="text-shadow: 0 0 30px rgba(251, 191, 36, 0.8);">
+                403
+            </h1>
+            <div class="text-6xl mb-4 shake-animation">🔒</div>
+        </div>
+        
+        <!-- Error Message -->
+        <h2 class="text-3xl font-bold text-white mb-4">Access Forbidden!</h2>
+        <p class="text-xl text-gray-300 mb-8">
+            You don't have permission to access this resource. Please check your credentials.
+        </p>
+        
+        <!-- Error Details -->
+        <div class="bg-white/10 backdrop-blur-lg rounded-xl p-6 border border-white/20 mb-8">
+            <p class="text-gray-300 mb-2">
+                <strong class="text-white">Error Code:</strong> 403 - Forbidden
+            </p>
+            <p class="text-gray-300">
+                Access to this resource is restricted. You may need to log in or contact an administrator.
+            </p>
+        </div>
+        
+        <!-- Action Buttons -->
+        <div class="flex flex-col sm:flex-row gap-4 justify-center">
+            <a href="{% url 'home' %}" 
+               class="glow inline-flex items-center justify-center px-8 py-3 bg-gradient-to-r from-yellow-600 to-orange-600 text-white rounded-lg font-semibold hover:from-yellow-700 hover:to-orange-700 transition-all duration-200">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
+                </svg>
+                Back to Home
+            </a>
+            
+            <a href="{% url 'authentication:customer_login' %}" 
+               class="inline-flex items-center justify-center px-8 py-3 bg-white/10 backdrop-blur-sm text-white border border-white/30 rounded-lg font-semibold hover:bg-white/20 transition-all duration-200">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"></path>
+                </svg>
+                Login
+            </a>
+        </div>
+        
+        <!-- Help Text -->
+        <div class="mt-12 text-gray-400 text-sm">
+            <p>If you believe you should have access, please contact support.</p>
+        </div>
+    </div>
+</body>
+</html>
+
+        
+        <div style="margin-bottom: 2rem;" class="animate-float">
+            <i class="bi bi-shield-lock" style="font-size: 6rem; color: #ef4444;"></i>
+        </div>
+        
+        <h1 style="font-size: 2.25rem; font-weight: 700; color: white; margin-bottom: 1rem;">
+            Access Denied
+        </h1>
+        <p style="font-size: 1.25rem; color: #9ca3af; margin-bottom: 2rem;">
+            You don't have permission to access this page. This area is restricted!
+        </p>
+        
+        <div class="glass-strong" style="border-radius: 1rem; padding: 1.5rem; margin-bottom: 2rem;">
+            <div style="display: flex; align-items: flex-start; gap: 0.75rem; text-align: left;">
+                <i class="bi bi-exclamation-triangle-fill" style="color: #f59e0b; font-size: 1.25rem; flex-shrink: 0; margin-top: 0.25rem;"></i>
+                <div>
+                    <p style="color: white; font-weight: 600; margin-bottom: 0.5rem;">Why am I seeing this?</p>
+                    <p style="color: #9ca3af; font-size: 0.875rem; margin-bottom: 0.5rem;">
+                        This could happen if:
+                    </p>
+                    <ul style="color: #9ca3af; font-size: 0.875rem; list-style: disc; padding-left: 1.25rem;">
+                        <li>You're not logged in</li>
+                        <li>You don't have the required permissions</li>
+                        <li>This page is restricted to certain user roles</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <div style="display: flex; flex-direction: column; gap: 1rem; margin-bottom: 2rem;">
+            <a href="{% url 'home' %}" class="btn btn-primary btn-lg btn-ripple hover-glow">
+                <i class="bi bi-house-fill"></i>
+                Back to Home
+                <i class="bi bi-arrow-right" style="margin-left: 0.5rem;"></i>
+            </a>
+            
+            <a href="{% url 'authentication:customer_login' %}" class="btn btn-secondary btn-lg">
+                <i class="bi bi-box-arrow-in-right"></i>
+                Sign In
+            </a>
+        </div>
+        
+        <div>
+            <p style="color: #6b7280; font-size: 0.875rem; margin-bottom: 1rem;">Need help?</p>
+            <div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 1rem; font-size: 0.875rem;">
+                <a href="{% url 'contact' %}" style="color: #9ca3af;">
+                    <i class="bi bi-envelope"></i> Contact Support
+                </a>
+                <a href="{% url 'about' %}" style="color: #9ca3af;">
+                    <i class="bi bi-info-circle"></i> Learn More
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <script src="{% static 'js/animations.js' %}"></script>
+</body>
+</html>

@@ -1,0 +1,75 @@
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&display=swap');
+@import "tailwindcss";
+
+@theme {
+  /* Custom color palette for gaming theme */
+  --color-gaming-primary: #111827;
+  --color-gaming-secondary: #1a202e;
+  --color-gaming-accent: #1f2937;
+  --color-gaming-highlight: #e94560;
+  --color-gaming-success: #00d4aa;
+  
+  /* Custom font family */
+  --font-gaming: "Orbitron", monospace;
+  
+  /* Custom breakpoints */
+  --breakpoint-xs: 475px;
+  --breakpoint-3xl: 1600px;
+}
+
+@layer base {
+  body {
+    background-color: #111827;
+    color: white;
+    font-family: system-ui, sans-serif;
+  }
+}
+
+@utility btn-primary {
+  background-color: var(--color-gaming-highlight);
+  color: white;
+  font-weight: 600;
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  transition: background-color 0.2s;
+  
+  &:hover {
+    background-color: #dc2626;
+  }
+}
+
+@utility btn-secondary {
+  background-color: var(--color-gaming-accent);
+  color: white;
+  font-weight: 600;
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  transition: background-color 0.2s;
+  
+  &:hover {
+    background-color: #2563eb;
+  }
+}
+
+@utility card {
+  background-color: var(--color-gaming-secondary);
+  border-radius: 0.5rem;
+  padding: 1.5rem;
+  border: 1px solid var(--color-gaming-accent);
+}
+
+@utility input-field {
+  background-color: var(--color-gaming-secondary);
+  border: 1px solid var(--color-gaming-accent);
+  border-radius: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  color: white;
+  
+  &::placeholder {
+    color: #9ca3af;
+  }
+  
+  &:focus {
+    outline: none;
+  }
+}

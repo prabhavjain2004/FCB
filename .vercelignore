@@ -1,0 +1,49 @@
+# Development and debug files
+static/css/responsive-debug.css
+static/js/responsive-debug.js
+
+# Documentation files
+*.md
+!README.md
+
+# Test files
+**/test_*.py
+**/tests/
+
+# Development environment
+.env
+.env.local
+.venv/
+venv/
+env/
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Cache files
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+
+# Database
+*.sqlite3
+*.db
+
+# Media files (if not needed in production)
+# media/
+
+# Static files (collected by Django)
+# staticfiles/
+
+# Logs
+*.log
+
+# OS files
+.DS_Store
+Thumbs.db

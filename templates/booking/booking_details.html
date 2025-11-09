@@ -1,0 +1,538 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}
+  Booking Details - TapNex Arena
+{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/booking-modal.css' %}">
+
+<style>
+    /* Enhanced Animations */
+    .animate-pulse-slow {
+        animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    }
+    
+    @keyframes float {
+        0%, 100% { transform: translateY(0px); }
+        50% { transform: translateY(-10px); }
+    }
+    
+    .float-animation {
+        animation: float 3s ease-in-out infinite;
+    }
+    
+    @keyframes shimmer {
+        0% { background-position: -1000px 0; }
+        100% { background-position: 1000px 0; }
+    }
+    
+    .shimmer-effect {
+        background: linear-gradient(
+            90deg,
+            rgba(255, 255, 255, 0) 0%,
+            rgba(255, 255, 255, 0.1) 50%,
+            rgba(255, 255, 255, 0) 100%
+        );
+        background-size: 1000px 100%;
+        animation: shimmer 2s infinite;
+    }
+    
+    /* Hero Background with Orbs */
+    .hero-bg {
+        position: absolute;
+        inset: 0;
+        overflow: hidden;
+        z-index: 0;
+        pointer-events: none;
+    }
+    
+    .gradient-orb {
+        position: absolute;
+        border-radius: 50%;
+        filter: blur(100px);
+        opacity: 0.3;
+        animation: floatOrb 20s ease-in-out infinite;
+    }
+    
+    .orb-1 {
+        width: 500px;
+        height: 500px;
+        background: radial-gradient(circle, rgba(102, 126, 234, 0.4) 0%, transparent 70%);
+        top: -150px;
+        right: -150px;
+        animation-delay: 0s;
+    }
+    
+    .orb-2 {
+        width: 400px;
+        height: 400px;
+        background: radial-gradient(circle, rgba(168, 85, 247, 0.3) 0%, transparent 70%);
+        bottom: -100px;
+        left: -100px;
+        animation-delay: 7s;
+    }
+    
+    @keyframes floatOrb {
+        0%, 100% { transform: translate(0, 0) scale(1); }
+        33% { transform: translate(30px, -30px) scale(1.1); }
+        66% { transform: translate(-30px, 30px) scale(0.9); }
+    }
+    
+    /* Grid Pattern */
+    .grid-pattern {
+        background-image: 
+            linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+        background-size: 50px 50px;
+        position: absolute;
+        inset: 0;
+        z-index: 0;
+    }
+    
+    /* Card Hover Glow */
+    .card-glow {
+        position: relative;
+    }
+    
+    .card-glow::before {
+        content: '';
+        position: absolute;
+        inset: -2px;
+        border-radius: inherit;
+        padding: 2px;
+        background: linear-gradient(135deg, #667eea, #a855f7);
+        -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+        -webkit-mask-composite: xor;
+        mask-composite: exclude;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+    
+    .card-glow:hover::before {
+        opacity: 0.5;
+    }
+    
+    /* Info Box Styles */
+    .info-box {
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .info-box::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.05), transparent);
+        transition: left 0.5s ease;
+    }
+    
+    .info-box:hover::before {
+        left: 100%;
+    }
+    
+    /* Hover Glow for Buttons */
+    .hover-glow {
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .hover-glow::after {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 0;
+        height: 0;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.2);
+        transform: translate(-50%, -50%);
+        transition: width 0.6s, height 0.6s;
+    }
+    
+    .hover-glow:hover::after {
+        width: 300px;
+        height: 300px;
+    }
+    
+    /* Capacity Dots */
+    .capacity-indicator {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        flex-wrap: wrap;
+        padding: 8px 0;
+        position: relative;
+    }
+    
+    .capacity-dot {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        transition: all 0.3s ease;
+    }
+    
+    .capacity-dot.booked {
+        background-color: #ef4444;
+    }
+    
+    .capacity-dot.your-booking {
+        background-color: #667eea;
+        animation: pulse-booking 2s ease-in-out infinite;
+        position: relative;
+        z-index: 1;
+    }
+    
+    .capacity-dot.available {
+        background-color: #10b981;
+    }
+    
+    @keyframes pulse-booking {
+        0%, 100% { 
+            transform: scale(1);
+            opacity: 1;
+        }
+        50% { 
+            transform: scale(1.15);
+            opacity: 0.95;
+        }
+    }
+    
+    /* Responsive Adjustments */
+    @media (max-width: 768px) {
+        .booking-hero h1 {
+            font-size: 2rem;
+        }
+
+        /* Slow down animations on mobile */
+        .float-animation {
+            animation: float 8s cubic-bezier(0.4, 0, 0.6, 1) infinite !important;
+        }
+
+        .animate-pulse-slow {
+            animation: pulse 4.5s cubic-bezier(0.4, 0, 0.6, 1) infinite !important;
+        }
+
+        .gradient-orb {
+            animation: floatOrb 40s cubic-bezier(0.4, 0, 0.6, 1) infinite !important;
+        }
+
+        .shimmer-effect {
+            animation: shimmer 4s cubic-bezier(0.4, 0, 0.6, 1) infinite !important;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-5px); }
+        }
+        
+        /* Mobile-specific optimizations */
+        .orb-1, .orb-2 {
+            width: 300px;
+            height: 300px;
+            filter: blur(80px);
+        }
+        
+        /* Reduce padding on mobile */
+        .card-glow {
+            padding: 1.25rem !important;
+        }
+        
+        /* Better capacity dots layout */
+        .capacity-indicator {
+            gap: 6px;
+        }
+        
+        .capacity-dot {
+            width: 10px;
+            height: 10px;
+        }
+        
+        /* Mobile button adjustments */
+        button, a {
+            font-size: 0.95rem;
+        }
+        
+        /* Reduce icon sizes on mobile */
+        .info-box .w-12 {
+            width: 2.5rem;
+            height: 2.5rem;
+        }
+        
+        .info-box i {
+            font-size: 1.25rem !important;
+        }
+    }
+    
+    @media (max-width: 640px) {
+        /* Extra small screens */
+        .card-glow {
+            padding: 1rem !important;
+        }
+        
+        /* Smaller text on mobile */
+        h1 {
+            font-size: 1.75rem !important;
+        }
+        
+        h2 {
+            font-size: 1.5rem !important;
+        }
+        
+        h3 {
+            font-size: 1.25rem !important;
+        }
+        
+        /* Compact info boxes */
+        .info-box {
+            padding: 1rem !important;
+        }
+        
+        /* Better wrapping for booking ID */
+        .info-box p[style*="monospace"] {
+            font-size: 0.75rem !important;
+            word-break: break-all;
+        }
+    }
+    
+    /* Button Hover Effects */
+    button:hover {
+        transform: translateY(-2px);
+    }
+    
+    button:active {
+        transform: translateY(0);
+    }
+    
+    a:hover {
+        transform: translateY(-2px);
+    }
+    
+    a:active {
+        transform: translateY(0);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+  <div class="min-h-screen py-6 sm:py-12 relative" style="background: #111827; padding-top: 40px;">
+    <!-- Animated Background -->
+    <div class="hero-bg">
+      <div class="gradient-orb orb-1"></div>
+      <div class="gradient-orb orb-2"></div>
+      <div class="grid-pattern"></div>
+    </div>
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+      <!-- Header Section -->
+      <div class="mb-6 sm:mb-10 animate-fade-in-up">
+        <div class="flex items-center gap-3 sm:gap-4 mb-4 sm:mb-6">
+          <a href="{% url 'booking:my_bookings' %}" class="flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 rounded-xl transition-all flex-shrink-0" style="background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.2); color: white;" onmouseover="this.style.background='rgba(255, 255, 255, 0.2)'" onmouseout="this.style.background='rgba(255, 255, 255, 0.1)'"><i class="bi bi-arrow-left text-lg sm:text-xl"></i></a>
+          <h1 class="text-2xl sm:text-4xl lg:text-5xl font-black text-white" style="font-family: 'Orbitron', sans-serif; line-height: 1.2;"><span style="background: linear-gradient(135deg, #00f5ff, #b537f2, #ff006e); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">Booking</span> Details</h1>
+        </div>
+        <p class="text-gray-300 text-sm sm:text-lg max-w-2xl">Complete information about your gaming session</p>
+      </div>
+
+      <!-- Main Content -->
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
+        <!-- Left Column - Booking Details -->
+        <div class="lg:col-span-2 space-y-4 sm:space-y-6 lg:space-y-8">
+          <!-- Game Details Card -->
+          <div class="card-glow animate-fade-in-up" style="animation-delay: 0.1s; background: rgba(30, 41, 59, 0.5); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 1.5rem; padding: 1.25rem;">
+            <div class="flex items-center gap-2 sm:gap-3 mb-4 sm:mb-6">
+              <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center flex-shrink-0" style="background: linear-gradient(135deg, #667eea, #a855f7);">
+                <i class="bi bi-controller text-white text-lg sm:text-xl"></i>
+              </div>
+              <h2 class="text-xl sm:text-2xl font-black text-white">Game Details</h2>
+            </div>
+
+            <div class="flex flex-col sm:flex-row items-start gap-4 sm:gap-6 mb-6 sm:mb-8 pb-6 sm:pb-8" style="border-bottom: 1px solid rgba(255, 255, 255, 0.1);">
+              <!-- Game Icon -->
+              <div class="w-20 h-20 sm:w-24 sm:h-24 lg:w-28 lg:h-28 rounded-2xl flex items-center justify-center flex-shrink-0 float-animation mx-auto sm:mx-0" style="background: linear-gradient(135deg, #667eea, #764ba2, #a855f7);">
+                {% if booking.game.image %}
+                  <img src="{{ booking.game.image.url }}" alt="{{ booking.game.name }}" class="w-full h-full object-cover rounded-2xl" />
+                {% else %}
+                  <i class="bi bi-trophy-fill text-white text-4xl sm:text-5xl"></i>
+                {% endif %}
+              </div>
+
+              <div class="flex-1 w-full sm:w-auto text-center sm:text-left">
+                <h3 class="text-xl sm:text-2xl lg:text-3xl font-black text-white mb-2 sm:mb-3" style="font-family: 'Orbitron', sans-serif;">{{ booking.game.name }}</h3>
+                <p class="text-gray-300 text-sm sm:text-base mb-3 sm:mb-4 leading-relaxed">{{ booking.game.description|default:"Premium gaming experience awaits you" }}</p>
+
+                <div class="flex flex-wrap gap-2 justify-center sm:justify-start">
+                  {% if booking.booking_type == 'PRIVATE' %}
+                    <span class="flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full text-xs font-semibold whitespace-nowrap" style="background: #667eea; color: white;"><i class="bi bi-lock-fill text-xs"></i> Private Booking</span>
+                  {% elif booking.booking_type == 'SHARED' %}
+                    <span class="flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full text-xs font-semibold whitespace-nowrap" style="background: #10b981; color: white;"><i class="bi bi-people-fill text-xs"></i> Shared Booking</span>
+                  {% else %}
+                    <span class="flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full text-xs font-semibold whitespace-nowrap" style="background: #3b82f6; color: white;"><i class="bi bi-stars text-xs"></i> Hybrid Booking</span>
+                  {% endif %}
+
+                  {% if booking.status == 'CONFIRMED' %}
+                    <span class="flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full text-xs font-semibold whitespace-nowrap" style="background: #10b981; color: white;"><i class="bi bi-check-circle-fill text-xs"></i> Confirmed</span>
+                  {% elif booking.status == 'COMPLETED' %}
+                    <span class="flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full text-xs font-semibold whitespace-nowrap" style="background: #6366f1; color: white;"><i class="bi bi-flag-fill text-xs"></i> Completed</span>
+                  {% elif booking.status == 'CANCELLED' %}
+                    <span class="flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full text-xs font-semibold whitespace-nowrap" style="background: #ef4444; color: white;"><i class="bi bi-x-circle-fill text-xs"></i> Cancelled</span>
+                  {% endif %}
+                </div>
+              </div>
+            </div>
+
+            <!-- Booking Info Grid -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 lg:gap-5">
+              <div class="info-box rounded-xl sm:rounded-2xl p-4 sm:p-5" style="background: rgba(102, 126, 234, 0.1); border: 1px solid rgba(102, 126, 234, 0.2); backdrop-filter: blur(10px);">
+                <div class="flex items-center gap-2 sm:gap-3 mb-2 sm:mb-3">
+                  <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center flex-shrink-0" style="background: rgba(102, 126, 234, 0.2);">
+                    <i class="bi bi-calendar-event text-xl sm:text-2xl" style="color: #818cf8;"></i>
+                  </div>
+                  <span class="text-xs sm:text-sm font-semibold uppercase tracking-wide" style="color: #9ca3af;">Date & Time</span>
+                </div>
+                <p class="text-white font-bold text-base sm:text-lg lg:text-xl mb-1">{{ booking.game_slot.date|date:'l, M d, Y' }}</p>
+                <p class="text-sm sm:text-base" style="color: #d1d5db;">{{ booking.game_slot.start_time|time:'h:i A' }} - {{ booking.game_slot.end_time|time:'h:i A' }}</p>
+              </div>
+
+              <div class="info-box rounded-xl sm:rounded-2xl p-4 sm:p-5" style="background: rgba(168, 85, 247, 0.1); border: 1px solid rgba(168, 85, 247, 0.2); backdrop-filter: blur(10px);">
+                <div class="flex items-center gap-2 sm:gap-3 mb-2 sm:mb-3">
+                  <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center flex-shrink-0" style="background: rgba(168, 85, 247, 0.2);">
+                    <i class="bi bi-clock-fill text-xl sm:text-2xl" style="color: #c084fc;"></i>
+                  </div>
+                  <span class="text-xs sm:text-sm font-semibold uppercase tracking-wide" style="color: #9ca3af;">Duration</span>
+                </div>
+                <p class="text-white font-bold text-base sm:text-lg lg:text-xl mb-1">{{ booking.game.slot_duration_minutes }} Minutes</p>
+                <p class="text-sm sm:text-base" style="color: #d1d5db;">Extended gaming session</p>
+              </div>
+
+              <div class="info-box rounded-xl sm:rounded-2xl p-4 sm:p-5" style="background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.2); backdrop-filter: blur(10px);">
+                <div class="flex items-center gap-2 sm:gap-3 mb-2 sm:mb-3">
+                  <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center flex-shrink-0" style="background: rgba(16, 185, 129, 0.2);">
+                    <i class="bi bi-people-fill text-xl sm:text-2xl" style="color: #34d399;"></i>
+                  </div>
+                  <span class="text-xs sm:text-sm font-semibold uppercase tracking-wide" style="color: #9ca3af;">Capacity</span>
+                </div>
+                <p class="text-white font-bold text-base sm:text-lg lg:text-xl mb-1">{{ booking.spots_booked }} Player{{ booking.spots_booked|pluralize }}</p>
+                <div class="text-sm mt-2" style="color: #d1d5db;">
+                  <div class="capacity-indicator">
+                    {% for i in "x"|ljust:booking.game.capacity %}
+                      <div class="capacity-dot {% if forloop.counter0 < booking.spots_booked %}
+                          your-booking
+                        {% else %}
+                          available
+                        {% endif %}"></div>
+                    {% endfor %}
+                  </div>
+                </div>
+              </div>
+
+              <div class="info-box rounded-xl sm:rounded-2xl p-4 sm:p-5" style="background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.2); backdrop-filter: blur(10px);">
+                <div class="flex items-center gap-2 sm:gap-3 mb-2 sm:mb-3">
+                  <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center flex-shrink-0" style="background: rgba(245, 158, 11, 0.2);">
+                    <i class="bi bi-hash text-xl sm:text-2xl" style="color: #fbbf24;"></i>
+                  </div>
+                  <span class="text-xs sm:text-sm font-semibold uppercase tracking-wide" style="color: #9ca3af;">Booking ID</span>
+                </div>
+                <p class="text-white font-bold text-xs sm:text-sm lg:text-base mb-1 tracking-wide" style="font-family: 'Courier New', monospace; word-break: break-all; line-height: 1.6;">#{{ booking.id }}</p>
+                <p class="text-xs sm:text-sm" style="color: #9ca3af;">Reference number</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right Column - Payment Summary -->
+        <div class="lg:col-span-1 space-y-4 sm:space-y-6">
+          <!-- Payment Summary Card -->
+          <div class="card-glow animate-fade-in-up" style="animation-delay: 0.15s; background: rgba(30, 41, 59, 0.5); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 1.5rem; padding: 1.25rem;">
+            <div class="flex items-center gap-2 sm:gap-3 mb-4 sm:mb-6">
+              <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center flex-shrink-0" style="background: linear-gradient(135deg, #667eea, #a855f7);">
+                <i class="bi bi-receipt text-white text-lg sm:text-xl"></i>
+              </div>
+              <h3 class="text-xl sm:text-2xl font-black text-white">Payment Summary</h3>
+            </div>
+
+            <div class="space-y-3 sm:space-y-4 mb-4 sm:mb-6">
+              <div class="flex justify-between items-start sm:items-center gap-2 pb-3 sm:pb-4" style="border-bottom: 1px solid rgba(255, 255, 255, 0.1);">
+                <span class="font-medium text-xs sm:text-sm lg:text-base flex-1" style="color: #d1d5db;">
+                  {% if booking.booking_type == 'PRIVATE' %}
+                    Private booking ({{ booking.game.capacity }} players)
+                  {% else %}
+                    {{ booking.spots_booked }} spot{{ booking.spots_booked|pluralize }} × ₹{{ booking.price_per_spot|floatformat:2 }}
+                  {% endif %}
+                </span>
+                <span class="text-white font-bold text-base sm:text-lg lg:text-xl whitespace-nowrap">₹{{ booking.subtotal|floatformat:2 }}</span>
+              </div>
+
+              {% if booking.platform_fee %}
+                <div class="flex justify-between items-center gap-2 pb-3 sm:pb-4" style="border-bottom: 1px solid rgba(255, 255, 255, 0.1);">
+                  <span class="font-medium flex items-center gap-2 text-xs sm:text-sm lg:text-base" style="color: #d1d5db;">Platform Fee</span>
+                  <span class="text-white font-bold text-base sm:text-lg whitespace-nowrap">₹{{ booking.platform_fee|floatformat:2 }}</span>
+                </div>
+              {% endif %}
+
+              <div class="rounded-xl sm:rounded-2xl p-4 sm:p-6 border-2 relative overflow-hidden" style="background: linear-gradient(135deg, rgba(102, 126, 234, 0.3), rgba(168, 85, 247, 0.2)); border-color: rgba(99, 102, 241, 0.4);">
+                <div class="shimmer-effect absolute inset-0"></div>
+                <div class="relative z-10">
+                  <div class="flex justify-between items-center gap-3">
+                    <div class="flex-1">
+                      <p class="text-xs sm:text-sm font-medium mb-1" style="color: #e5e7eb;">Total Amount</p>
+                      <p class="text-white font-black text-2xl sm:text-3xl lg:text-4xl" style="font-family: 'Orbitron', sans-serif;">₹{{ booking.total_amount|floatformat:2 }}</p>
+                    </div>
+                    <i class="bi bi-credit-card-2-front text-3xl sm:text-4xl lg:text-5xl flex-shrink-0" style="color: rgba(255, 255, 255, 0.2);"></i>
+                  </div>
+                </div>
+              </div>
+
+              {% if booking.razorpay_payment_id %}
+                <div class="rounded-xl sm:rounded-2xl p-4 sm:p-5 border-2" style="background: rgba(16, 185, 129, 0.1); border-color: rgba(16, 185, 129, 0.3); backdrop-filter: blur(10px);">
+                  <div class="flex items-center gap-2 sm:gap-3 mb-2 sm:mb-3">
+                    <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center flex-shrink-0" style="background: rgba(16, 185, 129, 0.2);">
+                      <i class="bi bi-check-circle-fill text-xl sm:text-2xl" style="color: #34d399;"></i>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                      <p class="text-green-300 font-bold text-base sm:text-lg">Payment Confirmed</p>
+                      <p class="text-green-200 text-xs">Transaction completed</p>
+                    </div>
+                  </div>
+                  <div class="rounded-lg p-2 sm:p-3" style="background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.2);">
+                    <p class="text-green-200 text-xs sm:text-sm font-mono break-all">{{ booking.razorpay_payment_id }}</p>
+                  </div>
+                </div>
+              {% endif %}
+
+              <div class="flex justify-between items-start sm:items-center gap-2 pb-3 sm:pb-4 pt-2" style="border-bottom: 1px solid rgba(255, 255, 255, 0.1);">
+                <span class="font-medium text-xs sm:text-sm lg:text-base" style="color: #9ca3af;">Booked On</span>
+                <span class="text-white font-semibold text-xs sm:text-sm text-right">{{ booking.created_at|date:'M j, Y g:i A' }}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Actions Card -->
+          <div class="card-glow animate-fade-in-up" style="animation-delay: 0.2s; background: rgba(30, 41, 59, 0.5); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 1.5rem; padding: 1.25rem;">
+            <h3 class="text-lg sm:text-xl font-black text-white mb-3 sm:mb-4">Quick Actions</h3>
+            <div class="space-y-2.5 sm:space-y-3">
+              {% if booking.status == 'CONFIRMED' and booking.start_datetime > now %}
+                <button onclick="cancelBooking('{{ booking.id }}')" class="w-full hover-glow px-4 sm:px-6 py-3 sm:py-4 rounded-xl text-sm sm:text-base font-bold transition-all text-white relative z-10 flex items-center justify-center gap-2" style="background: rgba(239, 68, 68, 0.2); border: 2px solid rgba(239, 68, 68, 0.4); cursor: pointer;" onmouseover="this.style.background='rgba(239, 68, 68, 0.3)'; this.style.borderColor='rgba(239, 68, 68, 0.6)'" onmouseout="this.style.background='rgba(239, 68, 68, 0.2)'; this.style.borderColor='rgba(239, 68, 68, 0.4)'"><i class="bi bi-x-circle-fill"></i><span>Cancel Booking</span></button>
+              {% endif %}
+
+              <a href="{% url 'booking:game_detail' game_id=booking.game.id %}" class="block w-full hover-glow px-4 sm:px-6 py-3 sm:py-4 rounded-xl text-sm sm:text-base font-bold transition-all text-white text-center relative z-10 flex items-center justify-center gap-2" style="background: linear-gradient(135deg, #667eea, #a855f7); cursor: pointer; text-decoration: none;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 20px 40px rgba(102, 126, 234, 0.4)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 10px 25px rgba(102, 126, 234, 0.3)'"><i class="bi bi-plus-circle-fill"></i><span>Book Another Session</span></a>
+
+              <a href="{% url 'booking:my_bookings' %}" class="block w-full px-4 sm:px-6 py-3 sm:py-4 rounded-xl text-sm sm:text-base font-bold transition-all text-white text-center relative z-10 flex items-center justify-center gap-2" style="background: rgba(255, 255, 255, 0.1); border: 2px solid rgba(255, 255, 255, 0.2); cursor: pointer; text-decoration: none;" onmouseover="this.style.background='rgba(255, 255, 255, 0.2)'; this.style.borderColor='rgba(255, 255, 255, 0.3)'" onmouseout="this.style.background='rgba(255, 255, 255, 0.1)'; this.style.borderColor='rgba(255, 255, 255, 0.2)'"><i class="bi bi-arrow-left"></i><span>Back to My Bookings</span></a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function cancelBooking(bookingId) {
+      if (confirm('Are you sure you want to cancel this booking? This action cannot be undone.')) {
+        window.location.href = `/booking/games/cancel/${bookingId}/`
+      }
+    }
+  </script>
+{% endblock %}

@@ -1,0 +1,1059 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Dashboard - TapNex Arena{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Enhanced Animations */
+    @keyframes float {
+        0%, 100% { transform: translateY(0px); }
+        50% { transform: translateY(-10px); }
+    }
+    
+    @keyframes shimmer {
+        0% { background-position: -1000px 0; }
+        100% { background-position: 1000px 0; }
+    }
+    
+    @keyframes pulse-glow {
+        0%, 100% { 
+            opacity: 1;
+        }
+        50% { 
+            opacity: 0.95;
+        }
+    }
+    
+    .float-animation {
+        animation: float 3s ease-in-out infinite;
+    }
+    
+    .shimmer-effect {
+        background: linear-gradient(
+            90deg,
+            rgba(255, 255, 255, 0) 0%,
+            rgba(255, 255, 255, 0.1) 50%,
+            rgba(255, 255, 255, 0) 100%
+        );
+        background-size: 1000px 100%;
+        animation: shimmer 2s infinite;
+    }
+    
+    /* Hero Background with Orbs */
+    .hero-bg {
+        position: absolute;
+        inset: 0;
+        overflow: hidden;
+        z-index: 0;
+        pointer-events: none;
+    }
+    
+    .gradient-orb {
+        position: absolute;
+        border-radius: 50%;
+        filter: blur(100px);
+        opacity: 0.3;
+        animation: floatOrb 20s ease-in-out infinite;
+    }
+    
+    .orb-1 {
+        width: 500px;
+        height: 500px;
+        background: radial-gradient(circle, rgba(102, 126, 234, 0.4) 0%, transparent 70%);
+        top: -150px;
+        right: -150px;
+    }
+    
+    .orb-2 {
+        width: 400px;
+        height: 400px;
+        background: radial-gradient(circle, rgba(168, 85, 247, 0.3) 0%, transparent 70%);
+        bottom: -100px;
+        left: -100px;
+        animation-delay: 7s;
+    }
+    
+    @keyframes floatOrb {
+        0%, 100% { transform: translate(0, 0) scale(1); }
+        33% { transform: translate(30px, -30px) scale(1.1); }
+        66% { transform: translate(-30px, 30px) scale(0.9); }
+    }
+    
+    /* Grid Pattern */
+    .grid-pattern {
+        background-image: 
+            linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+        background-size: 50px 50px;
+        position: absolute;
+        inset: 0;
+        z-index: 0;
+    }
+    
+    /* Card Styles */
+    .card-glow {
+        position: relative;
+        background: rgba(30, 41, 59, 0.5);
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 1.5rem;
+        transition: all 0.3s ease;
+        z-index: 10;
+        width: 100%;
+        box-sizing: border-box;
+    }
+    
+    .card-glow::before {
+        content: '';
+        position: absolute;
+        inset: -2px;
+        border-radius: inherit;
+        padding: 2px;
+        background: linear-gradient(135deg, #667eea, #a855f7);
+        -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+        -webkit-mask-composite: xor;
+        mask-composite: exclude;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+        z-index: -1;
+    }
+    
+    .card-glow:hover::before {
+        opacity: 0.5;
+    }
+    
+    /* Ensure all links and buttons are clickable */
+    a, button, .clickable {
+        position: relative;
+        z-index: 100;
+        pointer-events: auto;
+    }
+    
+    /* Touch-friendly tap targets for mobile */
+    @media (max-width: 768px) {
+        a, button {
+            min-height: 44px;
+            min-width: 44px;
+        }
+        
+        /* Disable hover effects on touch devices */
+        @media (hover: none) {
+            .game-card:hover,
+            .booking-card:hover,
+            .quick-action-card:hover,
+            .stat-card:hover {
+                transform: none;
+            }
+            
+            .game-card:active {
+                transform: scale(0.98);
+            }
+            
+            .quick-action-card:active {
+                transform: scale(0.98);
+            }
+        }
+    }
+    
+    /* Status Badges */
+    .status-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem 1rem;
+        border-radius: 9999px;
+        font-size: 0.875rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+    
+    .status-pending {
+        background: rgba(251, 191, 36, 0.2);
+        color: #fbbf24;
+        border: 1px solid rgba(251, 191, 36, 0.3);
+    }
+    
+    .status-confirmed {
+        background: rgba(16, 185, 129, 0.2);
+        color: #10b981;
+        border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+    
+    .status-in_progress {
+        background: rgba(59, 130, 246, 0.2);
+        color: #3b82f6;
+        border: 1px solid rgba(59, 130, 246, 0.3);
+    }
+    
+    .status-completed {
+        background: rgba(107, 114, 128, 0.2);
+        color: #9ca3af;
+        border: 1px solid rgba(107, 114, 128, 0.3);
+    }
+    
+    .status-cancelled, .status-expired {
+        background: rgba(239, 68, 68, 0.2);
+        color: #ef4444;
+        border: 1px solid rgba(239, 68, 68, 0.3);
+    }
+    
+    /* Stat Card */
+    .stat-card {
+        position: relative;
+        overflow: hidden;
+        transition: all 0.3s ease;
+        width: 100%;
+        box-sizing: border-box;
+    }
+    
+    .stat-card:hover {
+        transform: translateY(-5px);
+    }
+    
+    /* Ensure proper centering */
+    .main-container {
+        box-sizing: border-box;
+        width: 100%;
+    }
+    
+    .main-container > * {
+        box-sizing: border-box;
+    }
+    
+    .stat-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.05), transparent);
+        transition: left 0.5s ease;
+    }
+    
+    .stat-card:hover::before {
+        left: 100%;
+    }
+    
+    /* Booking Card */
+    .booking-card {
+        background: rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 1rem;
+        padding: 1.5rem;
+        transition: all 0.3s ease;
+        position: relative;
+        z-index: 50;
+        width: 100%;
+        box-sizing: border-box;
+    }
+    
+    .booking-card:hover {
+        border-color: rgba(102, 126, 234, 0.5);
+        transform: translateY(-2px);
+    }
+    
+    .booking-card a {
+        position: relative;
+        z-index: 100;
+        pointer-events: auto;
+    }
+    
+    /* Game Card */
+    .game-card {
+        background: rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 1rem;
+        padding: 1rem;
+        transition: all 0.3s ease;
+        cursor: pointer;
+        position: relative;
+        z-index: 50;
+        pointer-events: auto;
+        margin: 0.5rem 0;
+        width: 100%;
+        box-sizing: border-box;
+    }
+    
+    .game-card:hover {
+        border-color: rgba(102, 126, 234, 0.5);
+        transform: translateY(-3px) scale(1.02);
+        z-index: 100;
+    }
+    
+    .game-card * {
+        pointer-events: none;
+    }
+    
+    /* Fix overflow clipping for scrollable containers */
+    .custom-scrollbar {
+        overflow-y: auto;
+        overflow-x: visible;
+        padding-right: 0.5rem;
+    }
+    
+    /* Button Styles */
+    .btn-primary {
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        color: white;
+        padding: 0.75rem 1.5rem;
+        border-radius: 0.75rem;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        border: none;
+        cursor: pointer;
+        position: relative;
+        overflow: hidden;
+        z-index: 100;
+    }
+    
+    .btn-primary:hover {
+        transform: translateY(-2px);
+    }
+    
+    .btn-secondary {
+        background: rgba(255, 255, 255, 0.1);
+        color: white;
+        padding: 0.75rem 1.5rem;
+        border-radius: 0.75rem;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        cursor: pointer;
+        position: relative;
+        z-index: 100;
+    }
+    
+    .btn-secondary:hover {
+        background: rgba(255, 255, 255, 0.2);
+        transform: translateY(-2px);
+    }
+    
+    /* Quick Action Cards */
+    .quick-action-card {
+        pointer-events: auto;
+    }
+    
+    .quick-action-card * {
+        pointer-events: none;
+    }
+    
+    /* Responsive */
+    @media (max-width: 768px) {
+        /* Slow down animations on mobile for better performance */
+        .float-animation {
+            animation: float 8s ease-in-out infinite !important;
+        }
+        
+        .gradient-orb {
+            animation: floatOrb 40s ease-in-out infinite !important;
+        }
+        
+        /* Slow down pulse animations */
+        .animate-pulse-slow,
+        [style*="animation: pulse-glow"] {
+            animation: pulse-glow 4.5s cubic-bezier(0.4, 0, 0.6, 1) infinite !important;
+        }
+        
+        /* Reduce orb size on mobile */
+        .orb-1 {
+            width: 300px;
+            height: 300px;
+        }
+        
+        .orb-2 {
+            width: 250px;
+            height: 250px;
+        }
+        
+        /* Adjust card padding for mobile - more specific */
+        .card-glow {
+            padding: 1rem !important;
+            margin-left: 0 !important;
+            margin-right: 0 !important;
+        }
+        
+        /* Better visual balance */
+        .booking-card {
+            padding: 1rem !important;
+            margin-left: 0 !important;
+            margin-right: 0 !important;
+        }
+        
+        .game-card {
+            padding: 0.875rem !important;
+            margin-left: 0 !important;
+            margin-right: 0 !important;
+        }
+        
+        /* Ensure content sections have proper spacing */
+        .lg\:col-span-2 > .card-glow,
+        .space-y-4 > .card-glow,
+        .space-y-8 > .card-glow {
+            margin-left: 0 !important;
+            margin-right: 0 !important;
+        }
+        
+        /* Smaller stat numbers on mobile */
+        .stat-card .text-4xl {
+            font-size: 2rem !important;
+        }
+        
+        /* Adjust welcome header */
+        .welcome-header h1 {
+            font-size: 1.5rem !important;
+        }
+        
+        /* Stack booking card content vertically */
+        /* .booking-card .flex {
+            flex-direction: column;
+            align-items: flex-start !important;
+        } */
+        
+        /* Reduce game card hover effect on mobile */
+        .game-card:hover {
+            transform: translateY(-2px) scale(1.01);
+        }
+        
+        /* Adjust quick action cards for mobile */
+        .quick-action-card {
+            padding: 0.75rem !important;
+        }
+        
+        .quick-action-card .w-12 {
+            width: 2.5rem !important;
+            height: 2.5rem !important;
+        }
+        
+        /* Reduce button padding on mobile */
+        .btn-primary, .btn-secondary {
+            padding: 0.625rem 1rem !important;
+            font-size: 0.875rem !important;
+        }
+        
+        /* Adjust status badges */
+        .status-badge {
+            font-size: 0.75rem !important;
+            padding: 0.375rem 0.75rem !important;
+        }
+        
+        /* Reduce icon sizes */
+        .bi {
+            font-size: 1.25rem !important;
+        }
+        
+        /* Adjust grid gaps */
+        .space-y-8 > * + * {
+            margin-top: 1.5rem !important;
+        }
+        
+        .space-y-6 > * + * {
+            margin-top: 1rem !important;
+        }
+        
+        /* Better grid spacing on mobile */
+        .stats-grid {
+            gap: 0.75rem !important;
+            padding: 0 0.25rem;
+        }
+        
+        .grid {
+            gap: 1rem !important;
+        }
+        
+        /* Make scrollable game list shorter on mobile */
+        .custom-scrollbar {
+            max-height: 300px !important;
+        }
+        
+        /* Adjust account info text */
+        .account-info-text {
+            font-size: 0.75rem !important;
+            word-break: break-all;
+        }
+    }
+    
+    @media (max-width: 640px) {
+        /* Extra small screens */
+        .text-4xl {
+            font-size: 1.75rem !important;
+        }
+        
+        .text-3xl {
+            font-size: 1.5rem !important;
+        }
+        
+        .text-2xl {
+            font-size: 1.25rem !important;
+        }
+        
+        .text-xl {
+            font-size: 1rem !important;
+        }
+        
+        /* Single column for stats on very small screens */
+        .stats-grid {
+            grid-template-columns: repeat(2, 1fr) !important;
+        }
+        
+        /* Reduce padding on main container */
+        .main-container {
+            padding-left: 1rem !important;
+            padding-right: 1rem !important;
+        }
+        
+        /* Remove card margins on mobile - container handles spacing */
+        .card-glow {
+            margin-left: 0 !important;
+            margin-right: 0 !important;
+        }
+        
+        /* Ensure grid items have proper spacing */
+        .grid > * {
+            padding-left: 0 !important;
+            padding-right: 0 !important;
+        }
+    }
+    
+    /* Extra padding for very small screens */
+    @media (max-width: 375px) {
+        .main-container {
+            padding-left: 0.875rem !important;
+            padding-right: 0.875rem !important;
+        }
+        
+        .card-glow {
+            margin-left: 0 !important;
+            margin-right: 0 !important;
+            padding: 0.875rem !important;
+        }
+        
+        /* Reduce stat card padding even more */
+        .stat-card {
+            padding: 0.75rem !important;
+        }
+        
+        /* Tighter spacing for booking cards */
+        .booking-card {
+            padding: 0.75rem !important;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="min-h-screen py-6 sm:py-12 relative" style="background: #111827;">
+    <!-- Animated Background -->
+    <div class="hero-bg">
+        <div class="gradient-orb orb-1"></div>
+        <div class="gradient-orb orb-2"></div>
+        <div class="grid-pattern"></div>
+    </div>
+    
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 main-container">
+        
+        <!-- Welcome Header -->
+        <div class="card-glow mt-4 sm:mt-0 mb-6 sm:mb-10 p-5 sm:p-8 animate-fade-in-up">
+            <div class="flex flex-col md:flex-row items-center justify-between gap-4 sm:gap-6">
+                <div class="flex items-center gap-4 sm:gap-6 w-full md:w-auto">
+                    <div class="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl flex items-center justify-center float-animation" 
+                         style="background: linear-gradient(135deg, #667eea, #764ba2);">
+                        {% if user.first_name %}
+                            <span class="text-3xl font-black text-white">{{ user.first_name|first|upper }}</span>
+                        {% else %}
+                            <i class="bi bi-person-fill text-white text-3xl"></i>
+                        {% endif %}
+                    </div>
+                    <div class="flex-1">
+                        <h1 class="text-2xl sm:text-3xl lg:text-4xl font-black text-white mb-2 welcome-header" style="font-family: 'Orbitron', sans-serif;">
+                            Welcome back, <span style="background: linear-gradient(135deg, #00f5ff, #b537f2); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">{{ user.first_name|default:user.username }}</span>!
+                        </h1>
+                        <p class="text-gray-300 text-sm sm:text-base lg:text-lg">Ready for your next gaming adventure?</p>
+                    </div>
+                </div>
+                <div class="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
+                    <a href="{% url 'booking:game_selection' %}" class="btn-primary flex items-center justify-center gap-2 w-full sm:w-auto">
+                        <i class="bi bi-plus-circle text-lg sm:text-xl"></i>
+                        <span class="text-sm sm:text-base">Book New Session</span>
+                    </a>
+                    <a href="{% url 'booking:my_bookings' %}" class="btn-secondary flex items-center justify-center gap-2 w-full sm:w-auto">
+                        <i class="bi bi-calendar-check text-lg sm:text-xl"></i>
+                        <span class="text-sm sm:text-base">My Bookings</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Stats Grid -->
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6 mb-6 sm:mb-10 stats-grid">
+            <!-- Total Bookings -->
+            <div class="card-glow stat-card p-4 sm:p-6 animate-fade-in-up" style="animation-delay: 0.1s;">
+                <div class="flex flex-col sm:flex-row items-center justify-between mb-2 sm:mb-4">
+                    <div class="w-12 h-12 sm:w-14 sm:h-14 rounded-xl flex items-center justify-center mb-2 sm:mb-0" 
+                         style="background: linear-gradient(135deg, #667eea, #764ba2);">
+                        <i class="bi bi-calendar-event text-white text-xl sm:text-2xl"></i>
+                    </div>
+                    <div class="text-center sm:text-right w-full sm:w-auto">
+                        <div class="text-2xl sm:text-3xl lg:text-4xl font-black text-white mb-1" style="font-family: 'Orbitron', sans-serif;">{{ total_bookings|default:0 }}</div>
+                        <div class="text-gray-400 text-xs sm:text-sm font-medium">Total Bookings</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Completed -->
+            <div class="card-glow stat-card p-4 sm:p-6 animate-fade-in-up" style="animation-delay: 0.2s;">
+                <div class="flex flex-col sm:flex-row items-center justify-between mb-2 sm:mb-4">
+                    <div class="w-12 h-12 sm:w-14 sm:h-14 rounded-xl flex items-center justify-center mb-2 sm:mb-0" 
+                         style="background: linear-gradient(135deg, #10b981, #059669);">
+                        <i class="bi bi-check-circle text-white text-xl sm:text-2xl"></i>
+                    </div>
+                    <div class="text-center sm:text-right w-full sm:w-auto">
+                        <div class="text-2xl sm:text-3xl lg:text-4xl font-black text-white mb-1" style="font-family: 'Orbitron', sans-serif;">{{ completed_bookings|default:0 }}</div>
+                        <div class="text-gray-400 text-xs sm:text-sm font-medium">Completed</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Hours Played -->
+            <div class="card-glow stat-card p-4 sm:p-6 animate-fade-in-up" style="animation-delay: 0.3s;">
+                <div class="flex flex-col sm:flex-row items-center justify-between mb-2 sm:mb-4">
+                    <div class="w-12 h-12 sm:w-14 sm:h-14 rounded-xl flex items-center justify-center mb-2 sm:mb-0" 
+                         style="background: linear-gradient(135deg, #f59e0b, #d97706);">
+                        <i class="bi bi-clock-history text-white text-xl sm:text-2xl"></i>
+                    </div>
+                    <div class="text-center sm:text-right w-full sm:w-auto">
+                        <div class="text-2xl sm:text-3xl lg:text-4xl font-black text-white mb-1" style="font-family: 'Orbitron', sans-serif;">{{ total_hours|default:0 }}</div>
+                        <div class="text-gray-400 text-xs sm:text-sm font-medium">Hours Played</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Total Spent -->
+            <div class="card-glow stat-card p-4 sm:p-6 animate-fade-in-up" style="animation-delay: 0.4s;">
+                <div class="flex flex-col sm:flex-row items-center justify-between mb-2 sm:mb-4">
+                    <div class="w-12 h-12 sm:w-14 sm:h-14 rounded-xl flex items-center justify-center mb-2 sm:mb-0" 
+                         style="background: linear-gradient(135deg, #a855f7, #9333ea);">
+                        <i class="bi bi-currency-rupee text-white text-xl sm:text-2xl"></i>
+                    </div>
+                    <div class="text-center sm:text-right w-full sm:w-auto">
+                        <div class="text-2xl sm:text-3xl lg:text-4xl font-black text-white mb-1" style="font-family: 'Orbitron', sans-serif;">₹{{ total_spent|floatformat:0 }}</div>
+                        <div class="text-gray-400 text-xs sm:text-sm font-medium">Total Spent</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content Grid -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-8">
+            
+            <!-- Left Column - Bookings -->
+            <div class="lg:col-span-2 space-y-4 sm:space-y-8">
+                
+                <!-- Current Active Booking -->
+                {% if current_booking %}
+                <div class="card-glow p-4 sm:p-6 animate-fade-in-up" style="animation-delay: 0.5s; border: 2px solid rgba(59, 130, 246, 0.5); animation: pulse-glow 2s ease-in-out infinite;">
+                    <div class="flex items-center gap-3 mb-4">
+                        <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center flex-shrink-0" 
+                             style="background: linear-gradient(135deg, #3b82f6, #2563eb);">
+                            <i class="bi bi-play-circle-fill text-white text-xl sm:text-2xl"></i>
+                        </div>
+                        <h2 class="text-xl sm:text-2xl font-black text-white">Active Session</h2>
+                    </div>
+                    
+                    <div class="flex flex-col sm:flex-row items-start gap-6">
+                        <div class="w-24 h-24 rounded-2xl flex items-center justify-center flex-shrink-0" 
+                             style="background: linear-gradient(135deg, #667eea, #764ba2);">
+                            {% if current_booking.game.image %}
+                            <img src="{{ current_booking.game.image.url }}" alt="{{ current_booking.game.name }}" 
+                                 class="w-full h-full object-cover rounded-2xl">
+                            {% else %}
+                            <i class="bi bi-controller text-white text-4xl"></i>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="flex-1">
+                            <h3 class="text-2xl font-black text-white mb-2">{{ current_booking.game.name }}</h3>
+                            <div class="grid grid-cols-2 gap-4 text-sm">
+                                <div>
+                                    <p class="text-gray-400">Time</p>
+                                    <p class="text-white font-semibold">{{ current_booking.game_slot.start_time|time:"h:i A" }} - {{ current_booking.game_slot.end_time|time:"h:i A" }}</p>
+                                </div>
+                                <div>
+                                    <p class="text-gray-400">Type</p>
+                                    <p class="text-white font-semibold">{{ current_booking.get_booking_type_display }}</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <span class="status-badge status-in_progress">
+                            <i class="bi bi-circle-fill" style="font-size: 0.5rem;"></i>
+                            In Progress
+                        </span>
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- Upcoming Bookings -->
+                <div class="card-glow p-4 sm:p-6 animate-fade-in-up" style="animation-delay: 0.6s;">
+                    <div class="flex items-center justify-between mb-6">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center flex-shrink-0" 
+                                 style="background: linear-gradient(135deg, #10b981, #059669);">
+                                <i class="bi bi-calendar-check text-white text-xl sm:text-2xl"></i>
+                            </div>
+                            <h2 class="text-xl sm:text-2xl font-black text-white">Upcoming Bookings</h2>
+                        </div>
+                        <a href="{% url 'booking:my_bookings' %}" class="text-indigo-400 hover:text-indigo-300 font-semibold text-xs sm:text-sm whitespace-nowrap">
+                            View All <i class="bi bi-arrow-right"></i>
+                        </a>
+                    </div>
+
+                    {% if upcoming_bookings %}
+                        <div class="space-y-4">
+                            {% for booking in upcoming_bookings %}
+                            <div class="booking-card {% if booking.status == 'CONFIRMED' or booking.status == 'IN_PROGRESS' %}cursor-pointer hover:border-indigo-500{% endif %}" 
+                                 {% if booking.status == 'CONFIRMED' or booking.status == 'IN_PROGRESS' %}
+                                 onclick="window.location.href='{% url 'booking:my_bookings' %}?highlight={{ booking.id }}'"
+                                 {% endif %}>
+                                <div class="flex flex-col sm:flex-row items-start justify-between gap-4">
+                                    <div class="flex items-start gap-4 flex-1">
+                                        <div class="w-14 h-14 sm:w-16 sm:h-16 rounded-xl flex items-center justify-center flex-shrink-0" 
+                                             style="background: linear-gradient(135deg, #667eea, #764ba2);">
+                                            {% if booking.game.image %}
+                                            <img src="{{ booking.game.image.url }}" alt="{{ booking.game.name }}" 
+                                                 class="w-full h-full object-cover rounded-xl">
+                                            {% else %}
+                                            <i class="bi bi-controller text-white text-xl sm:text-2xl"></i>
+                                            {% endif %}
+                                        </div>
+                                        
+                                        <div class="flex-1">
+                                            <h3 class="text-white font-bold text-lg mb-1">{{ booking.game.name }}</h3>
+                                            <div class="flex flex-wrap items-center gap-3 text-sm text-gray-300">
+                                                <span class="flex items-center gap-1">
+                                                    <i class="bi bi-calendar3"></i>
+                                                    {{ booking.game_slot.date|date:"M j, Y" }}
+                                                </span>
+                                                <span class="flex items-center gap-1">
+                                                    <i class="bi bi-clock"></i>
+                                                    {{ booking.game_slot.start_time|time:"h:i A" }}
+                                                </span>
+                                                <span class="flex items-center gap-1">
+                                                    <i class="bi bi-people"></i>
+                                                    {{ booking.spots_booked }} spot{{ booking.spots_booked|pluralize }}
+                                                </span>
+                                            </div>
+                                            <p class="text-gray-400 text-sm mt-2">
+                                                <span class="font-semibold text-white">₹{{ booking.total_amount|floatformat:2 }}</span>
+                                            </p>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="flex flex-col items-end gap-2">
+                                        <span class="status-badge status-{{ booking.status|lower }}">
+                                            {{ booking.get_status_display }}
+                                        </span>
+                                        {% if booking.status == 'PENDING' %}
+                                        <a href="{% url 'booking:hybrid_confirm' booking.id %}" 
+                                           class="text-yellow-400 hover:text-yellow-300 text-sm font-semibold z-10 relative"
+                                           onclick="event.stopPropagation()">
+                                            Complete Payment <i class="bi bi-arrow-right"></i>
+                                        </a>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="text-center py-12">
+                            <div class="w-20 h-20 mx-auto mb-4 rounded-2xl flex items-center justify-center" 
+                                 style="background: rgba(255, 255, 255, 0.05);">
+                                <i class="bi bi-calendar-x text-white/40 text-4xl"></i>
+                            </div>
+                            <h3 class="text-white font-bold text-lg mb-2">No Upcoming Bookings</h3>
+                            <p class="text-gray-400 mb-6">Book your next gaming session now!</p>
+                            <a href="{% url 'booking:game_selection' %}" class="btn-primary inline-flex items-center gap-2">
+                                <i class="bi bi-plus-circle"></i>
+                                Book Now
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+
+                <!-- Recent Bookings -->
+                <div class="card-glow p-4 sm:p-6 animate-fade-in-up" style="animation-delay: 0.7s;">
+                    <div class="flex items-center justify-between mb-6">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center flex-shrink-0" 
+                                 style="background: linear-gradient(135deg, #a855f7, #9333ea);">
+                                <i class="bi bi-clock-history text-white text-xl sm:text-2xl"></i>
+                            </div>
+                            <h2 class="text-xl sm:text-2xl font-black text-white">Recent Activity</h2>
+                        </div>
+                        <a href="{% url 'booking:my_bookings' %}" class="text-indigo-400 hover:text-indigo-300 font-semibold text-xs sm:text-sm whitespace-nowrap">
+                            View All <i class="bi bi-arrow-right"></i>
+                        </a>
+                    </div>
+
+                    {% if recent_bookings %}
+                        <div class="space-y-3">
+                            {% for booking in recent_bookings %}
+                            <div class="booking-card">
+                                <div class="flex items-center justify-between gap-4">
+                                    <div class="flex items-center gap-3 flex-1">
+                                        <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-lg flex items-center justify-center flex-shrink-0" 
+                                             style="background: rgba(102, 126, 234, 0.2);">
+                                            <i class="bi bi-controller text-indigo-400 text-lg sm:text-xl"></i>
+                                        </div>
+                                        
+                                        <div class="flex-1 min-w-0">
+                                            <h4 class="text-white font-semibold truncate">{{ booking.game.name }}</h4>
+                                            <p class="text-gray-400 text-sm">
+                                                {{ booking.game_slot.date|date:"M j" }} • {{ booking.game_slot.start_time|time:"h:i A" }}
+                                            </p>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="flex items-center gap-3">
+                                        <span class="text-white font-semibold text-sm">₹{{ booking.total_amount|floatformat:0 }}</span>
+                                        <span class="status-badge status-{{ booking.status|lower }}">
+                                            {{ booking.get_status_display }}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="text-center py-8">
+                            <div class="w-16 h-16 mx-auto mb-4 rounded-xl flex items-center justify-center" 
+                                 style="background: rgba(255, 255, 255, 0.05);">
+                                <i class="bi bi-inbox text-white/40 text-3xl"></i>
+                            </div>
+                            <p class="text-gray-400">No booking history yet</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Right Column - Quick Actions & Games -->
+            <div class="space-y-4 sm:space-y-8">
+                
+                <!-- Quick Actions -->
+                <div class="card-glow p-4 sm:p-6 animate-fade-in-up" style="animation-delay: 0.8s;">
+                    <div class="flex items-center gap-3 mb-6">
+                        <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center flex-shrink-0" 
+                             style="background: linear-gradient(135deg, #667eea, #764ba2);">
+                            <i class="bi bi-lightning-charge-fill text-white text-xl sm:text-2xl"></i>
+                        </div>
+                        <h2 class="text-xl sm:text-2xl font-black text-white">Quick Actions</h2>
+                    </div>
+                    
+                    <div class="space-y-3">
+                        <a href="{% url 'booking:game_selection' %}" 
+                           class="flex items-center gap-4 p-4 rounded-xl transition-all duration-300 group quick-action-card"
+                           style="background: rgba(102, 126, 234, 0.1); border: 1px solid rgba(102, 126, 234, 0.2); position: relative; z-index: 20; cursor: pointer;"
+                           onmouseover="this.style.background='rgba(102, 126, 234, 0.2)'; this.style.borderColor='rgba(102, 126, 234, 0.4)'; this.style.transform='translateY(-2px)'"
+                           onmouseout="this.style.background='rgba(102, 126, 234, 0.1)'; this.style.borderColor='rgba(102, 126, 234, 0.2)'; this.style.transform='translateY(0)'">
+                            <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-lg flex items-center justify-center flex-shrink-0" 
+                                 style="background: rgba(102, 126, 234, 0.3);">
+                                <i class="bi bi-plus-circle text-indigo-400 text-lg sm:text-2xl"></i>
+                            </div>
+                            <div class="flex-1">
+                                <p class="text-white font-semibold">New Booking</p>
+                                <p class="text-gray-400 text-sm">Reserve your slot</p>
+                            </div>
+                            <i class="bi bi-arrow-right text-indigo-400 text-xl group-hover:translate-x-1 transition-transform"></i>
+                        </a>
+
+                        <a href="{% url 'booking:my_bookings' %}" 
+                           class="flex items-center gap-4 p-4 rounded-xl transition-all duration-300 group quick-action-card"
+                           style="background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.2); position: relative; z-index: 20; cursor: pointer;"
+                           onmouseover="this.style.background='rgba(16, 185, 129, 0.2)'; this.style.borderColor='rgba(16, 185, 129, 0.4)'; this.style.transform='translateY(-2px)'"
+                           onmouseout="this.style.background='rgba(16, 185, 129, 0.1)'; this.style.borderColor='rgba(16, 185, 129, 0.2)'; this.style.transform='translateY(0)'">
+                            <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-lg flex items-center justify-center flex-shrink-0" 
+                                 style="background: rgba(16, 185, 129, 0.3);">
+                                <i class="bi bi-calendar-check text-green-400 text-lg sm:text-2xl"></i>
+                            </div>
+                            <div class="flex-1">
+                                <p class="text-white font-semibold">My Bookings</p>
+                                <p class="text-gray-400 text-sm">View & manage</p>
+                            </div>
+                            <i class="bi bi-arrow-right text-green-400 text-xl group-hover:translate-x-1 transition-transform"></i>
+                        </a>
+
+                        <a href="{% url 'contact' %}" 
+                           class="flex items-center gap-4 p-4 rounded-xl transition-all duration-300 group quick-action-card"
+                           style="background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.2); position: relative; z-index: 20; cursor: pointer;"
+                           onmouseover="this.style.background='rgba(245, 158, 11, 0.2)'; this.style.borderColor='rgba(245, 158, 11, 0.4)'; this.style.transform='translateY(-2px)'"
+                           onmouseout="this.style.background='rgba(245, 158, 11, 0.1)'; this.style.borderColor='rgba(245, 158, 11, 0.2)'; this.style.transform='translateY(0)'">
+                            <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-lg flex items-center justify-center flex-shrink-0" 
+                                 style="background: rgba(245, 158, 11, 0.3);">
+                                <i class="bi bi-headset text-yellow-400 text-lg sm:text-2xl"></i>
+                            </div>
+                            <div class="flex-1">
+                                <p class="text-white font-semibold">Support</p>
+                                <p class="text-gray-400 text-sm">Get help</p>
+                            </div>
+                            <i class="bi bi-arrow-right text-yellow-400 text-xl group-hover:translate-x-1 transition-transform"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Account Info -->
+                <div class="card-glow p-4 sm:p-6 animate-fade-in-up" style="animation-delay: 0.9s;">
+                    <div class="flex items-center gap-3 mb-6">
+                        <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center flex-shrink-0" 
+                             style="background: linear-gradient(135deg, #a855f7, #9333ea);">
+                            <i class="bi bi-person-circle text-white text-xl sm:text-2xl"></i>
+                        </div>
+                        <h2 class="text-xl sm:text-2xl font-black text-white">Account</h2>
+                    </div>
+                    
+                    <div class="space-y-4">
+                        <div class="flex justify-between items-center py-3 border-b border-white/10">
+                            <span class="text-gray-400 text-sm">Email</span>
+                            <span class="text-white text-xs sm:text-sm font-medium truncate ml-4 account-info-text">{{ user.email }}</span>
+                        </div>
+                        <div class="flex justify-between items-center py-3 border-b border-white/10">
+                            <span class="text-gray-400 text-sm">Phone</span>
+                            <span class="text-white text-xs sm:text-sm font-medium">{{ customer.phone_number|default:"Not set" }}</span>
+                        </div>
+                        <div class="flex justify-between items-center py-3 border-b border-white/10">
+                            <span class="text-gray-400 text-sm">Member Since</span>
+                            <span class="text-white text-xs sm:text-sm font-medium">{{ user.date_joined|date:"M Y" }}</span>
+                        </div>
+                        <div class="flex justify-between items-center py-3">
+                            <span class="text-gray-400">Status</span>
+                            <span class="status-badge status-confirmed">
+                                <i class="bi bi-check-circle-fill" style="font-size: 0.75rem;"></i>
+                                Active
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="mt-6 pt-6 border-t border-white/10">
+                        <a href="{% url 'account_logout' %}" 
+                           class="w-full flex items-center justify-center gap-2 py-3 rounded-lg font-semibold transition-all duration-300"
+                           style="background: rgba(239, 68, 68, 0.2); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.3); position: relative; z-index: 100; cursor: pointer;"
+                           onmouseover="this.style.background='rgba(239, 68, 68, 0.3)'; this.style.transform='translateY(-2px)'"
+                           onmouseout="this.style.background='rgba(239, 68, 68, 0.2)'; this.style.transform='translateY(0)'">
+                            <i class="bi bi-box-arrow-right"></i>
+                            Sign Out
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Available Games -->
+                <div class="card-glow p-4 sm:p-6 animate-fade-in-up" style="animation-delay: 1s;">
+                    <div class="flex items-center gap-3 mb-6">
+                        <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center flex-shrink-0" 
+                             style="background: linear-gradient(135deg, #f59e0b, #d97706);">
+                            <i class="bi bi-controller text-white text-xl sm:text-2xl"></i>
+                        </div>
+                        <h2 class="text-xl sm:text-2xl font-black text-white">Available Games</h2>
+                    </div>
+                    
+                    {% if available_games %}
+                        <div class="space-y-3 max-h-96 custom-scrollbar" style="padding: 0.5rem 0.25rem; overflow-y: auto; overflow-x: visible;">
+                            {% for game in available_games %}
+                            <a href="{% url 'booking:game_detail' game.id %}" class="game-card block">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-14 h-14 rounded-lg flex items-center justify-center flex-shrink-0" 
+                                         style="background: linear-gradient(135deg, #667eea, #764ba2);">
+                                        {% if game.image %}
+                                        <img src="{{ game.image.url }}" alt="{{ game.name }}" 
+                                             class="w-full h-full object-cover rounded-lg">
+                                        {% else %}
+                                        <i class="bi bi-trophy-fill text-white text-xl"></i>
+                                        {% endif %}
+                                    </div>
+                                    
+                                    <div class="flex-1 min-w-0">
+                                        <h4 class="text-white font-semibold truncate">{{ game.name }}</h4>
+                                        <div class="flex items-center gap-2 text-sm text-gray-400">
+                                            <span class="flex items-center gap-1">
+                                                <i class="bi bi-people"></i>
+                                                {{ game.capacity }}
+                                            </span>
+                                            <span>•</span>
+                                            <span class="flex items-center gap-1">
+                                                <i class="bi bi-currency-rupee"></i>
+                                                {{ game.private_price|floatformat:0 }}
+                                            </span>
+                                        </div>
+                                    </div>
+                                    
+                                    {% if game.is_active %}
+                                    <span class="flex items-center gap-1 text-green-400 text-sm font-semibold">
+                                        <i class="bi bi-circle-fill" style="font-size: 0.5rem;"></i>
+                                        Available
+                                    </span>
+                                    {% else %}
+                                    <span class="flex items-center gap-1 text-red-400 text-sm font-semibold">
+                                        <i class="bi bi-circle-fill" style="font-size: 0.5rem;"></i>
+                                        Offline
+                                    </span>
+                                    {% endif %}
+                                </div>
+                            </a>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="text-center py-8">
+                            <div class="w-16 h-16 mx-auto mb-4 rounded-xl flex items-center justify-center" 
+                                 style="background: rgba(255, 255, 255, 0.05);">
+                                <i class="bi bi-controller text-white/40 text-3xl"></i>
+                            </div>
+                            <p class="text-gray-400">No games available</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Custom Scrollbar */
+    .custom-scrollbar::-webkit-scrollbar {
+        width: 6px;
+    }
+    
+    .custom-scrollbar::-webkit-scrollbar-track {
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 10px;
+    }
+    
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+        background: rgba(102, 126, 234, 0.5);
+        border-radius: 10px;
+    }
+    
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+        background: rgba(102, 126, 234, 0.7);
+    }
+    
+    /* Fade in animation */
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    .animate-fade-in-up {
+        animation: fadeInUp 0.6s ease-out forwards;
+        opacity: 0;
+    }
+</style>
+{% endblock %}

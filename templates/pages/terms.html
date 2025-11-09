@@ -1,0 +1,446 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}
+  Terms & Conditions - TapNex Gaming Cafe
+{% endblock %}
+
+{% block extra_css %}
+  <style>
+    :root {
+        --glass-bg: rgba(255, 255, 255, 0.05);
+        --glass-border: rgba(255, 255, 255, 0.1);
+        --primary: #6f42c1;
+        --secondary: #e83e8c;
+        --accent-cyan: #00d4ff;
+        --text-primary: #ffffff;
+        --text-secondary: #b8b9ba;
+        --bg-dark: #121212;
+    }
+    
+    .legal-hero {
+        background: linear-gradient(135deg, #111827 0%, #1a202e 100%);
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .legal-hero::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: 
+            radial-gradient(circle at 20% 50%, rgba(168, 237, 234, 0.1) 0%, transparent 50%),
+            radial-gradient(circle at 80% 80%, rgba(254, 214, 227, 0.1) 0%, transparent 50%);
+    }
+    
+    .legal-content {
+        max-width: 900px;
+        margin: 0 auto;
+    }
+    
+    .legal-section {
+        background: var(--glass-bg);
+        backdrop-filter: blur(20px);
+        border: 1px solid var(--glass-border);
+        border-radius: 1rem;
+        padding: 2rem;
+        margin-bottom: 1.5rem;
+        transition: all 0.3s ease;
+    }
+    
+    .legal-section:hover {
+        border-color: rgba(168, 237, 234, 0.4);
+        transform: translateX(5px);
+    }
+    
+    .section-number {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 2.5rem;
+        height: 2.5rem;
+        background: linear-gradient(135deg, var(--primary), var(--secondary));
+        border-radius: 0.5rem;
+        color: white;
+        font-weight: 700;
+        margin-bottom: 1.5rem;
+        flex-shrink: 0;
+    }
+    
+    .subsection-title {
+        color: var(--accent-cyan);
+        font-weight: 600;
+        margin-top: 1.5rem;
+        margin-bottom: 1rem;
+    }
+    
+    .legal-list {
+        list-style: none;
+        padding-left: 0;
+    }
+    
+    .legal-list li {
+        position: relative;
+        padding-left: 2rem;
+        margin-bottom: 0.75rem;
+        color: var(--text-secondary);
+    }
+    
+    .legal-list li::before {
+        content: '✓';
+        position: absolute;
+        left: 0;
+        color: var(--accent-cyan);
+        font-weight: 700;
+    }
+    
+    .highlight-box {
+        background: linear-gradient(135deg, rgba(168, 237, 234, 0.1), rgba(254, 214, 227, 0.1));
+        border: 1px solid rgba(168, 237, 234, 0.3);
+        border-radius: 0.75rem;
+        padding: 1.5rem;
+        margin: 1.5rem 0;
+        transition: all 0.3s ease;
+    }
+
+    .highlight-box:hover {
+        border-color: rgba(168, 237, 234, 0.5);
+        background: linear-gradient(135deg, rgba(168, 237, 234, 0.15), rgba(254, 214, 227, 0.15));
+    }
+    
+    .toc {
+        position: sticky;
+        top: 2rem;
+        background: var(--glass-bg);
+        backdrop-filter: blur(20px);
+        border: 1px solid var(--glass-border);
+        border-radius: 1rem;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+    }
+    
+    .toc h4 {
+        padding-bottom: 1rem;
+        border-bottom: 2px solid rgba(168, 237, 234, 0.2);
+        margin-bottom: 1rem;
+    }
+    
+    .toc-link {
+        display: block;
+        padding: 0.75rem 1rem;
+        margin-bottom: 0.5rem;
+        color: #b8b9ba !important;
+        text-decoration: none;
+        border-left: 3px solid transparent;
+        border-radius: 0.5rem;
+        transition: all 0.3s ease;
+        font-size: 0.95rem;
+    }
+    
+    .toc-link:hover {
+        border-left-color: #00d4ff;
+        color: #ffffff !important;
+        background: rgba(0, 212, 255, 0.1);
+        transform: translateX(5px);
+    }
+    
+    .text-light-gray {
+        color: #e5e5e5 !important;
+    }
+    
+    .gradient-text {
+        background: linear-gradient(135deg, #00d4ff, #e83e8c);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+    
+    .hover-glow:hover {
+        text-shadow: 0 0 8px currentColor;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+  <!-- Hero Section -->
+  <section class="legal-hero py-20">
+    <div class="container">
+      <div class="text-center" style="position: relative; z-index: 1;">
+        <div class="mb-6">
+          <div class="inline-flex items-center justify-center w-20 h-20 rounded-full" style="background: rgba(168, 237, 234, 0.2); backdrop-filter: blur(10px); border: 2px solid rgba(168, 237, 234, 0.4);">
+            <i class="bi bi-file-text text-cyan" style="font-size: 2.5rem;"></i>
+          </div>
+        </div>
+        <h1 class="display-3 fw-bold text-white mb-4" data-scroll-reveal>Terms & Conditions</h1>
+        <p class="lead text-white mb-3" style="opacity: 0.9;" data-scroll-reveal data-scroll-delay="100">Please read these terms carefully before using our services</p>
+        <p class="text-white" style="opacity: 0.8; font-size: 0.875rem;" data-scroll-reveal data-scroll-delay="150">Last Updated: November 1, 2025</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Main Content -->
+  <section class="py-5 bg-dark">
+    <div class="container py-5">
+      <div class="row g-5">
+        <!-- Table of Contents -->
+        <div class="col-lg-4">
+          <div class="toc" data-scroll-reveal>
+            <h4 class="text-white mb-4"><i class="bi bi-list-ul me-2"></i>Table of Contents</h4>
+            <nav>
+              <a href="#section1" class="toc-link">1. Acceptance of Terms</a>
+              <a href="#section2" class="toc-link">2. Service Description</a>
+              <a href="#section3" class="toc-link">3. User Accounts</a>
+              <a href="#section4" class="toc-link">4. Booking Policy</a>
+              <a href="#section5" class="toc-link">5. Cancellation Policy</a>
+              <a href="#section6" class="toc-link">6. User Conduct</a>
+              <a href="#section7" class="toc-link">7. Prohibited Activities</a>
+              <a href="#section8" class="toc-link">8. Limitation of Liability</a>
+              <a href="#section9" class="toc-link">9. Intellectual Property</a>
+              <a href="#section10" class="toc-link">10. Privacy</a>
+              <a href="#section11" class="toc-link">11. Changes to Terms</a>
+              <a href="#section12" class="toc-link">12. Termination</a>
+              <a href="#section13" class="toc-link">13. Governing Law</a>
+              <a href="#section14" class="toc-link">14. Contact Information</a>
+            </nav>
+          </div>
+        </div>
+
+        <!-- Content Sections -->
+        <div class="col-lg-8">
+          <div class="legal-content">
+            <!-- Section 1 -->
+            <div id="section1" class="legal-section" data-scroll-reveal>
+              <div>
+                <span class="section-number">1</span>
+                <div>
+                  <h3 class="text-white mb-4">Acceptance of Terms</h3>
+                  <p class="text-light-gray">
+                    By accessing and using TapNex Gaming Cafe booking platform at <span class="gradient-text fw-semibold">forge.tapnex.tech</span>, you accept and agree to be bound by these Terms and Conditions. If you do not agree to these terms, please do not use our services.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Section 2 -->
+            <div id="section2" class="legal-section" data-scroll-reveal>
+              <div>
+                <span class="section-number">2</span>
+                <div>
+                  <h3 class="text-white mb-4">Service Description</h3>
+                  <p class="text-light-gray mb-3">TapNex provides an online booking platform for gaming cafe slots, including:</p>
+                  <ul class="legal-list">
+                    <li>Online reservation of gaming stations and slots</li>
+                    <li>Selection of gaming titles and time slots</li>
+                    <li>Private and shared booking options</li>
+                    <li>Secure online payment processing</li>
+                    <li>Booking management and notifications</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+
+            <!-- Section 3 -->
+            <div id="section3" class="legal-section" data-scroll-reveal>
+              <div>
+                <span class="section-number">3</span>
+                <div>
+                  <h3 class="text-white mb-4">User Accounts</h3>
+                  <p class="text-light-gray mb-3">To use our booking services, you must:</p>
+                  <ul class="legal-list">
+                    <li>Create an account with accurate information</li>
+                    <li>Be at least 13 years old (or have parental consent)</li>
+                    <li>Maintain the security of your account credentials</li>
+                    <li>Accept responsibility for all activities under your account</li>
+                    <li>Notify us immediately of any unauthorized use</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+
+            <!-- Section 4 -->
+            <div id="section4" class="legal-section" data-scroll-reveal>
+              <div>
+                <span class="section-number">4</span>
+                <div>
+                  <h3 class="text-white mb-4">Booking Policy</h3>
+
+                  <h5 class="subsection-title">Reservation</h5>
+                  <ul class="legal-list mb-4">
+                    <li>Bookings are subject to availability</li>
+                    <li>You must arrive within 15 minutes of your scheduled time</li>
+                    <li>Late arrivals may result in reduced gaming time</li>
+                    <li>No-shows may result in forfeiture of booking</li>
+                  </ul>
+
+                  <h5 class="subsection-title">Payment</h5>
+                  <ul class="legal-list">
+                    <li>All payments must be made online through Razorpay</li>
+                    <li>Prices are displayed in Indian Rupees (₹)</li>
+                    <li>Payment must be completed at the time of booking</li>
+                    <li>All prices include applicable taxes</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+
+            <!-- Section 5 -->
+            <div id="section5" class="legal-section" data-scroll-reveal>
+              <div>
+                <span class="section-number">5</span>
+                <div>
+                  <h3 class="text-white mb-4">Cancellation Policy</h3>
+                  <p class="text-light-gray">
+                    Please refer to our <a href="{% url 'refund_policy' %}" class="text-cyan text-decoration-none hover-glow">Refund & Cancellation Policy</a> for detailed information about cancellations and refunds.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Section 6 -->
+            <div id="section6" class="legal-section" data-scroll-reveal>
+              <div>
+                <span class="section-number">6</span>
+                <div>
+                  <h3 class="text-white mb-4">User Conduct</h3>
+                  <p class="text-light-gray mb-3">While using our platform and facilities, you agree to:</p>
+                  <ul class="legal-list">
+                    <li>Respect other users and staff</li>
+                    <li>Use equipment properly and report any damage</li>
+                    <li>Not engage in any illegal activities</li>
+                    <li>Not harass, abuse, or harm others</li>
+                    <li>Follow all cafe rules and guidelines</li>
+                    <li>Not resell or transfer bookings without permission</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+
+            <!-- Section 7 -->
+            <div id="section7" class="legal-section" data-scroll-reveal>
+              <div>
+                <span class="section-number">7</span>
+                <div>
+                  <h3 class="text-white mb-4">Prohibited Activities</h3>
+                  <p class="text-light-gray mb-3">You may not:</p>
+                  <ul class="legal-list">
+                    <li>Use the platform for fraudulent purposes</li>
+                    <li>Attempt to gain unauthorized access to our systems</li>
+                    <li>Upload malicious code or viruses</li>
+                    <li>Scrape or automatically collect data from our platform</li>
+                    <li>Impersonate others or provide false information</li>
+                    <li>Interfere with the proper functioning of the platform</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+
+            <!-- Section 8 -->
+            <div id="section8" class="legal-section" data-scroll-reveal>
+              <div>
+                <span class="section-number">8</span>
+                <div>
+                  <h3 class="text-white mb-4">Limitation of Liability</h3>
+                  <p class="text-light-gray mb-3">TapNex Gaming Cafe is not liable for:</p>
+                  <ul class="legal-list">
+                    <li>Loss of personal property</li>
+                    <li>Technical issues or service interruptions</li>
+                    <li>Third-party conduct or content</li>
+                    <li>Any indirect, incidental, or consequential damages</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+
+            <!-- Section 9 -->
+            <div id="section9" class="legal-section" data-scroll-reveal>
+              <div>
+                <span class="section-number">9</span>
+                <div>
+                  <h3 class="text-white mb-4">Intellectual Property</h3>
+                  <p class="text-light-gray">All content on the TapNex platform, including logos, text, graphics, and software, is the property of TapNex Technologies or its licensors and is protected by copyright and trademark laws.</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Section 10 -->
+            <div id="section10" class="legal-section" data-scroll-reveal>
+              <div>
+                <span class="section-number">10</span>
+                <div>
+                  <h3 class="text-white mb-4">Privacy</h3>
+                  <p class="text-light-gray">
+                    Your privacy is important to us. Please review our <a href="{% url 'privacy' %}" class="text-cyan text-decoration-none hover-glow">Privacy Policy</a> to understand how we collect, use, and protect your information.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Section 11 -->
+            <div id="section11" class="legal-section" data-scroll-reveal>
+              <div>
+                <span class="section-number">11</span>
+                <div>
+                  <h3 class="text-white mb-4">Changes to Terms</h3>
+                  <p class="text-light-gray">We reserve the right to modify these terms at any time. Changes will be effective immediately upon posting. Your continued use of the platform constitutes acceptance of the modified terms.</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Section 12 -->
+            <div id="section12" class="legal-section" data-scroll-reveal>
+              <div>
+                <span class="section-number">12</span>
+                <div>
+                  <h3 class="text-white mb-4">Termination</h3>
+                  <p class="text-light-gray">We reserve the right to suspend or terminate your account and access to our services at any time, without notice, for conduct that we believe violates these Terms or is harmful to other users, us, or third parties, or for any other reason.</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Section 13 -->
+            <div id="section13" class="legal-section" data-scroll-reveal>
+              <div>
+                <span class="section-number">13</span>
+                <div>
+                  <h3 class="text-white mb-4">Governing Law</h3>
+                  <p class="text-light-gray">These Terms shall be governed by and construed in accordance with the laws of India. Any disputes arising from these terms will be subject to the exclusive jurisdiction of the courts in India.</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Section 14 -->
+            <div id="section14" class="legal-section" data-scroll-reveal>
+              <div>
+                <span class="section-number">14</span>
+                <div>
+                  <h3 class="text-white mb-4">Contact Information</h3>
+                  <p class="text-light-gray mb-4">For questions about these Terms and Conditions, please contact:</p>
+                  <div class="highlight-box">
+                    <h5 class="text-white mb-2">TapNex Technologies</h5>
+                    <p class="text-light-gray mb-3">A brand of NEXGEN FC</p>
+                    <p class="mb-2">
+                      <i class="bi bi-envelope text-cyan me-2"></i>
+                      <a href="mailto:info@tapnex.tech" class="text-cyan text-decoration-none hover-glow">info@tapnex.tech</a>
+                    </p>
+                    <p class="mb-0">
+                      <i class="bi bi-globe text-cyan me-2"></i>
+                      <a href="https://forge.tapnex.tech" class="text-cyan text-decoration-none hover-glow">forge.tapnex.tech</a>
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Back to Home -->
+            <div class="text-center mt-5">
+              <a href="{% url 'home' %}" class="btn btn-outline-primary btn-lg"><i class="bi bi-arrow-left me-2"></i>Back to Home</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+{% endblock %}

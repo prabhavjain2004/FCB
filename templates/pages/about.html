@@ -1,0 +1,607 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block title %}About Us - TapNex Gaming Cafe{% endblock %}
+
+{% block extra_css %}
+<style>
+    .about-hero {
+        background: linear-gradient(135deg, #111827 0%, #1a202e 100%);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .about-hero::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: 
+            radial-gradient(circle at 20% 50%, rgba(168, 237, 234, 0.1) 0%, transparent 50%),
+            radial-gradient(circle at 80% 80%, rgba(254, 214, 227, 0.1) 0%, transparent 50%);
+        animation: gradient-shift 15s ease infinite;
+    }
+
+    @keyframes gradient-shift {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.8; }
+    }
+
+    .mission-card {
+        background: var(--glass-bg);
+        backdrop-filter: blur(20px);
+        border: 1px solid var(--glass-border);
+        border-radius: 1rem;
+        padding: 2.5rem;
+        margin-bottom: 2rem;
+        transition: all 0.3s ease;
+        height: 100%;
+    }
+
+    .mission-card:hover {
+        transform: translateY(-5px);
+        border-color: rgba(168, 237, 234, 0.4);
+    }
+
+    .mission-icon {
+        width: 4rem;
+        height: 4rem;
+        background: linear-gradient(135deg, #e94560, #00d4aa);
+        border-radius: 1rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 1.5rem;
+    }
+
+    .value-card {
+        background: var(--glass-bg);
+        backdrop-filter: blur(20px);
+        border: 1px solid var(--glass-border);
+        border-radius: 1rem;
+        padding: 2rem;
+        text-align: center;
+        margin-bottom: 1.5rem;
+        transition: all 0.3s ease;
+        height: 100%;
+    }
+
+    .value-card:hover {
+        transform: translateY(-5px);
+        border-color: rgba(168, 237, 234, 0.4);
+    }
+
+    .value-icon {
+        width: 3.5rem;
+        height: 3.5rem;
+        background: rgba(0, 212, 255, 0.15);
+        border: 1px solid rgba(0, 212, 255, 0.3);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 1.5rem;
+        transition: all 0.3s ease;
+    }
+
+    .value-card:hover .value-icon {
+        background: rgba(0, 212, 255, 0.25);
+        border-color: rgba(0, 212, 255, 0.5);
+        transform: scale(1.1);
+    }
+
+    .feature-highlight {
+        background: linear-gradient(135deg, rgba(168, 237, 234, 0.1), rgba(254, 214, 227, 0.1));
+        border: 1px solid rgba(168, 237, 234, 0.3);
+        border-radius: 1rem;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+        transition: all 0.3s ease;
+    }
+
+    .feature-highlight:hover {
+        border-color: rgba(168, 237, 234, 0.5);
+        background: linear-gradient(135deg, rgba(168, 237, 234, 0.15), rgba(254, 214, 227, 0.15));
+        transform: translateX(5px);
+    }
+
+    .stats-counter {
+        font-size: 3rem;
+        font-weight: 700;
+        background: linear-gradient(135deg, #00d4ff, #e83e8c);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .text-light-gray {
+        color: #e5e5e5 !important;
+    }
+
+    .gradient-text {
+        background: linear-gradient(135deg, #00d4ff, #e83e8c);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .text-cyan {
+        color: #00d4ff !important;
+    }
+
+    .text-purple {
+        color: #e83e8c !important;
+    }
+
+    .glass-card {
+        background: var(--glass-bg);
+        backdrop-filter: blur(20px);
+        border: 1px solid var(--glass-border);
+        border-radius: 1rem;
+        padding: 2rem;
+        text-align: center;
+        transition: all 0.3s ease;
+        height: 100%;
+    }
+
+    .glass-card:hover {
+        transform: translateY(-5px);
+        border-color: rgba(168, 237, 234, 0.4);
+    }
+
+    .icon-box {
+        width: 3.5rem;
+        height: 3.5rem;
+        border-radius: 0.75rem;
+        background: linear-gradient(135deg, #e94560, #00d4aa);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .icon-box i {
+        font-size: 1.75rem;
+        color: white;
+    }
+
+    .stats-container {
+        display: flex;
+        justify-content: space-around;
+        gap: 2rem;
+        flex-wrap: wrap;
+    }
+
+    .stat-item {
+        text-align: center;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="about-hero py-20">
+    <div class="container">
+        <div class="text-center" style="position: relative; z-index: 1;">
+            <div class="mb-6">
+                <div class="inline-flex items-center justify-center w-20 h-20 rounded-full"
+                     style="background: rgba(168, 237, 234, 0.2); backdrop-filter: blur(10px); border: 2px solid rgba(168, 237, 234, 0.4);">
+                    <i class="bi bi-info-circle text-cyan" style="font-size: 2.5rem;"></i>
+                </div>
+            </div>
+            <h1 class="display-3 fw-bold text-white mb-4" data-scroll-reveal>About TapNex</h1>
+            <p class="lead text-white mb-5" style="max-width: 600px; margin: 0 auto; opacity: 0.9;" data-scroll-reveal data-scroll-delay="100">
+                Revolutionizing the gaming cafe experience across India
+            </p>
+            <div class="d-flex justify-content-center gap-3" data-scroll-reveal data-scroll-delay="200">
+                <a href="#mission" class="btn btn-light btn-lg">
+                    <i class="bi bi-arrow-down me-2"></i>Learn More
+                </a>
+                <a href="{% url 'booking:game_selection' %}" class="btn btn-outline-light btn-lg">
+                    <i class="bi bi-controller me-2"></i>Book Now
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Who We Are -->
+<section class="py-5 bg-dark">
+    <div class="container py-5">
+        <div class="row align-items-center g-5">
+            <div class="col-lg-6" data-scroll-reveal>
+                <h2 class="display-5 fw-bold text-white mb-4">Who We Are</h2>
+                <p class="text-light-gray mb-4">
+                    Welcome to <span class="gradient-text fw-bold">TapNex Gaming Cafe</span>, India's premier gaming slot booking platform. We're transforming how gamers connect with gaming cafes across the country.
+                </p>
+                <p class="text-light-gray mb-4">
+                    Built on cutting-edge technology and powered by passion for gaming, TapNex provides a seamless, hassle-free booking experience for gamers and cafe owners alike. Our platform leverages real-time slot management, secure payments, and instant notifications to create the ultimate gaming experience.
+                </p>
+                <div class="stats-container">
+                    <div class="stat-item">
+                        <div class="stats-counter">1000+</div>
+                        <p class="text-muted mb-0">Bookings</p>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stats-counter">500+</div>
+                        <p class="text-muted mb-0">Users</p>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stats-counter">99%</div>
+                        <p class="text-muted mb-0">Satisfaction</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6" data-scroll-reveal data-scroll-delay="100">
+                <div class="position-relative">
+                    <div class="glass-card p-5 text-center">
+                        <i class="bi bi-controller gradient-text" style="font-size: 8rem;"></i>
+                        <h3 class="text-white mt-4 mb-3">Gaming Simplified</h3>
+                        <p class="text-light-gray">
+                            Book your favorite games in seconds, pay securely, and show up ready to play. No hassles, no waiting.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Mission & Vision -->
+<section id="mission" class="py-5" style="background: linear-gradient(180deg, #0d0d1a 0%, #1a0d2e 100%);">
+    <div class="container py-5">
+        <div class="text-center mb-5" data-scroll-reveal>
+            <h2 class="display-5 fw-bold text-white mb-3">Mission & Vision</h2>
+            <p class="text-light-gray">Driving the future of gaming cafes</p>
+        </div>
+        
+        <div class="row g-4">
+            <!-- Mission -->
+            <div class="col-md-6" data-scroll-reveal>
+                <div class="mission-card h-100">
+                    <div class="mission-icon">
+                        <i class="bi bi-bullseye text-white" style="font-size: 2rem;"></i>
+                    </div>
+                    <h3 class="text-white mb-3">Our Mission</h3>
+                    <p class="text-light-gray mb-4">
+                        To revolutionize the gaming cafe industry by providing an intuitive, reliable, and efficient booking platform that empowers gamers and cafe owners.
+                    </p>
+                    <ul class="list-unstyled">
+                        <li class="mb-2 text-light-gray">
+                            <i class="bi bi-check-circle text-success me-2"></i>
+                            Simplify gaming cafe bookings
+                        </li>
+                        <li class="mb-2 text-light-gray">
+                            <i class="bi bi-check-circle text-success me-2"></i>
+                            Empower cafe owners with tools
+                        </li>
+                        <li class="mb-2 text-light-gray">
+                            <i class="bi bi-check-circle text-success me-2"></i>
+                            Build a thriving gaming community
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            
+            <!-- Vision -->
+            <div class="col-md-6" data-scroll-reveal data-scroll-delay="100">
+                <div class="mission-card h-100">
+                    <div class="mission-icon">
+                        <i class="bi bi-eye text-white" style="font-size: 2rem;"></i>
+                    </div>
+                    <h3 class="text-white mb-3">Our Vision</h3>
+                    <p class="text-light-gray mb-4">
+                        To become the go-to platform for gaming cafe bookings across India, creating a thriving ecosystem for the gaming community.
+                    </p>
+                    <ul class="list-unstyled">
+                        <li class="mb-2 text-light-gray">
+                            <i class="bi bi-check-circle text-success me-2"></i>
+                            Pan-India gaming network
+                        </li>
+                        <li class="mb-2 text-light-gray">
+                            <i class="bi bi-check-circle text-success me-2"></i>
+                            Seamless booking experience
+                        </li>
+                        <li class="mb-2 text-light-gray">
+                            <i class="bi bi-check-circle text-success me-2"></i>
+                            Community-driven platform
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- What We Offer -->
+<section class="py-5 bg-dark">
+    <div class="container py-5">
+        <div class="text-center mb-5" data-scroll-reveal>
+            <h2 class="display-5 fw-bold text-white mb-3">What We Offer</h2>
+            <p class="text-light-gray">Comprehensive solutions for gamers and cafe owners</p>
+        </div>
+        
+        <div class="row g-5">
+            <!-- For Gamers -->
+            <div class="col-lg-6" data-scroll-reveal>
+                <div class="glass-card p-4">
+                    <div class="d-flex align-items-center mb-4">
+                        <div class="flex-shrink-0">
+                            <div class="icon-box gradient-bg">
+                                <i class="bi bi-controller"></i>
+                            </div>
+                        </div>
+                        <div class="ms-3">
+                            <h3 class="text-white mb-0">For Gamers</h3>
+                            <p class="text-muted mb-0">Ultimate gaming experience</p>
+                        </div>
+                    </div>
+                    
+                    <div class="feature-highlight">
+                        <div class="d-flex align-items-start">
+                            <i class="bi bi-clock-history text-cyan me-3 mt-1" style="font-size: 1.5rem;"></i>
+                            <div>
+                                <h5 class="text-white mb-2">Real-Time Booking</h5>
+                                <p class="text-light-gray mb-0">
+                                    Instant slot booking with live availability updates
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="feature-highlight">
+                        <div class="d-flex align-items-start">
+                            <i class="bi bi-shield-check text-cyan me-3 mt-1" style="font-size: 1.5rem;"></i>
+                            <div>
+                                <h5 class="text-white mb-2">Secure Payments</h5>
+                                <p class="text-light-gray mb-0">
+                                    Safe transactions via Razorpay with multiple payment options
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="feature-highlight">
+                        <div class="d-flex align-items-start">
+                            <i class="bi bi-google text-cyan me-3 mt-1" style="font-size: 1.5rem;"></i>
+                            <div>
+                                <h5 class="text-white mb-2">Easy Login</h5>
+                                <p class="text-light-gray mb-0">
+                                    Quick Google OAuth login - no password hassles
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="feature-highlight">
+                        <div class="d-flex align-items-start">
+                            <i class="bi bi-speedometer2 text-cyan me-3 mt-1" style="font-size: 1.5rem;"></i>
+                            <div>
+                                <h5 class="text-white mb-2">Personal Dashboard</h5>
+                                <p class="text-light-gray mb-0">
+                                    Track bookings, manage sessions, view history
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- For Cafe Owners -->
+            <div class="col-lg-6" data-scroll-reveal data-scroll-delay="100">
+                <div class="glass-card p-4">
+                    <div class="d-flex align-items-center mb-4">
+                        <div class="flex-shrink-0">
+                            <div class="icon-box gradient-bg">
+                                <i class="bi bi-shop"></i>
+                            </div>
+                        </div>
+                        <div class="ms-3">
+                            <h3 class="text-white mb-0">For Cafe Owners</h3>
+                            <p class="text-muted mb-0">Powerful management tools</p>
+                        </div>
+                    </div>
+                    
+                    <div class="feature-highlight">
+                        <div class="d-flex align-items-start">
+                            <i class="bi bi-gear text-purple me-3 mt-1" style="font-size: 1.5rem;"></i>
+                            <div>
+                                <h5 class="text-white mb-2">Slot Management</h5>
+                                <p class="text-light-gray mb-0">
+                                    Automated slot generation and custom scheduling
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="feature-highlight">
+                        <div class="d-flex align-items-start">
+                            <i class="bi bi-graph-up text-purple me-3 mt-1" style="font-size: 1.5rem;"></i>
+                            <div>
+                                <h5 class="text-white mb-2">Analytics Dashboard</h5>
+                                <p class="text-light-gray mb-0">
+                                    Real-time insights, revenue tracking, booking trends
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="feature-highlight">
+                        <div class="d-flex align-items-start">
+                            <i class="bi bi-qr-code text-purple me-3 mt-1" style="font-size: 1.5rem;"></i>
+                            <div>
+                                <h5 class="text-white mb-2">QR Verification</h5>
+                                <p class="text-light-gray mb-0">
+                                    Instant booking verification with QR code scanning
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="feature-highlight">
+                        <div class="d-flex align-items-start">
+                            <i class="bi bi-bell text-purple me-3 mt-1" style="font-size: 1.5rem;"></i>
+                            <div>
+                                <h5 class="text-white mb-2">Notifications</h5>
+                                <p class="text-light-gray mb-0">
+                                    Telegram alerts for bookings, cancellations, payments
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Core Values -->
+<section class="py-5" style="background: linear-gradient(180deg, #1a0d2e 0%, #0d0d1a 100%);">
+    <div class="container py-5">
+        <div class="text-center mb-5" data-scroll-reveal>
+            <h2 class="display-5 fw-bold text-white mb-3">Our Core Values</h2>
+            <p class="text-light-gray">Principles that guide everything we do</p>
+        </div>
+        
+        <div class="row g-4">
+            <div class="col-md-4" data-scroll-reveal>
+                <div class="value-card">
+                    <div class="value-icon">
+                        <i class="bi bi-lightning-charge text-cyan" style="font-size: 1.5rem;"></i>
+                    </div>
+                    <h4 class="text-white mb-3">Innovation</h4>
+                    <p class="text-light-gray mb-0">
+                        Constantly evolving with cutting-edge technology
+                    </p>
+                </div>
+            </div>
+            
+            <div class="col-md-4" data-scroll-reveal data-scroll-delay="100">
+                <div class="value-card">
+                    <div class="value-icon">
+                        <i class="bi bi-shield-check text-cyan" style="font-size: 1.5rem;"></i>
+                    </div>
+                    <h4 class="text-white mb-3">Reliability</h4>
+                    <p class="text-light-gray mb-0">
+                        Dependable service you can count on
+                    </p>
+                </div>
+            </div>
+            
+            <div class="col-md-4" data-scroll-reveal data-scroll-delay="200">
+                <div class="value-card">
+                    <div class="value-icon">
+                        <i class="bi bi-people text-cyan" style="font-size: 1.5rem;"></i>
+                    </div>
+                    <h4 class="text-white mb-3">Community</h4>
+                    <p class="text-light-gray mb-0">
+                        Building connections in the gaming world
+                    </p>
+                </div>
+            </div>
+            
+            <div class="col-md-4" data-scroll-reveal>
+                <div class="value-card">
+                    <div class="value-icon">
+                        <i class="bi bi-star text-cyan" style="font-size: 1.5rem;"></i>
+                    </div>
+                    <h4 class="text-white mb-3">Excellence</h4>
+                    <p class="text-light-gray mb-0">
+                        Committed to quality in every detail
+                    </p>
+                </div>
+            </div>
+            
+            <div class="col-md-4" data-scroll-reveal data-scroll-delay="100">
+                <div class="value-card">
+                    <div class="value-icon">
+                        <i class="bi bi-heart text-cyan" style="font-size: 1.5rem;"></i>
+                    </div>
+                    <h4 class="text-white mb-3">Passion</h4>
+                    <p class="text-light-gray mb-0">
+                        Fueled by love for gaming culture
+                    </p>
+                </div>
+            </div>
+            
+            <div class="col-md-4" data-scroll-reveal data-scroll-delay="200">
+                <div class="value-card">
+                    <div class="value-icon">
+                        <i class="bi bi-rocket text-cyan" style="font-size: 1.5rem;"></i>
+                    </div>
+                    <h4 class="text-white mb-3">Growth</h4>
+                    <p class="text-light-gray mb-0">
+                        Always improving, always advancing
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Technology Stack -->
+<section class="py-5 bg-dark">
+    <div class="container py-5">
+        <div class="text-center mb-5" data-scroll-reveal>
+            <h2 class="display-5 fw-bold text-white mb-3">Built with Modern Tech</h2>
+            <p class="text-light-gray">Powered by industry-leading technologies</p>
+        </div>
+        
+        <div class="row g-4">
+            <div class="col-md-3 col-sm-6" data-scroll-reveal>
+                <div class="glass-card p-4 text-center h-100">
+                    <i class="bi bi-filetype-py gradient-text" style="font-size: 3rem;"></i>
+                    <h5 class="text-white mt-3 mb-2">Django</h5>
+                    <p class="text-muted mb-0">Backend Framework</p>
+                </div>
+            </div>
+            
+            <div class="col-md-3 col-sm-6" data-scroll-reveal data-scroll-delay="50">
+                <div class="glass-card p-4 text-center h-100">
+                    <i class="bi bi-database gradient-text" style="font-size: 3rem;"></i>
+                    <h5 class="text-white mt-3 mb-2">PostgreSQL</h5>
+                    <p class="text-muted mb-0">Database</p>
+                </div>
+            </div>
+            
+            <div class="col-md-3 col-sm-6" data-scroll-reveal data-scroll-delay="100">
+                <div class="glass-card p-4 text-center h-100">
+                    <i class="bi bi-credit-card gradient-text" style="font-size: 3rem;"></i>
+                    <h5 class="text-white mt-3 mb-2">Razorpay</h5>
+                    <p class="text-muted mb-0">Payments</p>
+                </div>
+            </div>
+            
+            <div class="col-md-3 col-sm-6" data-scroll-reveal data-scroll-delay="150">
+                <div class="glass-card p-4 text-center h-100">
+                    <i class="bi bi-telegram gradient-text" style="font-size: 3rem;"></i>
+                    <h5 class="text-white mt-3 mb-2">Telegram</h5>
+                    <p class="text-muted mb-0">Notifications</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CTA Section -->
+<section class="py-5" style="background: linear-gradient(135deg, #111827 0%, #111827 100%);">
+    <div class="container py-5">
+        <div class="text-center" data-scroll-reveal>
+            <h2 class="display-5 fw-bold text-white mb-4">Ready to Experience TapNex?</h2>
+            <p class="lead text-white mb-5" style="opacity: 0.9;">
+                Join thousands of gamers who trust TapNex for their gaming cafe bookings
+            </p>
+            <div class="d-flex justify-content-center gap-3">
+                <a href="{% url 'booking:game_selection' %}" class="btn btn-light btn-lg">
+                    <i class="bi bi-controller me-2"></i>Book Your Slot
+                </a>
+                <a href="{% url 'contact' %}" class="btn btn-outline-light btn-lg">
+                    <i class="bi bi-envelope me-2"></i>Contact Us
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

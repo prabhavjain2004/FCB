@@ -1,0 +1,511 @@
+{% extends 'authentication/owner_base.html' %}
+{% load static %}
+
+{% block title %}Advanced Schedule Management - {{ game.name }}{% endblock %}
+{% block page_title %}Advanced Schedule Management{% endblock %}
+{% block page_subtitle %}{{ game.name }} - Analytics & Optimization{% endblock %}
+
+{% block extra_css %}
+<style>
+    .hero-bg {
+        position: absolute;
+        inset: 0;
+        overflow: hidden;
+        z-index: 0;
+        pointer-events: none;
+    }
+    
+    .gradient-orb {
+        position: absolute;
+        border-radius: 50%;
+        filter: blur(100px);
+        opacity: 0.2;
+        animation: floatOrb 20s ease-in-out infinite;
+    }
+    
+    .orb-1 {
+        width: 400px;
+        height: 400px;
+        background: radial-gradient(circle, rgba(102, 126, 234, 0.4) 0%, transparent 70%);
+        top: -100px;
+        right: -100px;
+    }
+    
+    .orb-2 {
+        width: 350px;
+        height: 350px;
+        background: radial-gradient(circle, rgba(168, 85, 247, 0.3) 0%, transparent 70%);
+        bottom: -80px;
+        left: -80px;
+        animation-delay: 7s;
+    }
+    
+    @keyframes floatOrb {
+        0%, 100% { transform: translate(0, 0) scale(1); }
+        33% { transform: translate(20px, -20px) scale(1.05); }
+        66% { transform: translate(-20px, 20px) scale(0.95); }
+    }
+    
+    .grid-pattern {
+        background-image: 
+            linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+        background-size: 50px 50px;
+        position: absolute;
+        inset: 0;
+        z-index: 0;
+    }
+    
+    .stats-card {
+        background: rgba(30, 41, 59, 0.5);
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 1rem;
+        padding: 1.5rem;
+    }
+    
+    .stat-value {
+        font-size: 1.875rem;
+        font-weight: 700;
+        color: #60a5fa;
+    }
+    
+    .stat-label {
+        font-size: 0.875rem;
+        color: #9ca3af;
+        margin-top: 0.25rem;
+    }
+    
+    .chart-container {
+        background: rgba(30, 41, 59, 0.5);
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 1rem;
+        padding: 1.5rem;
+    }
+    
+    .suggestion-card {
+        background: rgba(30, 41, 59, 0.5);
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 1rem;
+        padding: 1.5rem;
+        border-left-width: 4px;
+        margin-bottom: 1rem;
+    }
+    
+    .suggestion-high {
+        border-left-color: #f87171;
+        background: rgba(239, 68, 68, 0.1);
+    }
+    
+    .suggestion-medium {
+        border-left-color: #fbbf24;
+        background: rgba(245, 158, 11, 0.1);
+    }
+    
+    .suggestion-low {
+        border-left-color: #34d399;
+        background: rgba(16, 185, 129, 0.1);
+    }
+    
+    .optimization-section {
+        background: linear-gradient(to right, rgba(168, 85, 247, 0.1), rgba(99, 102, 241, 0.1));
+        border-radius: 1rem;
+        padding: 1.5rem;
+        border: 1px solid rgba(168, 85, 247, 0.2);
+    }
+    
+    .schedule-config {
+        background: rgba(30, 41, 59, 0.5);
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 1rem;
+        padding: 1.5rem;
+    }
+    
+    .bar-chart {
+        display: flex;
+        align-items: flex-end;
+        gap: 0.5rem;
+        height: 8rem;
+    }
+    
+    .bar {
+        background: #3b82f6;
+        border-radius: 0.5rem 0.5rem 0 0;
+        flex: 1;
+        min-width: 0;
+        transition: all 0.3s;
+    }
+    
+    .bar:hover {
+        background: #2563eb;
+    }
+    
+    .bar-label {
+        font-size: 0.75rem;
+        color: #9ca3af;
+        margin-top: 0.5rem;
+        text-align: center;
+    }
+    
+    .loading-spinner {
+        animation: spin 1s linear infinite;
+        height: 1.5rem;
+        width: 1.5rem;
+        color: #a855f7;
+    }
+    
+    @keyframes spin {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="relative">
+    <!-- Background Elements -->
+    <div class="hero-bg">
+        <div class="gradient-orb orb-1"></div>
+        <div class="gradient-orb orb-2"></div>
+        <div class="grid-pattern"></div>
+    </div>
+    
+    <div class="relative z-10">
+        <!-- Header Actions -->
+        <div class="mb-6">
+            <div class="flex flex-wrap gap-3">
+                <div class="flex space-x-4">
+                    <a href="{% url 'booking:game_management:individual_schedule_management' game_id=game.id %}" 
+                       class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium">
+                        Edit Schedule
+                    </a>
+                    <a href="{% url 'booking:game_management:game_detail' game_id=game.id %}" 
+                       class="text-gray-600 hover:text-gray-800 flex items-center">
+                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                        </svg>
+                        Back to Game Details
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Game Info Card -->
+        <div class="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg p-6 border border-blue-200 mb-8">
+            <div class="flex items-start justify-between">
+                <div>
+                    <h2 class="text-xl font-semibold text-gray-900">{{ game.name }}</h2>
+                    <p class="text-gray-600 mt-1">{{ game.description }}</p>
+                    <div class="mt-4 grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                        <div>
+                            <span class="font-medium">Capacity:</span> {{ game.capacity }} players
+                        </div>
+                        <div>
+                            <span class="font-medium">Type:</span> {{ game.get_booking_type_display }}
+                        </div>
+                        <div>
+                            <span class="font-medium">Current Hours:</span> {{ current_schedule.opening_time|time:"H:i" }} - {{ current_schedule.closing_time|time:"H:i" }}
+                        </div>
+                        <div>
+                            <span class="font-medium">Slot Duration:</span> {{ current_schedule.slot_duration }} minutes
+                        </div>
+                    </div>
+                </div>
+                {% if game.image %}
+                <img src="{{ game.image.url }}" alt="{{ game.name }}" class="w-24 h-24 rounded-lg object-cover">
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Statistics Overview -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <div class="stats-card">
+                <div class="stat-value">{{ statistics.total_bookings }}</div>
+                <div class="stat-label">Total Bookings (30 days)</div>
+            </div>
+            <div class="stats-card">
+                <div class="stat-value">₹{{ statistics.total_revenue|floatformat:0 }}</div>
+                <div class="stat-label">Total Revenue (30 days)</div>
+            </div>
+            <div class="stats-card">
+                <div class="stat-value">{{ statistics.utilization_rate }}%</div>
+                <div class="stat-label">Slot Utilization Rate</div>
+            </div>
+            <div class="stats-card">
+                <div class="stat-value">{{ statistics.upcoming_bookings }}</div>
+                <div class="stat-label">Upcoming Bookings</div>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+            <!-- Hourly Booking Patterns -->
+            <div class="chart-container">
+                <h3 class="text-lg font-semibold text-gray-900 mb-4">Hourly Booking Patterns</h3>
+                {% if hourly_stats %}
+                    <div class="space-y-2">
+                        {% for hour_data in hourly_stats.items %}
+                        <div class="flex items-center">
+                            <div class="w-16 text-sm text-gray-600">{{ hour_data.0 }}:00</div>
+                            <div class="flex-1 bg-gray-200 rounded-full h-4 mx-2">
+                                <div class="bg-blue-500 h-4 rounded-full" style="width: {% if hour_data.1.bookings %}{{ hour_data.1.bookings|add:1 }}0%{% else %}2%{% endif %}"></div>
+                            </div>
+                            <div class="w-16 text-sm text-gray-900">{{ hour_data.1.bookings|default:0 }}</div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="text-center text-gray-500 py-8">
+                        <p>No booking data available for hourly analysis</p>
+                    </div>
+                {% endif %}
+                <p class="text-sm text-gray-600 mt-4">Peak hours show higher booking volumes</p>
+            </div>
+
+            <!-- Daily Booking Patterns -->
+            <div class="chart-container">
+                <h3 class="text-lg font-semibold text-gray-900 mb-4">Daily Booking Patterns</h3>
+                {% if daily_stats %}
+                    <div class="space-y-2">
+                        {% for day_data in daily_stats.items %}
+                        <div class="flex items-center">
+                            <div class="w-20 text-sm text-gray-600">{{ day_data.0|slice:":3" }}</div>
+                            <div class="flex-1 bg-gray-200 rounded-full h-4 mx-2">
+                                <div class="bg-green-500 h-4 rounded-full" style="width: {% if day_data.1.bookings %}{{ day_data.1.bookings|add:1 }}0%{% else %}2%{% endif %}"></div>
+                            </div>
+                            <div class="w-16 text-sm text-gray-900">{{ day_data.1.bookings|default:0 }}</div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="text-center text-gray-500 py-8">
+                        <p>No booking data available for daily analysis</p>
+                    </div>
+                {% endif %}
+                <p class="text-sm text-gray-600 mt-4">Weekly patterns help optimize daily schedules</p>
+            </div>
+        </div>
+
+        <!-- Optimization Suggestions -->
+        <div class="optimization-section mb-8">
+            <div class="flex items-center justify-between mb-6">
+                <div>
+                    <h3 class="text-xl font-semibold text-gray-900">Schedule Optimization Suggestions</h3>
+                    <p class="text-gray-600 mt-1">AI-powered recommendations based on your booking data</p>
+                </div>
+                <button id="refreshSuggestions" 
+                        class="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-medium flex items-center">
+                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                    </svg>
+                    Refresh Analysis
+                </button>
+            </div>
+            
+            <div id="suggestionsContainer">
+                <div class="flex items-center justify-center py-8">
+                    <svg class="loading-spinner" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    <span class="ml-2 text-gray-600">Analyzing booking patterns...</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Current Schedule Configuration -->
+        <div class="schedule-config">
+            <h3 class="text-lg font-semibold text-gray-900 mb-4">Current Schedule Configuration</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Operating Hours</label>
+                    <p class="text-lg font-semibold text-gray-900">
+                        {{ current_schedule.opening_time|time:"H:i" }} - {{ current_schedule.closing_time|time:"H:i" }}
+                    </p>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Slot Duration</label>
+                    <p class="text-lg font-semibold text-gray-900">{{ current_schedule.slot_duration }} minutes</p>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Available Days</label>
+                    <p class="text-lg font-semibold text-gray-900">
+                        {% for day in current_schedule.available_days %}
+                            {{ day|title }}{% if not forloop.last %}, {% endif %}
+                        {% endfor %}
+                    </p>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Slots per Day</label>
+                    <p class="text-lg font-semibold text-gray-900" id="slotsPerDay">Calculating...</p>
+                </div>
+            </div>
+            
+            <div class="mt-6 flex space-x-4">
+                <a href="{% url 'booking:game_management:individual_schedule_management' game_id=game.id %}" 
+                   class="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium">
+                    Modify Schedule
+                </a>
+                <button id="previewChanges" 
+                        class="px-6 py-3 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 font-medium">
+                    Preview Changes
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const suggestionsContainer = document.getElementById('suggestionsContainer');
+    const refreshButton = document.getElementById('refreshSuggestions');
+    
+    // Load optimization suggestions
+    function loadOptimizationSuggestions() {
+        suggestionsContainer.innerHTML = `
+            <div class="flex items-center justify-center py-8">
+                <svg class="loading-spinner" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                <span class="ml-2 text-gray-600">Analyzing booking patterns...</span>
+            </div>
+        `;
+        
+        fetch(`{% url 'booking:game_management:schedule_optimization_suggestions' game_id=game.id %}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    renderSuggestions(data.suggestions, data.analytics);
+                } else {
+                    renderError(data.error);
+                }
+            })
+            .catch(error => {
+                renderError('Failed to load optimization suggestions: ' + error.message);
+            });
+    }
+    
+    function renderSuggestions(suggestions, analytics) {
+        if (suggestions.length === 0) {
+            suggestionsContainer.innerHTML = `
+                <div class="text-center py-8">
+                    <svg class="w-16 h-16 mx-auto text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                    <h4 class="text-lg font-medium text-gray-900 mb-2">Schedule Looks Great!</h4>
+                    <p class="text-gray-600">No optimization suggestions at this time. Your current schedule appears to be well-optimized based on available data.</p>
+                    <p class="text-sm text-gray-500 mt-2">Analyzed ${analytics.total_bookings} bookings over ${analytics.analysis_period.days} days</p>
+                </div>
+            `;
+            return;
+        }
+        
+        let html = '';
+        
+        suggestions.forEach(suggestion => {
+            const impactClass = suggestion.impact === 'high' ? 'suggestion-high' : 
+                               suggestion.impact === 'medium' ? 'suggestion-medium' : 'suggestion-low';
+            
+            const impactIcon = suggestion.impact === 'high' ? 
+                '<svg class="w-5 h-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path></svg>' :
+                suggestion.impact === 'medium' ?
+                '<svg class="w-5 h-5 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>' :
+                '<svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>';
+            
+            html += `
+                <div class="suggestion-card ${impactClass}">
+                    <div class="flex items-start">
+                        <div class="flex-shrink-0 mr-3 mt-1">
+                            ${impactIcon}
+                        </div>
+                        <div class="flex-1">
+                            <h4 class="font-medium text-gray-900 mb-2">${suggestion.title}</h4>
+                            <p class="text-gray-700 mb-3">${suggestion.description}</p>
+                            <div class="bg-white bg-opacity-50 rounded p-3">
+                                <p class="text-sm font-medium text-gray-800">Recommended Action:</p>
+                                <p class="text-sm text-gray-700">${suggestion.action}</p>
+                            </div>
+                            <div class="mt-2 flex items-center text-sm">
+                                <span class="px-2 py-1 rounded text-xs font-medium ${
+                                    suggestion.impact === 'high' ? 'bg-red-100 text-red-800' :
+                                    suggestion.impact === 'medium' ? 'bg-yellow-100 text-yellow-800' :
+                                    'bg-green-100 text-green-800'
+                                }">
+                                    ${suggestion.impact.toUpperCase()} IMPACT
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        });
+        
+        // Add analytics summary
+        html += `
+            <div class="bg-white rounded-lg p-4 border border-gray-200 mt-4">
+                <h4 class="font-medium text-gray-900 mb-3">Analysis Summary</h4>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                    <div>
+                        <span class="text-gray-600">Total Bookings:</span>
+                        <span class="font-medium ml-1">${analytics.total_bookings}</span>
+                    </div>
+                    <div>
+                        <span class="text-gray-600">Total Revenue:</span>
+                        <span class="font-medium ml-1">₹${analytics.total_revenue.toFixed(0)}</span>
+                    </div>
+                    <div>
+                        <span class="text-gray-600">Utilization Rate:</span>
+                        <span class="font-medium ml-1">${(analytics.utilization_rate * 100).toFixed(1)}%</span>
+                    </div>
+                    <div>
+                        <span class="text-gray-600">Analysis Period:</span>
+                        <span class="font-medium ml-1">${analytics.analysis_period.days} days</span>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        suggestionsContainer.innerHTML = html;
+    }
+    
+    function renderError(error) {
+        suggestionsContainer.innerHTML = `
+            <div class="bg-red-50 rounded-lg p-6 border border-red-200">
+                <div class="flex items-center">
+                    <svg class="w-5 h-5 text-red-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                    <span class="font-medium text-red-800">Analysis Error</span>
+                </div>
+                <p class="mt-2 text-red-700">${error}</p>
+            </div>
+        `;
+    }
+    
+    // Calculate slots per day
+    function calculateSlotsPerDay() {
+        const openingTime = new Date('2000-01-01 {{ current_schedule.opening_time|time:"H:i" }}');
+        const closingTime = new Date('2000-01-01 {{ current_schedule.closing_time|time:"H:i" }}');
+        const slotDuration = {{ current_schedule.slot_duration }};
+        
+        const totalMinutes = (closingTime - openingTime) / (1000 * 60);
+        const slotsPerDay = Math.floor(totalMinutes / slotDuration);
+        
+        document.getElementById('slotsPerDay').textContent = slotsPerDay;
+    }
+    
+    // Event listeners
+    refreshButton.addEventListener('click', loadOptimizationSuggestions);
+    
+    // Initial load
+    loadOptimizationSuggestions();
+    calculateSlotsPerDay();
+});
+</script>
+{% endblock %}

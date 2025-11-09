@@ -1,0 +1,200 @@
+{% extends 'authentication/owner_base.html' %}
+{% load static %}
+
+{% block title %}{{ game.name }} - Details{% endblock %}
+{% block page_title %}{{ game.name }}{% endblock %}
+{% block page_subtitle %}View and manage slots and bookings for this game{% endblock %}
+
+{% block extra_css %}
+<style>
+    .slot-card {
+        background: rgba(30, 41, 59, 0.5);
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 1rem;
+        padding: 1rem;
+        transition: all 0.3s ease;
+    }
+    
+    .slot-card:hover {
+        border-color: rgba(102, 126, 234, 0.5);
+        transform: translateY(-2px);
+    }
+    
+    .slot-available {
+        border-left: 4px solid #10b981;
+    }
+    
+    .slot-partial {
+        border-left: 4px solid #f59e0b;
+    }
+    
+    .slot-full {
+        border-left: 4px solid #ef4444;
+    }
+    
+    .date-section {
+        background: rgba(30, 41, 59, 0.3);
+        border-radius: 1.5rem;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="relative">
+    <!-- Quick Actions -->
+    <div class="flex flex-wrap gap-3 mb-6">
+        <a href="{% url 'booking:game_management:dashboard' %}" class="btn btn-secondary">
+            <i class="bi bi-arrow-left"></i> Back to Dashboard
+        </a>
+        <a href="{% url 'booking:game_management:game_update' game.id %}" class="btn btn-primary">
+            <i class="bi bi-pencil"></i> Edit Game
+        </a>
+        <a href="{% url 'booking:game_management:game_analytics' game.id %}" class="btn btn-secondary" style="background: rgba(168, 85, 247, 0.2); color: #a855f7; border-color: rgba(168, 85, 247, 0.3);">
+            <i class="bi bi-graph-up"></i> Analytics
+        </a>
+        <a href="{% url 'booking:game_management:individual_schedule_management' game.id %}" class="btn btn-secondary" style="background: rgba(16, 185, 129, 0.2); color: #34d399; border-color: rgba(16, 185, 129, 0.3);">
+            <i class="bi bi-calendar-range"></i> Manage Schedule
+        </a>
+    </div>
+
+    <!-- Game Info Card -->
+    <div class="owner-card mb-6">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+                <h2 class="text-2xl font-bold text-white mb-4">Game Information</h2>
+                <div class="space-y-3">
+                    <div class="flex justify-between">
+                        <span class="text-gray-400">Capacity:</span>
+                        <span class="text-white font-semibold">{{ game.capacity }} players</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-400">Type:</span>
+                        <span class="px-2 py-1 text-xs font-bold rounded-full {% if game.booking_type == 'SINGLE' %}bg-blue-500/20 text-blue-400 border border-blue-500/30{% else %}bg-purple-500/20 text-purple-400 border border-purple-500/30{% endif %}">
+                            {{ game.get_booking_type_display }}
+                        </span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-400">Schedule:</span>
+                        <span class="text-white font-semibold">{{ game.opening_time|time:'H:i' }} - {{ game.closing_time|time:'H:i' }}</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-400">Slot Duration:</span>
+                        <span class="text-white font-semibold">{{ game.slot_duration_minutes }} minutes</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-400">Private Price:</span>
+                        <span class="text-green-400 font-bold">₹{{ game.private_price }}</span>
+                    </div>
+                    {% if game.shared_price %}
+                    <div class="flex justify-between">
+                        <span class="text-gray-400">Shared Price:</span>
+                        <span class="text-blue-400 font-bold">₹{{ game.shared_price }}/person</span>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div>
+                <h2 class="text-2xl font-bold text-white mb-4">Statistics</h2>
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="text-center p-4 rounded-lg" style="background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.3);">
+                        <div class="text-3xl font-black text-blue-400">{{ total_slots }}</div>
+                        <div class="text-xs text-gray-400 mt-1">Total Slots</div>
+                    </div>
+                    <div class="text-center p-4 rounded-lg" style="background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3);">
+                        <div class="text-3xl font-black text-green-400">{{ confirmed_bookings }}</div>
+                        <div class="text-xs text-gray-400 mt-1">Bookings</div>
+                    </div>
+                    <div class="text-center p-4 rounded-lg col-span-2" style="background: rgba(168, 85, 247, 0.1); border: 1px solid rgba(168, 85, 247, 0.3);">
+                        <div class="text-3xl font-black text-purple-400">₹{{ revenue|floatformat:0 }}</div>
+                        <div class="text-xs text-gray-400 mt-1">Total Revenue</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Date Filter -->
+    <div class="owner-card mb-6">
+        <form method="get" class="flex flex-wrap gap-4 items-end">
+            <div class="flex-1 min-w-[200px]">
+                <label class="block text-sm font-medium text-gray-400 mb-2">From Date</label>
+                <input type="date" name="date_from" value="{{ date_from|date:'Y-m-d' }}" class="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-lg text-white">
+            </div>
+            <div class="flex-1 min-w-[200px]">
+                <label class="block text-sm font-medium text-gray-400 mb-2">To Date</label>
+                <input type="date" name="date_to" value="{{ date_to|date:'Y-m-d' }}" class="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-lg text-white">
+            </div>
+            <button type="submit" class="btn btn-primary">
+                <i class="bi bi-search"></i> Filter
+            </button>
+        </form>
+    </div>
+
+    <!-- Slots by Date -->
+    {% if slots_by_date %}
+        {% for date, slots in slots_by_date.items %}
+        <div class="date-section">
+            <h3 class="text-xl font-bold text-white mb-4">
+                {{ date|date:'l, F j, Y' }}
+                <span class="text-sm font-normal text-gray-400 ml-2">({{ slots|length }} slots)</span>
+            </h3>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {% for slot_info in slots %}
+                {% with slot=slot_info.slot availability=slot_info.availability bookings=slot_info.bookings %}
+                <div class="slot-card {% if availability.available_spots == availability.total_capacity %}slot-available{% elif availability.available_spots > 0 %}slot-partial{% else %}slot-full{% endif %}">
+                    <div class="flex justify-between items-start mb-3">
+                        <div>
+                            <div class="text-lg font-bold text-white">
+                                {{ slot.start_time|time:'H:i' }} - {{ slot.end_time|time:'H:i' }}
+                            </div>
+                            <div class="text-xs text-gray-400">
+                                {% if slot.is_custom %}
+                                    <span class="px-2 py-1 bg-yellow-500/20 text-yellow-400 rounded">Custom</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            {% if availability %}
+                            <div class="text-sm font-semibold {% if availability.available_spots == 0 %}text-red-400{% elif availability.available_spots < availability.total_capacity %}text-yellow-400{% else %}text-green-400{% endif %}">
+                                {{ availability.available_spots }}/{{ availability.total_capacity }}
+                            </div>
+                            <div class="text-xs text-gray-400">available</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    {% if bookings %}
+                    <div class="border-t border-white/10 pt-3 mt-3">
+                        <div class="text-xs font-semibold text-gray-400 mb-2">Bookings:</div>
+                        {% for booking in bookings %}
+                        <div class="text-xs text-white mb-1 flex justify-between items-center">
+                            <span>{{ booking.customer.user.get_full_name|default:booking.customer.user.username }}</span>
+                            <span class="px-2 py-0.5 rounded text-xs {% if booking.status == 'CONFIRMED' %}bg-green-500/20 text-green-400{% elif booking.status == 'PENDING' %}bg-yellow-500/20 text-yellow-400{% else %}bg-gray-500/20 text-gray-400{% endif %}">
+                                {{ booking.booking_type|title }} ({{ booking.spots_booked }})
+                            </span>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="text-xs text-gray-500 italic">No bookings yet</div>
+                    {% endif %}
+                </div>
+                {% endwith %}
+                {% endfor %}
+            </div>
+        </div>
+        {% endfor %}
+    {% else %}
+    <div class="owner-card text-center py-12">
+        <i class="bi bi-calendar-x text-gray-600 text-6xl mb-4"></i>
+        <h3 class="text-white font-bold text-lg mb-2">No slots found</h3>
+        <p class="text-gray-400 mb-6">No slots available for the selected date range.</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

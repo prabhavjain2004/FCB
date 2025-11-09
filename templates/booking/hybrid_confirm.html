@@ -1,0 +1,1275 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Confirm Booking - TapNex Arena{% endblock %}
+
+{% block extra_css %}
+<!-- Razorpay Checkout Script -->
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<link rel="stylesheet" href="{% static 'css/booking-modal.css' %}">
+
+<style>
+    /* Enhanced Animations */
+    .animate-pulse-slow {
+        animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    }
+    
+    @keyframes float {
+        0%, 100% { transform: translateY(0px); }
+        50% { transform: translateY(-10px); }
+    }
+    
+    .float-animation {
+        animation: float 3s ease-in-out infinite;
+    }
+    
+    @keyframes shimmer {
+        0% { background-position: -1000px 0; }
+        100% { background-position: 1000px 0; }
+    }
+    
+    .shimmer-effect {
+        background: linear-gradient(
+            90deg,
+            rgba(255, 255, 255, 0) 0%,
+            rgba(255, 255, 255, 0.1) 50%,
+            rgba(255, 255, 255, 0) 100%
+        );
+        background-size: 1000px 100%;
+        animation: shimmer 2s infinite;
+    }
+    
+    /* Hero Background with Orbs */
+    .hero-bg {
+        position: absolute;
+        inset: 0;
+        overflow: hidden;
+        z-index: 0;
+        pointer-events: none;
+    }
+    
+    .gradient-orb {
+        position: absolute;
+        border-radius: 50%;
+        filter: blur(100px);
+        opacity: 0.3;
+        animation: floatOrb 20s ease-in-out infinite;
+    }
+    
+    .orb-1 {
+        width: 500px;
+        height: 500px;
+        background: radial-gradient(circle, rgba(102, 126, 234, 0.4) 0%, transparent 70%);
+        top: -150px;
+        right: -150px;
+        animation-delay: 0s;
+    }
+    
+    .orb-2 {
+        width: 400px;
+        height: 400px;
+        background: radial-gradient(circle, rgba(168, 85, 247, 0.3) 0%, transparent 70%);
+        bottom: -100px;
+        left: -100px;
+        animation-delay: 7s;
+    }
+    
+    @keyframes floatOrb {
+        0%, 100% { transform: translate(0, 0) scale(1); }
+        33% { transform: translate(30px, -30px) scale(1.1); }
+        66% { transform: translate(-30px, 30px) scale(0.9); }
+    }
+    
+    /* Grid Pattern */
+    .grid-pattern {
+        background-image: 
+            linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+        background-size: 50px 50px;
+        position: absolute;
+        inset: 0;
+        z-index: 0;
+    }
+    
+    /* Progress Step Enhancements */
+    .progress-step {
+        position: relative;
+        transition: all 0.3s ease;
+    }
+    
+    .progress-step:hover {
+        transform: scale(1.05);
+    }
+    
+    .progress-line {
+        height: 3px;
+        background: linear-gradient(90deg, transparent, var(--color-primary-500), transparent);
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .progress-line::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.5), transparent);
+        animation: progressShine 2s ease-in-out infinite;
+    }
+    
+    @keyframes progressShine {
+        to { left: 100%; }
+    }
+    
+    /* Card Hover Glow */
+    .card-glow {
+        position: relative;
+    }
+    
+    .card-glow::before {
+        content: '';
+        position: absolute;
+        inset: -2px;
+        border-radius: inherit;
+        padding: 2px;
+        background: linear-gradient(135deg, #667eea, #a855f7);
+        -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+        -webkit-mask-composite: xor;
+        mask-composite: exclude;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+    
+    .card-glow:hover::before {
+        opacity: 0.5;
+    }
+    
+    /* Info Box Styles */
+    .info-box {
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .info-box::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.05), transparent);
+        transition: left 0.5s ease;
+    }
+    
+    .info-box:hover::before {
+        left: 100%;
+    }
+    
+    /* Hover Glow for Primary Button */
+    .hover-glow {
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .hover-glow::after {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 0;
+        height: 0;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.2);
+        transform: translate(-50%, -50%);
+        transition: width 0.6s, height 0.6s;
+    }
+    
+    .hover-glow:hover::after {
+        width: 300px;
+        height: 300px;
+    }
+    
+    /* Capacity Dots */
+    .capacity-indicator {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        flex-wrap: wrap;
+        padding: 8px 0;
+        position: relative;
+    }
+    
+    .capacity-dot {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        transition: all 0.3s ease;
+    }
+    
+    .capacity-dot.booked {
+        background-color: #ef4444;
+    }
+    
+    .capacity-dot.your-booking {
+        background-color: #667eea;
+        animation: pulse-booking 2s ease-in-out infinite;
+        position: relative;
+        z-index: 1;
+    }
+    
+    .capacity-dot.available {
+        background-color: #10b981;
+    }
+    
+    @keyframes pulse-booking {
+        0%, 100% { 
+            transform: scale(1);
+            opacity: 1;
+        }
+        50% { 
+            transform: scale(1.15);
+            opacity: 0.95;
+        }
+    }
+    
+    /* Spot selector enhanced styles */
+    .spot-select-btn {
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        background: rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(10px);
+        border: 2px solid rgba(255, 255, 255, 0.2);
+        border-radius: 12px;
+        padding: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        color: white;
+    }
+    
+    .spot-select-btn:hover:not(.active) {
+        transform: scale(1.05);
+        border-color: #667eea;
+        background: rgba(102, 126, 234, 0.1);
+    }
+    
+    .spot-select-btn.active {
+        background: linear-gradient(135deg, #667eea 0%, #a855f7 100%);
+        color: white;
+        border-color: #667eea;
+        transform: scale(1.05);
+    }
+    
+    /* Responsive Adjustments */
+    @media (max-width: 768px) {
+        .progress-step-text {
+            display: none;
+        }
+        
+        .booking-hero h1 {
+            font-size: 2rem;
+        }
+
+        /* Ultra compact 2x2 grid for mobile */
+        @media (max-width: 640px) {
+            .info-box {
+                padding: 0.5rem !important;
+                gap: 0.5rem !important;
+            }
+
+            .info-box .w-8 {
+                width: 1.75rem !important;
+                height: 1.75rem !important;
+            }
+
+            .info-box .text-lg {
+                font-size: 0.875rem !important;
+            }
+
+            .info-box .text-xs {
+                font-size: 0.625rem !important;
+                line-height: 1.2 !important;
+            }
+
+            .capacity-indicator {
+                gap: 3px !important;
+                padding: 4px 0 !important;
+            }
+
+            .capacity-dot {
+                width: 6px !important;
+                height: 6px !important;
+            }
+        }
+
+        /* Slow down animations on mobile */
+        .float-animation {
+            animation: float 8s cubic-bezier(0.4, 0, 0.6, 1) infinite !important;
+        }
+
+        .animate-pulse-slow,
+        .pulse-booking {
+            animation: pulse-booking 4.5s cubic-bezier(0.4, 0, 0.6, 1) infinite !important;
+        }
+
+        .gradient-orb {
+            animation: floatOrb 40s cubic-bezier(0.4, 0, 0.6, 1) infinite !important;
+        }
+
+        .shimmer-effect {
+            animation: shimmer 4s cubic-bezier(0.4, 0, 0.6, 1) infinite !important;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-5px); }
+        }
+    }
+    
+    /* Button Hover Effects */
+    #paymentButton:hover {
+        transform: translateY(-2px);
+    }
+    
+    #paymentButton:active {
+        transform: translateY(0);
+    }
+    
+    button:hover {
+        transform: translateY(-2px);
+    }
+    
+    button:active {
+        transform: translateY(0);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="min-h-screen py-12 relative" style="background: #111827;">
+    <!-- Animated Background -->
+    <div class="hero-bg">
+        <div class="gradient-orb orb-1"></div>
+        <div class="gradient-orb orb-2"></div>
+        <div class="grid-pattern"></div>
+    </div>
+    
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+        
+        <!-- Payment Timer Warning -->
+        <div id="paymentTimerBanner" class="mb-8 animate-fade-in-up" style="animation-delay: 0s;">
+            <div class="card-glow relative overflow-hidden" style="background: linear-gradient(135deg, rgba(239, 68, 68, 0.2), rgba(245, 158, 11, 0.2)); backdrop-filter: blur(20px); border: 2px solid rgba(239, 68, 68, 0.5); border-radius: 1.5rem; padding: 1.5rem;">
+                <div class="flex items-center justify-between gap-4 flex-wrap">
+                    <div>
+                        <h3 class="text-white font-bold text-lg mb-1">Complete Payment Within 5 Minutes</h3>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <div id="paymentTimer" class="text-center">
+                            <div class="text-4xl font-black text-white mb-1" style="font-family: 'Orbitron', monospace;">
+                                <span id="timerMinutes">05</span>:<span id="timerSeconds">00</span>
+                            </div>
+                            <div class="text-xs text-gray-300 font-medium">Minutes Remaining</div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Progress Bar -->
+                <div class="mt-4 h-2 bg-white/10 rounded-full overflow-hidden">
+                    <div id="timerProgressBar" class="h-full bg-gradient-to-r from-red-500 to-orange-500 transition-all duration-1000 ease-linear" style="width: 100%;"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- Left Column - Booking Details -->
+            <div class="lg:col-span-2 space-y-8">
+                
+                <!-- Header Section -->
+                <div class="booking-hero animate-fade-in-up" style="animation-delay: 0.05s;">
+                    <h1 class="text-4xl sm:text-5xl font-black text-white mb-4" style="font-family: 'Orbitron', sans-serif; line-height: 1.2;">
+                        <span style="background: linear-gradient(135deg, #00f5ff, #b537f2, #ff006e); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">Confirm</span> Your Booking
+                    </h1>
+                    <p class="text-gray-300 text-lg max-w-2xl">Review your booking details carefully and proceed to secure your gaming session with payment</p>
+                </div>
+
+                <!-- Game Details Card - Enhanced -->
+                <div class="card-glow animate-fade-in-up" style="animation-delay: 0.1s; background: rgba(30, 41, 59, 0.5); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 1.5rem; padding: 2rem;">
+                    <h2 class="text-2xl font-black text-white mb-6">Game Details</h2>
+                    
+                    <div class="mb-8 pb-8" style="border-bottom: 1px solid rgba(255, 255, 255, 0.1);">
+                        <h3 class="text-2xl sm:text-3xl font-black text-white mb-3" style="font-family: 'Orbitron', sans-serif;">{{ booking.game.name }}</h3>
+                        <p class="text-gray-300 mb-4 leading-relaxed hidden sm:block">{{ booking.game.description|default:"Premium gaming experience awaits you" }}</p>
+                        
+                        <div class="flex flex-wrap gap-2">
+                            {% if booking.booking_type == 'PRIVATE' %}
+                            <span class="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold" style="background: #667eea; color: white;">
+                                <i class="bi bi-lock-fill"></i> Private Booking
+                            </span>
+                            {% else %}
+                            <span class="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold" style="background: #10b981; color: white;">
+                                <i class="bi bi-people-fill"></i> Shared Booking
+                            </span>
+                            {% endif %}
+                            
+                            {% if is_hybrid %}
+                            <span class="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold" style="background: #3b82f6; color: white;">
+                                <i class="bi bi-stars"></i> Hybrid Game
+                            </span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <!-- Booking Info - Modern Compact Cards -->
+                    <div class="mb-6">
+                        <!-- Primary Info Row -->
+                        <div class="grid grid-cols-2 gap-2 mb-2">
+                            <!-- Date & Time Card -->
+                            <div class="rounded-lg p-3 relative overflow-hidden" style="background: linear-gradient(135deg, rgba(102, 126, 234, 0.15), rgba(102, 126, 234, 0.05)); border: 1px solid rgba(102, 126, 234, 0.3);">
+                                <div class="absolute top-0 right-0 w-16 h-16 rounded-full" style="background: radial-gradient(circle, rgba(102, 126, 234, 0.2), transparent); transform: translate(30%, -30%);"></div>
+                                <p class="text-xs font-semibold mb-1.5" style="color: #818cf8;">■ DATE & TIME</p>
+                                <p class="text-white font-bold text-sm mb-0.5">{{ booking.game_slot.date|date:"M d, Y" }}</p>
+                                <p class="text-xs" style="color: rgba(255, 255, 255, 0.7);">{{ booking.game_slot.start_time|time:"h:i A" }} - {{ booking.game_slot.end_time|time:"h:i A" }}</p>
+                            </div>
+                            
+                            <!-- Duration Card -->
+                            <div class="rounded-lg p-3 relative overflow-hidden" style="background: linear-gradient(135deg, rgba(168, 85, 247, 0.15), rgba(168, 85, 247, 0.05)); border: 1px solid rgba(168, 85, 247, 0.3);">
+                                <div class="absolute top-0 right-0 w-16 h-16 rounded-full" style="background: radial-gradient(circle, rgba(168, 85, 247, 0.2), transparent); transform: translate(30%, -30%);"></div>
+                                <p class="text-xs font-semibold mb-1.5" style="color: #c084fc;">■ DURATION</p>
+                                <p class="text-white font-bold text-2xl">{{ booking.game.slot_duration_minutes }}<span class="text-sm ml-1" style="color: rgba(255, 255, 255, 0.7);">min</span></p>
+                            </div>
+                        </div>
+                        
+                        <!-- Secondary Info Row -->
+                        <div class="grid grid-cols-2 gap-2">
+                            <!-- Players Card -->
+                            <div class="rounded-lg p-3 relative overflow-hidden" style="background: linear-gradient(135deg, rgba(16, 185, 129, 0.15), rgba(16, 185, 129, 0.05)); border: 1px solid rgba(16, 185, 129, 0.3);">
+                                <div class="absolute top-0 right-0 w-16 h-16 rounded-full" style="background: radial-gradient(circle, rgba(16, 185, 129, 0.2), transparent); transform: translate(30%, -30%);"></div>
+                                <p class="text-xs font-semibold mb-1.5" style="color: #34d399;">■ PLAYERS</p>
+                                <p class="text-white font-bold text-2xl mb-1"><span id="currentSpotsDisplay">{{ booking.spots_booked }}</span></p>
+                                <div class="capacity-indicator" id="capacityDotsContainer" style="gap: 4px; padding: 0;">
+                                    <!-- Capacity dots will be rendered by JavaScript -->
+                                </div>
+                            </div>
+                            
+                            <!-- Booking ID Card -->
+                            <div class="rounded-lg p-3 relative overflow-hidden" style="background: linear-gradient(135deg, rgba(245, 158, 11, 0.15), rgba(245, 158, 11, 0.05)); border: 1px solid rgba(245, 158, 11, 0.3);">
+                                <div class="absolute top-0 right-0 w-16 h-16 rounded-full" style="background: radial-gradient(circle, rgba(245, 158, 11, 0.2), transparent); transform: translate(30%, -30%);"></div>
+                                <p class="text-xs font-semibold mb-1.5" style="color: #fbbf24;">■ BOOKING ID</p>
+                                <p class="text-white font-bold text-xs tracking-wider" style="font-family: 'Courier New', monospace; word-break: break-all; line-height: 1.4;">#{{ booking.id|slice:":13" }}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Right Column - Payment Summary -->
+            <div class="lg:col-span-1 space-y-6">
+                
+                <!-- Payment Summary Card - Enhanced -->
+                <div class="card-glow animate-fade-in-up" style="animation-delay: 0.15s; background: rgba(30, 41, 59, 0.5); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 1.5rem; padding: 2rem;">
+                    <div class="flex items-center gap-3 mb-6">
+                        <div class="w-10 h-10 rounded-xl flex items-center justify-center" style="background: linear-gradient(135deg, #667eea, #a855f7);">
+                            <i class="bi bi-receipt text-white text-xl"></i>
+                        </div>
+                        <h3 class="text-2xl font-black text-white">Payment Summary</h3>
+                    </div>
+                    
+                    <div class="space-y-4 mb-6">
+                        <div class="flex justify-between items-center pb-4" style="border-bottom: 1px solid rgba(255, 255, 255, 0.1);">
+                            <span class="font-medium text-base spots-price-display" style="color: #d1d5db;">
+                                {% if booking.booking_type == 'PRIVATE' %}
+                                Private booking ({{ booking.game.capacity }} players)
+                                {% else %}
+                                <span id="spotsText">{{ booking.spots_booked }} spot{{ booking.spots_booked|pluralize }}</span> × ₹<span id="pricePerSpot">{{ booking.price_per_spot }}</span>
+                                {% endif %}
+                            </span>
+                            <span class="text-white font-bold text-xl subtotal-display">₹<span id="subtotalAmount">{{ booking.subtotal|floatformat:2 }}</span></span>
+                        </div>
+                        
+                        {% if booking.platform_fee %}
+                        <div class="flex justify-between items-center pb-4" style="border-bottom: 1px solid rgba(255, 255, 255, 0.1);">
+                            <span class="font-medium flex items-center gap-2 text-base" style="color: #d1d5db;">
+                                Platform Fee
+                            </span>
+                            <span class="text-white font-bold text-lg">₹{{ booking.platform_fee|floatformat:2 }}</span>
+                        </div>
+                        {% endif %}
+                        
+                        <div class="rounded-2xl p-6 border-2 relative overflow-hidden" style="background: linear-gradient(135deg, rgba(102, 126, 234, 0.3), rgba(168, 85, 247, 0.2)); border-color: rgba(99, 102, 241, 0.4);">
+                            <div class="shimmer-effect absolute inset-0"></div>
+                            <div class="relative z-10">
+                                <div class="flex justify-between items-center">
+                                    <div>
+                                        <p class="text-sm font-medium mb-1" style="color: #e5e7eb;">Total Amount</p>
+                                        <p class="text-white font-black text-4xl total-display" style="font-family: 'Orbitron', sans-serif;">₹<span id="totalAmount">{{ booking.total_amount|floatformat:2 }}</span></p>
+                                    </div>
+                                    <i class="bi bi-credit-card-2-front text-5xl" style="color: rgba(255, 255, 255, 0.2);"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Action Buttons - Enhanced -->
+                    <div class="space-y-3" style="max-width: 100%; position: relative; z-index: 10;">
+                        <button onclick="proceedToPayment()" id="paymentButton" style="background: linear-gradient(135deg, #667eea, #764ba2); border: 2px solid transparent; padding: 1rem; font-size: 1.125rem; font-weight: 600; border-radius: 0.75rem; color: white; cursor: pointer; transition: all 0.2s; display: block; width: 100%; text-align: center; position: relative; z-index: 10;">
+                            <i class="bi bi-credit-card text-lg"></i>
+                            <span>Proceed to Payment</span>
+                            <i class="bi bi-arrow-right text-lg"></i>
+                        </button>
+                        
+                        <button onclick="cancelBooking()" style="background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(10px); color: white; border: 2px solid rgba(255, 255, 255, 0.2); padding: 1rem; font-size: 1.125rem; font-weight: 600; border-radius: 0.75rem; cursor: pointer; transition: all 0.2s; display: block; width: 100%; text-align: center; position: relative; z-index: 10;">
+                            <i class="bi bi-x-circle"></i>
+                            Cancel Booking
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Status Card - Enhanced -->
+                <div class="animate-fade-in-up border-2 rounded-2xl" style="animation-delay: 0.2s; background: linear-gradient(135deg, rgba(245, 158, 11, 0.15), rgba(245, 158, 11, 0.05)); border-color: rgba(245, 158, 11, 0.3); backdrop-filter: blur(20px); padding: 2rem;">
+                    <p class="text-sm mb-3 font-bold flex items-center gap-2" style="color: #fbbf24;">
+                        <i class="bi bi-info-circle-fill"></i>
+                        Important Notice
+                    </p>
+                    <p class="text-sm leading-relaxed" style="color: rgba(251, 191, 36, 0.9);">
+                        Your booking is temporarily reserved. Please complete the payment within <strong>5 minutes</strong> to confirm your reservation. Unpaid bookings will be automatically cancelled.
+                    </p>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script>
+// Spot modification variables
+let originalSpots = parseInt('{{ booking.spots_booked }}');
+let selectedNewSpots = parseInt('{{ booking.spots_booked }}');
+const bookingId = "{{ booking.id }}";
+const pricePerSpot = parseFloat('{{ booking.price_per_spot }}');
+const platformFee = parseFloat('{{ booking.platform_fee|default:0 }}');
+const gameCapacity = parseInt('{{ booking.game.capacity }}');
+const gameSlotId = '{{ booking.game_slot.id }}';
+
+// Render capacity dots with accurate state
+function renderCapacityDots(confirmedBookings, yourPendingSpots, totalCapacity) {
+    const container = document.getElementById('capacityDotsContainer');
+    if (!container) return;
+    
+    container.innerHTML = '';
+    
+    for (let i = 0; i < totalCapacity; i++) {
+        const dot = document.createElement('div');
+        dot.className = 'capacity-dot';
+        
+        if (i < confirmedBookings) {
+            // Red dots for confirmed bookings by others
+            dot.classList.add('booked');
+        } else if (i < confirmedBookings + yourPendingSpots) {
+            // Blue/pulsing dots for your pending booking
+            dot.classList.add('your-booking');
+        } else {
+            // Green dots for available spots
+            dot.classList.add('available');
+        }
+        
+        container.appendChild(dot);
+    }
+}
+
+// Fetch real-time slot availability
+function fetchSlotAvailability() {
+    fetch(`/booking/api/slot-availability/${gameSlotId}/`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                const availability = data.availability;
+                const confirmedBookings = availability.booked_spots;
+                const yourPendingSpots = originalSpots;
+                
+                // Render capacity dots
+                renderCapacityDots(confirmedBookings, yourPendingSpots, gameCapacity);
+                
+                // Update max spots available for modification
+                updateMaxSpotsAvailable(availability.available_spots);
+            }
+        })
+        .catch(error => {
+            // Silently handle error
+        });
+}
+
+// Update max spots available
+function updateMaxSpotsAvailable(availableSpots) {
+    // Calculate truly available spots (excluding current booking)
+    const trulyAvailable = availableSpots;
+    const maxTotal = Math.min(originalSpots + trulyAvailable, gameCapacity);
+    
+    // Update spot selector buttons
+    const buttons = document.querySelectorAll('.spot-select-btn');
+    buttons.forEach((btn) => {
+        const btnSpots = parseInt(btn.dataset.spots);
+        if (btnSpots > maxTotal) {
+            btn.disabled = true;
+            btn.style.opacity = '0.3';
+            btn.style.cursor = 'not-allowed';
+        } else {
+            btn.disabled = false;
+            btn.style.opacity = '1';
+            btn.style.cursor = 'pointer';
+        }
+    });
+}
+
+// Initialize on page load
+document.addEventListener('DOMContentLoaded', function() {
+    fetchSlotAvailability();
+    // Refresh every 3 seconds
+    setInterval(fetchSlotAvailability, 3000);
+});
+
+// Select number of spots
+function selectSpots(spots) {
+    selectedNewSpots = parseInt(spots);
+    
+    // Update button states
+    const buttons = document.querySelectorAll('.spot-select-btn');
+    buttons.forEach((btn) => {
+        const btnSpots = parseInt(btn.dataset.spots);
+        if (btnSpots === spots) {
+            btn.classList.add('active');
+        } else {
+            btn.classList.remove('active');
+        }
+    });
+    
+    // Update displays
+    document.getElementById('currentSpotsDisplay').textContent = spots;
+    
+    // Enable/disable update button based on whether spots changed
+    const updateBtn = document.getElementById('updateSpotsButton');
+    if (spots !== originalSpots) {
+        updateBtn.disabled = false;
+        updateBtn.style.opacity = '1';
+    } else {
+        updateBtn.disabled = true;
+        updateBtn.style.opacity = '0.5';
+    }
+    
+    // Hide previous message
+    const messageDiv = document.getElementById('spotUpdateMessage');
+    if(messageDiv) {
+        messageDiv.classList.add('hidden');
+    }
+    
+    // Update pricing preview
+    updatePricingPreview(spots);
+    
+    // Update capacity dots preview (fetch latest data first)
+    fetchSlotAvailability();
+}
+
+// Update pricing preview
+function updatePricingPreview(newSpots) {
+    const newSubtotal = (newSpots * pricePerSpot).toFixed(2);
+    // Platform fee stays the same regardless of spots for now
+    const newTotal = (parseFloat(newSubtotal) + parseFloat(platformFee)).toFixed(2);
+    
+    // Update spots text
+    const spotsText = document.getElementById('spotsText');
+    if(spotsText) {
+        spotsText.textContent = `${newSpots} spot${newSpots > 1 ? 's' : ''}`;
+    }
+    
+    // Update subtotal
+    const subtotalAmount = document.getElementById('subtotalAmount');
+    if(subtotalAmount) {
+        subtotalAmount.textContent = newSubtotal;
+    }
+    
+    // Update total
+    const totalAmount = document.getElementById('totalAmount');
+    if(totalAmount) {
+        totalAmount.textContent = newTotal;
+    }
+}
+
+// Update booking spots via AJAX
+function updateBookingSpots() {
+    const updateBtn = document.getElementById('updateSpotsButton');
+    const messageDiv = document.getElementById('spotUpdateMessage');
+    
+    // Set flex properties FIRST to prevent layout shift
+    updateBtn.style.display = 'flex';
+    updateBtn.style.alignItems = 'center';
+    updateBtn.style.justifyContent = 'center';
+    
+    // Then preserve button dimensions
+    const width = updateBtn.offsetWidth;
+    const height = updateBtn.offsetHeight;
+    updateBtn.style.width = width + 'px';
+    updateBtn.style.height = height + 'px';
+    updateBtn.style.minWidth = width + 'px';
+    updateBtn.style.minHeight = height + 'px';
+    
+    // Show loading state
+    updateBtn.innerHTML = '<div class="flex items-center justify-center gap-2"><div class="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div><span>Updating...</span></div>';
+    updateBtn.disabled = true;
+    
+    fetch(`/booking/games/update-spots/${bookingId}/`, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            spots: selectedNewSpots
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Update original spots
+            originalSpots = selectedNewSpots;
+            
+            // Show success message
+            messageDiv.textContent = `✅ ${data.message}`;
+            messageDiv.classList.remove('hidden');
+            messageDiv.style.background = 'rgba(16, 185, 129, 0.1)';
+            messageDiv.style.border = '1px solid rgba(16, 185, 129, 0.3)';
+            messageDiv.style.color = '#6ee7b7';
+            
+            // Reset button
+            updateBtn.innerHTML = 'Update Booking';
+            updateBtn.disabled = true;
+            updateBtn.style.opacity = '0.5';
+            
+            // Reload page after 2 seconds to refresh all data
+            setTimeout(() => {
+                window.location.reload();
+            }, 2000);
+        } else {
+            // Show error message
+            messageDiv.textContent = `❌ ${data.error}`;
+            messageDiv.classList.remove('hidden');
+            messageDiv.style.background = 'rgba(239, 68, 68, 0.1)';
+            messageDiv.style.border = '1px solid rgba(239, 68, 68, 0.3)';
+            messageDiv.style.color = '#fca5a5';
+            
+            // Reset button
+            updateBtn.innerHTML = 'Update Booking';
+            updateBtn.disabled = false;
+        }
+    })
+    .catch(error => {
+        messageDiv.textContent = `❌ Failed to update booking. Please try again.`;
+        messageDiv.classList.remove('hidden');
+        messageDiv.style.background = 'rgba(239, 68, 68, 0.1)';
+        messageDiv.style.border = '1px solid rgba(239, 68, 68, 0.3)';
+        messageDiv.style.color = '#fca5a5';
+        
+        updateBtn.innerHTML = 'Update Booking';
+        updateBtn.disabled = false;
+    });
+}
+
+// Enhanced payment processing with better UX
+function proceedToPayment() {
+    const button = document.getElementById('paymentButton');
+    const originalHTML = button.innerHTML;
+    
+    // Remove animation classes FIRST to prevent interference
+    button.classList.remove('hover-glow', 'btn-ripple', 'group');
+    
+    // Force remove any pseudo-element effects by resetting overflow
+    button.style.overflow = 'visible';
+    
+    // Set flex properties FIRST to prevent layout shift
+    button.style.display = 'flex';
+    button.style.alignItems = 'center';
+    button.style.justifyContent = 'center';
+    
+    // Then preserve button dimensions
+    const width = button.offsetWidth;
+    const height = button.offsetHeight;
+    button.style.width = width + 'px';
+    button.style.height = height + 'px';
+    button.style.minWidth = width + 'px';
+    button.style.minHeight = height + 'px';
+    
+    // Animated loading state
+    button.innerHTML = `
+        <div style="display: flex; align-items: center; justify-content: center; gap: 0.5rem;">
+            <div class="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent"></div>
+            <span>Processing...</span>
+        </div>
+    `;
+    button.disabled = true;
+    button.style.opacity = '0.8';
+    
+    // Create Razorpay order
+    fetch('/booking/payment/create-order/{{ booking.id }}/', {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+            'Content-Type': 'application/json'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (!data.success) {
+            throw new Error(data.error || 'Failed to create order');
+        }
+        
+        // Initialize Razorpay checkout
+        const options = {
+            key: data.key,
+            amount: data.amount,
+            currency: data.currency,
+            name: 'NEXGEN FC',
+            description: '{{ booking.game.name }} - {{ booking.booking_type }} Booking',
+            order_id: data.order_id,
+            prefill: {
+                name: data.customer_name,
+                email: data.customer_email,
+                contact: data.customer_phone
+            },
+            theme: {
+                color: '#667eea'
+            },
+            handler: function(response) {
+                // Payment successful - verify signature
+                verifyPayment(response, data.booking_id);
+            },
+            modal: {
+                ondismiss: function() {
+                    button.innerHTML = originalHTML;
+                    button.disabled = false;
+                    button.style.opacity = '1';
+                }
+            }
+        };
+        
+        const rzp = new Razorpay(options);
+        
+        rzp.on('payment.failed', function(response) {
+            window.location.href = '/booking/payment/cancelled/{{ booking.id }}/';
+        });
+        
+        rzp.open();
+        
+        // Reset button if Razorpay modal doesn't open
+        setTimeout(() => {
+            if (button.disabled && button.innerHTML.includes('Processing')) {
+                button.innerHTML = originalHTML;
+                button.disabled = false;
+                button.style.opacity = '1';
+            }
+        }, 3000);
+    })
+    .catch(error => {
+        showNotification('error', 'Failed to initiate payment: ' + error.message);
+        button.innerHTML = originalHTML;
+        button.disabled = false;
+        button.style.opacity = '1';
+    });
+}
+
+function verifyPayment(razorpayResponse, bookingId) {
+    const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+    
+    document.body.innerHTML = `
+        <style>
+            @keyframes spin {
+                from { transform: rotate(0deg); }
+                to { transform: rotate(360deg); }
+            }
+            .spinner {
+                animation: spin 1.5s linear infinite;
+            }
+        </style>
+        <div style="background: #111827; min-height: 100vh; display: flex; align-items: center; justify-content: center;">
+            <div style="text-align: center; max-width: 28rem; margin: 0 auto; padding: 0 1rem;">
+                <div class="spinner" style="width: 4rem; height: 4rem; border-radius: 9999px; border: 4px solid transparent; border-bottom-color: #667eea; margin: 0 auto 1rem auto;"></div>
+                <h2 style="font-size: 1.5rem; font-weight: 700; color: white; margin-bottom: 0.5rem;">Verifying Payment...</h2>
+                <p style="color: #9ca3af;">Please wait while we confirm your booking</p>
+            </div>
+        </div>
+    `;
+    
+    pollPaymentStatus(bookingId, csrfToken, razorpayResponse, 0);
+}
+
+function pollPaymentStatus(bookingId, csrfToken, razorpayResponse, attempts) {
+    const maxWebhookAttempts = 3;  // Reduced from 5 to 3 for faster API fallback
+    const maxTotalAttempts = 15;  // Reduced from 20 to 15
+    
+    fetch('/booking/payment/status/' + bookingId + '/', {
+        method: 'GET',
+        headers: {
+            'X-CSRFToken': csrfToken
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success && data.booking_status === 'CONFIRMED') {
+            window.location.href = '/booking/payment/success/' + bookingId + '/';
+        } else if (attempts < maxWebhookAttempts) {
+            setTimeout(() => {
+                pollPaymentStatus(bookingId, csrfToken, razorpayResponse, attempts + 1);
+            }, 500);  // Reduced from 1000ms to 500ms for faster polling
+        } else if (attempts === maxWebhookAttempts) {
+            verifyPaymentViaAPI(bookingId, csrfToken, razorpayResponse, attempts);
+        } else if (attempts >= maxTotalAttempts) {
+            alert('Payment processing is taking longer than expected. Please check your bookings or contact support.');
+            window.location.href = '/booking/my-bookings/';
+        } else {
+            setTimeout(() => {
+                pollPaymentStatus(bookingId, csrfToken, razorpayResponse, attempts + 1);
+            }, 1000);
+        }
+    })
+    .catch(error => {
+        if (attempts >= maxTotalAttempts) {
+            alert('Unable to verify payment status. Please contact support.');
+            window.location.href = '/booking/my-bookings/';
+        } else {
+            setTimeout(() => {
+                pollPaymentStatus(bookingId, csrfToken, razorpayResponse, attempts + 1);
+            }, 1000);
+        }
+    });
+}
+
+function verifyPaymentViaAPI(bookingId, csrfToken, razorpayResponse, currentAttempts) {
+    fetch('/booking/payment/verify/', {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': csrfToken,
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            razorpay_order_id: razorpayResponse.razorpay_order_id,
+            razorpay_payment_id: razorpayResponse.razorpay_payment_id,
+            razorpay_signature: razorpayResponse.razorpay_signature,
+            booking_id: bookingId
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            window.location.href = '/booking/payment/success/' + bookingId + '/';
+        } else {
+            setTimeout(() => {
+                pollPaymentStatus(bookingId, csrfToken, razorpayResponse, currentAttempts + 1);
+            }, 1000);
+        }
+    })
+    .catch(error => {
+        setTimeout(() => {
+            pollPaymentStatus(bookingId, csrfToken, razorpayResponse, currentAttempts + 1);
+        }, 1000);
+    });
+}
+
+function cancelBooking() {
+    if (confirm('⚠️ Are you sure you want to cancel this booking?\n\nThis action cannot be undone.')) {
+        const cancelBtn = event.target;
+        const originalHTML = cancelBtn.innerHTML;
+        
+        // Set flex properties FIRST to prevent layout shift
+        cancelBtn.style.display = 'flex';
+        cancelBtn.style.alignItems = 'center';
+        cancelBtn.style.justifyContent = 'center';
+        
+        // Then preserve button dimensions
+        const width = cancelBtn.offsetWidth;
+        const height = cancelBtn.offsetHeight;
+        cancelBtn.style.width = width + 'px';
+        cancelBtn.style.height = height + 'px';
+        cancelBtn.style.minWidth = width + 'px';
+        cancelBtn.style.minHeight = height + 'px';
+        
+        cancelBtn.innerHTML = `
+            <div style="display: flex; align-items: center; justify-content: center; gap: 0.5rem;">
+                <div class="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
+                <span>Cancelling...</span>
+            </div>
+        `;
+        cancelBtn.disabled = true;
+        
+        fetch('/booking/games/cancel/{{ booking.id }}/', {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showNotification('success', 'Booking cancelled successfully');
+                setTimeout(() => {
+                    window.location.href = '{% url "booking:game_detail" game_id=booking.game.id %}';
+                }, 1000);
+            } else {
+                showNotification('error', data.error || 'Error cancelling booking');
+                cancelBtn.innerHTML = originalHTML;
+                cancelBtn.disabled = false;
+            }
+        })
+        .catch(error => {
+            showNotification('error', 'Error cancelling booking. Please try again.');
+            cancelBtn.innerHTML = originalHTML;
+            cancelBtn.disabled = false;
+        });
+    }
+}
+
+// Enhanced notification system
+function showNotification(type, message) {
+    const notification = document.createElement('div');
+    const icons = {
+        success: 'check-circle-fill',
+        error: 'exclamation-circle-fill',
+        warning: 'exclamation-triangle-fill',
+        info: 'info-circle-fill'
+    };
+    
+    const colors = {
+        success: 'rgba(16, 185, 129, 0.9)',
+        error: 'rgba(239, 68, 68, 0.9)',
+        warning: 'rgba(245, 158, 11, 0.9)',
+        info: 'rgba(59, 130, 246, 0.9)'
+    };
+    
+    notification.className = `fixed top-24 right-6 z-50 max-w-md p-4 rounded-xl shadow-2xl animate-fade-in-down`;
+    notification.style.background = colors[type];
+    notification.style.border = `2px solid ${colors[type]}`;
+    notification.innerHTML = `
+        <div class="flex items-start gap-3">
+            <i class="bi bi-${icons[type]} text-white text-2xl flex-shrink-0"></i>
+            <div class="flex-1">
+                <p class="text-white font-semibold text-sm">${message}</p>
+            </div>
+            <button onclick="this.parentElement.parentElement.remove()" class="text-white/80 hover:text-white">
+                <i class="bi bi-x-lg"></i>
+            </button>
+        </div>
+    `;
+    
+    document.body.appendChild(notification);
+    
+    setTimeout(() => {
+        notification.style.animation = 'fadeOut 0.3s ease-out forwards';
+        setTimeout(() => notification.remove(), 300);
+    }, 5000);
+}
+
+// Add CSRF token for AJAX requests
+document.addEventListener('DOMContentLoaded', function() {
+    const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]');
+    if (!csrfToken) {
+        const token = document.createElement('input');
+        token.type = 'hidden';
+        token.name = 'csrfmiddlewaretoken';
+        token.value = '{{ csrf_token }}';
+        document.body.appendChild(token);
+    }
+    
+    // Initialize payment timer
+    initializePaymentTimer();
+});
+
+// Payment Timer System
+let timerInterval = null;
+const RESERVATION_EXPIRES_AT_STR = '{{ booking.reservation_expires_at|date:"c" }}';
+const RESERVATION_EXPIRES_AT = RESERVATION_EXPIRES_AT_STR ? new Date(RESERVATION_EXPIRES_AT_STR) : null;
+const TOTAL_DURATION_MS = 5 * 60 * 1000; // 5 minutes in milliseconds
+
+function initializePaymentTimer() {
+    // Check if reservation expiry time exists
+    if (!RESERVATION_EXPIRES_AT || isNaN(RESERVATION_EXPIRES_AT.getTime())) {
+        // No valid expiry time - hide timer banner silently
+        // This can happen for old bookings created before the reservation system
+        const timerBanner = document.getElementById('paymentTimerBanner');
+        if (timerBanner) {
+            timerBanner.style.display = 'none';
+        }
+        return;
+    }
+    
+    // Check if reservation has already expired
+    const now = new Date();
+    if (now >= RESERVATION_EXPIRES_AT) {
+        handleTimerExpired();
+        return;
+    }
+    
+    // Start the timer
+    updateTimer();
+    timerInterval = setInterval(updateTimer, 1000);
+}
+
+function updateTimer() {
+    if (!RESERVATION_EXPIRES_AT) {
+        return;
+    }
+    
+    const now = new Date();
+    const timeRemaining = RESERVATION_EXPIRES_AT - now;
+    
+    if (timeRemaining <= 0) {
+        handleTimerExpired();
+        return;
+    }
+    
+    // Calculate minutes and seconds
+    const minutes = Math.floor(timeRemaining / 60000);
+    const seconds = Math.floor((timeRemaining % 60000) / 1000);
+    
+    // Update display
+    const minutesEl = document.getElementById('timerMinutes');
+    const secondsEl = document.getElementById('timerSeconds');
+    
+    if (minutesEl) minutesEl.textContent = String(minutes).padStart(2, '0');
+    if (secondsEl) secondsEl.textContent = String(seconds).padStart(2, '0');
+    
+    // Update progress bar
+    const percentageRemaining = (timeRemaining / TOTAL_DURATION_MS) * 100;
+    const progressBar = document.getElementById('timerProgressBar');
+    if (progressBar) {
+        progressBar.style.width = percentageRemaining + '%';
+        
+        // Change color based on time remaining
+        if (percentageRemaining < 20) {
+            progressBar.style.background = 'linear-gradient(to right, #dc2626, #ef4444)'; // Red
+        } else if (percentageRemaining < 50) {
+            progressBar.style.background = 'linear-gradient(to right, #f59e0b, #fbbf24)'; // Orange/Yellow
+        }
+    }
+    
+    // Show warning when less than 1 minute
+    if (timeRemaining < 60000 && timeRemaining > 59000) {
+        showTimerWarning('Less than 1 minute remaining!');
+    }
+    
+    // Flash timer when less than 30 seconds
+    const timerElement = document.getElementById('paymentTimer');
+    if (timeRemaining < 30000) {
+        timerElement.style.animation = 'pulse 0.5s ease-in-out infinite';
+    }
+}
+
+function handleTimerExpired() {
+    // Stop the timer
+    if (timerInterval) {
+        clearInterval(timerInterval);
+        timerInterval = null;
+    }
+    
+    // Update display
+    document.getElementById('timerMinutes').textContent = '00';
+    document.getElementById('timerSeconds').textContent = '00';
+    document.getElementById('timerProgressBar').style.width = '0%';
+    
+    // Show expiry modal
+    showExpiryModal();
+}
+
+function showExpiryModal() {
+    const modal = document.createElement('div');
+    modal.className = 'fixed inset-0 bg-black/80 backdrop-blur-sm z-[100] flex items-center justify-center p-4';
+    modal.innerHTML = `
+        <div class="bg-gradient-to-br from-gray-900 to-gray-800 rounded-2xl max-w-md w-full p-8 border-2 border-red-500/50 shadow-2xl animate-shake">
+            <div class="text-center">
+                <div class="w-20 h-20 bg-red-500/20 rounded-full flex items-center justify-center mx-auto mb-6">
+                    <i class="bi bi-hourglass-bottom text-red-400 text-4xl"></i>
+                </div>
+                <h2 class="text-3xl font-black text-white mb-4">Payment Time Expired</h2>
+                <p class="text-gray-300 mb-6 leading-relaxed">
+                    Your 5-minute payment window has expired. Your reservation has been released and the spots are now available for other users.
+                </p>
+                <div class="bg-yellow-500/10 border border-yellow-500/30 rounded-lg p-4 mb-6">
+                    <p class="text-yellow-300 text-sm">
+                        <i class="bi bi-info-circle-fill"></i>
+                        Don't worry! You can book again if the slot is still available.
+                    </p>
+                </div>
+                <div class="flex gap-3">
+                    <a href="/booking/games/{{ booking.game.id }}/" 
+                       class="flex-1 bg-gradient-to-r from-primary-500 to-secondary-500 hover:from-primary-600 hover:to-secondary-600 text-white px-6 py-3 rounded-lg font-semibold transition-all shadow-lg">
+                        <i class="bi bi-arrow-clockwise"></i> Book Again
+                    </a>
+                    <a href="/" 
+                       class="flex-1 bg-white/10 hover:bg-white/20 text-white px-6 py-3 rounded-lg font-medium transition-colors border border-white/20">
+                        Go Home
+                    </a>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(modal);
+    
+    // Disable payment button
+    const payButton = document.getElementById('payNowButton');
+    if (payButton) {
+        payButton.disabled = true;
+        payButton.classList.add('opacity-50', 'cursor-not-allowed');
+        payButton.innerHTML = '<i class="bi bi-hourglass-bottom"></i> Payment Expired';
+    }
+}
+
+function showTimerWarning(message) {
+    const notification = document.createElement('div');
+    notification.className = 'fixed top-4 right-4 z-50 animate-slide-in';
+    notification.innerHTML = `
+        <div class="bg-gradient-to-br from-yellow-900/95 to-orange-800/95 backdrop-blur-xl rounded-xl p-4 border-2 border-yellow-500/50 shadow-xl max-w-sm">
+            <div class="flex items-center gap-3">
+                <i class="bi bi-exclamation-triangle-fill text-yellow-300 text-2xl"></i>
+                <div>
+                    <p class="text-white font-bold text-sm">${message}</p>
+                    <p class="text-yellow-200 text-xs mt-1">Complete your payment quickly!</p>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(notification);
+    
+    setTimeout(() => {
+        notification.style.opacity = '0';
+        setTimeout(() => notification.remove(), 300);
+    }, 5000);
+}
+
+// Add shake animation
+const shakeStyle = document.createElement('style');
+shakeStyle.textContent = `
+    @keyframes shake {
+        0%, 100% { transform: translateX(0); }
+        10%, 30%, 50%, 70%, 90% { transform: translateX(-10px); }
+        20%, 40%, 60%, 80% { transform: translateX(10px); }
+    }
+    .animate-shake {
+        animation: shake 0.5s ease-in-out;
+    }
+    @keyframes slide-in {
+        from {
+            opacity: 0;
+            transform: translateX(100%);
+        }
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+    .animate-slide-in {
+        animation: slide-in 0.3s ease-out;
+    }
+`;
+document.head.appendChild(shakeStyle);
+</script>
+{% csrf_token %}
+{% endblock %}

@@ -1,0 +1,185 @@
+{% extends "base.html" %}
+
+{% block title %}Login Error - TapNex{% endblock %}
+
+{% block content %}
+<style>
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    @keyframes scaleIn {
+        from {
+            transform: scale(0);
+        }
+        to {
+            transform: scale(1);
+        }
+    }
+    
+    .animate-fade-in {
+        animation: fadeIn 0.5s ease-out;
+    }
+    
+    .animate-scale-in {
+        animation: scaleIn 0.5s ease-out 0.2s both;
+    }
+    
+    /* Mobile optimizations */
+    @media (max-width: 640px) {
+        .error-container {
+            padding: 1rem;
+            padding-top: 5rem !important;
+        }
+        
+        .error-card {
+            padding: 1.5rem;
+        }
+        
+        .error-icon {
+            width: 4rem;
+            height: 4rem;
+        }
+        
+        .error-title {
+            font-size: 1.5rem;
+            line-height: 2rem;
+        }
+        
+        .error-text {
+            font-size: 0.875rem;
+        }
+        
+        .error-btn {
+            padding: 0.875rem 1rem;
+            font-size: 0.9375rem;
+            touch-action: manipulation;
+            -webkit-tap-highlight-color: transparent;
+        }
+    }
+    
+    /* Enhanced button hover effects */
+    .error-btn {
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .error-btn::before {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 0;
+        height: 0;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.1);
+        transform: translate(-50%, -50%);
+        transition: width 0.6s, height 0.6s;
+    }
+    
+    .error-btn:active::before {
+        width: 300px;
+        height: 300px;
+    }
+    
+    /* Gradient background */
+    .error-bg {
+        background: linear-gradient(135deg, #1a1f2e 0%, #0f1419 100%);
+    }
+</style>
+
+<div class="error-bg min-h-screen flex items-center justify-center error-container py-12 pt-24">
+    <div class="max-w-md w-full animate-fade-in">
+        <div class="card text-center error-card">
+            <!-- Error Icon -->
+            <div class="w-20 h-20 error-icon bg-gradient-to-br from-red-500/30 to-red-600/20 rounded-full flex items-center justify-center mx-auto mb-6 animate-scale-in">
+                <svg class="w-10 h-10 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                </svg>
+            </div>
+
+            <h1 class="text-3xl error-title font-gaming font-bold text-white mb-4">
+                Login Error
+            </h1>
+            
+            <p class="text-gray-400 error-text mb-8 leading-relaxed">
+                We encountered an issue while trying to log you in with Google. This is usually temporary.
+            </p>
+
+            <!-- Error Message -->
+            <div class="bg-red-500/10 rounded-lg p-4 mb-6 border border-red-500/20 error-message">
+                <p class="text-sm text-red-300">
+                    <i class="bi bi-exclamation-triangle mr-2"></i>
+                    Authentication failed - please try again
+                </p>
+            </div>
+
+            <!-- Troubleshooting Tips -->
+            <div class="bg-gaming-accent/10 rounded-lg p-4 mb-6 text-left">
+                <p class="text-sm font-semibold text-white mb-2">Quick fixes to try:</p>
+                <ul class="text-sm text-gray-400 space-y-1">
+                    <li>• Clear your browser cache and cookies</li>
+                    <li>• Try a different browser</li>
+                    <li>• Check your internet connection</li>
+                    <li>• Disable browser extensions temporarily</li>
+                </ul>
+            </div>
+
+            <div class="space-y-3">
+                <a href="{% url 'authentication:customer_login' %}" class="btn-primary w-full flex items-center justify-center text-center error-btn">
+                    <i class="bi bi-arrow-clockwise mr-2"></i>
+                    Try Again
+                </a>
+                
+                <a href="{% url 'home' %}" class="btn-secondary w-full flex items-center justify-center text-center error-btn">
+                    <i class="bi bi-house-door mr-2"></i>
+                    Return to Home
+                </a>
+            </div>
+
+            <!-- Additional Quick Links -->
+            <div class="mt-6 pt-6 border-t border-gaming-accent">
+                <p class="text-gray-400 text-sm mb-3">Still having trouble?</p>
+                <a href="{% url 'contact' %}" class="text-gaming-highlight hover:underline text-sm font-semibold">
+                    <i class="bi bi-headset mr-1"></i>
+                    Contact Support
+                </a>
+            </div>
+        </div>
+        
+        <!-- Footer branding -->
+        <div class="text-center mt-6">
+            <p class="text-gray-600 text-sm">
+                Powered by <span class="text-gaming-highlight font-semibold">TapNex</span>
+            </p>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Auto-dismiss error message after 3 seconds
+    document.addEventListener('DOMContentLoaded', function() {
+        const errorMessage = document.querySelector('.error-message');
+        if (errorMessage) {
+            setTimeout(() => {
+                errorMessage.style.opacity = '0';
+                errorMessage.style.transform = 'translateY(-10px)';
+                errorMessage.style.transition = 'all 0.3s ease';
+                
+                // Remove from DOM after fade out
+                setTimeout(() => {
+                    errorMessage.remove();
+                }, 300);
+            }, 3000);
+        }
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,408 @@
+{% extends 'authentication/owner_base.html' %}
+{% load static %}
+
+{% block title %}Bookings Management{% endblock %}
+{% block page_title %}Bookings{% endblock %}
+{% block page_subtitle %}Manage all customer bookings{% endblock %}
+
+{% block extra_css %}
+<style>
+    .hero-bg {
+        position: absolute;
+        inset: 0;
+        overflow: hidden;
+        z-index: 0;
+        pointer-events: none;
+        height: 100%;
+    }
+    
+    .gradient-orb {
+        position: absolute;
+        border-radius: 50%;
+        filter: blur(100px);
+        opacity: 0.2;
+        animation: floatOrb 20s ease-in-out infinite;
+    }
+    
+    .orb-1 {
+        width: 400px;
+        height: 400px;
+        background: radial-gradient(circle, rgba(102, 126, 234, 0.4) 0%, transparent 70%);
+        top: -100px;
+        right: -100px;
+    }
+    
+    .orb-2 {
+        width: 350px;
+        height: 350px;
+        background: radial-gradient(circle, rgba(168, 85, 247, 0.3) 0%, transparent 70%);
+        bottom: -80px;
+        left: -80px;
+        animation-delay: 7s;
+    }
+    
+    @keyframes floatOrb {
+        0%, 100% { transform: translate(0, 0) scale(1); }
+        33% { transform: translate(20px, -20px) scale(1.05); }
+        66% { transform: translate(-20px, 20px) scale(0.95); }
+    }
+    
+    .grid-pattern {
+        background-image: 
+            linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+        background-size: 50px 50px;
+        position: absolute;
+        inset: 0;
+        z-index: 0;
+    }
+    
+    /* Dark theme for select dropdowns */
+    select option {
+        background-color: #1e293b;
+        color: #ffffff;
+        padding: 8px;
+    }
+    
+    select option:hover {
+        background-color: #334155;
+    }
+    
+    select option:checked {
+        background-color: #4f46e5;
+        color: #ffffff;
+    }
+    
+    @media (max-width: 768px) {
+        .orb-1, .orb-2 {
+            width: 250px;
+            height: 250px;
+            filter: blur(60px);
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="relative">
+    <!-- Background Elements -->
+    <div class="hero-bg">
+        <div class="gradient-orb orb-1"></div>
+        <div class="gradient-orb orb-2"></div>
+        <div class="grid-pattern"></div>
+    </div>
+    
+    <!-- Status Summary -->
+    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-6 relative z-10">
+        <a href="?status=confirmed" class="stat-card animate-fade-in-up {% if status_filter == 'confirmed' %}ring-2 ring-green-500{% endif %}" style="animation-delay: 0.1s;">
+            <i class="bi bi-check-circle text-green-400 text-xl mb-1 block"></i>
+            <p class="text-gray-400 text-xs mb-1 font-medium">Confirmed</p>
+            <p class="text-2xl font-black text-green-400" style="font-family: 'Orbitron', sans-serif;">{{ confirmed_bookings }}</p>
+            <p class="text-xs text-gray-500 mt-1">Upcoming</p>
+        </a>
+        <a href="?status=in_progress" class="stat-card animate-fade-in-up {% if status_filter == 'in_progress' %}ring-2 ring-blue-500{% endif %}" style="animation-delay: 0.2s;">
+            <i class="bi bi-play-circle text-blue-400 text-xl mb-1 block"></i>
+            <p class="text-gray-400 text-xs mb-1 font-medium">In Progress</p>
+            <p class="text-2xl font-black text-blue-400" style="font-family: 'Orbitron', sans-serif;">{{ in_progress_bookings }}</p>
+            <p class="text-xs text-gray-500 mt-1">Active now</p>
+        </a>
+        <a href="?status=completed" class="stat-card animate-fade-in-up {% if status_filter == 'completed' %}ring-2 ring-gray-500{% endif %}" style="animation-delay: 0.3s;">
+            <i class="bi bi-check-all text-gray-400 text-xl mb-1 block"></i>
+            <p class="text-gray-400 text-xs mb-1 font-medium">Completed</p>
+            <p class="text-2xl font-black text-gray-400" style="font-family: 'Orbitron', sans-serif;">{{ completed_bookings }}</p>
+            <p class="text-xs text-gray-500 mt-1">Finished</p>
+        </a>
+        <a href="?status=cancelled" class="stat-card animate-fade-in-up {% if status_filter == 'cancelled' %}ring-2 ring-red-500{% endif %}" style="animation-delay: 0.4s;">
+            <i class="bi bi-x-circle text-red-400 text-xl mb-1 block"></i>
+            <p class="text-gray-400 text-xs mb-1 font-medium">Cancelled</p>
+            <p class="text-2xl font-black text-red-400" style="font-family: 'Orbitron', sans-serif;">{{ cancelled_bookings }}</p>
+            <p class="text-xs text-gray-500 mt-1">Cancelled</p>
+        </a>
+        <a href="?status=pending" class="stat-card animate-fade-in-up {% if status_filter == 'pending' %}ring-2 ring-yellow-500{% endif %} {% if pending_payment_bookings > 0 %}ring-2 ring-yellow-500/50 animate-pulse{% endif %}" style="animation-delay: 0.5s;">
+            <i class="bi bi-clock-history text-yellow-400 text-xl mb-1 block"></i>
+            <p class="text-gray-400 text-xs mb-1 font-medium">Pending</p>
+            <p class="text-2xl font-black text-yellow-400" style="font-family: 'Orbitron', sans-serif;">{{ pending_payment_bookings }}</p>
+            <p class="text-xs text-gray-500 mt-1">Awaiting payment</p>
+        </a>
+        <a href="?status=no_show" class="stat-card animate-fade-in-up {% if status_filter == 'no_show' %}ring-2 ring-orange-500{% endif %}" style="animation-delay: 0.6s;">
+            <i class="bi bi-person-x text-orange-400 text-xl mb-1 block"></i>
+            <p class="text-gray-400 text-xs mb-1 font-medium">No Shows</p>
+            <p class="text-2xl font-black text-orange-400" style="font-family: 'Orbitron', sans-serif;">{{ no_shows }}</p>
+            <p class="text-xs text-gray-500 mt-1">Didn't arrive</p>
+        </a>
+    </div>
+
+    <!-- Filters -->
+    <div class="owner-card mb-6 relative z-10 animate-fade-in-up" style="animation-delay: 0.7s;">
+        <div class="flex items-center gap-3 mb-4">
+            <i class="bi bi-funnel text-indigo-400 text-xl"></i>
+            <h3 class="text-lg font-bold text-white">Filter Bookings</h3>
+        </div>
+        <form method="get" id="filterForm" class="space-y-4">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-300 mb-2">
+                        <i class="bi bi-search text-gray-400 mr-1"></i> Search
+                    </label>
+                    <input type="text" 
+                           name="search" 
+                           value="{{ search_query }}"
+                           placeholder="ID, Name, Email..." 
+                           class="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all">
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-300 mb-2">
+                        <i class="bi bi-bookmark text-gray-400 mr-1"></i> Status
+                    </label>
+                    <select name="status" class="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all">
+                        <option value="all" {% if status_filter == 'all' %}selected{% endif %}>All Statuses</option>
+                        <option value="confirmed" {% if status_filter == 'confirmed' %}selected{% endif %}>Confirmed</option>
+                        <option value="in_progress" {% if status_filter == 'in_progress' %}selected{% endif %}>In Progress</option>
+                        <option value="completed" {% if status_filter == 'completed' %}selected{% endif %}>Completed</option>
+                        <option value="cancelled" {% if status_filter == 'cancelled' %}selected{% endif %}>Cancelled</option>
+                        <option value="pending" {% if status_filter == 'pending' %}selected{% endif %}>Pending</option>
+                        <option value="no_show" {% if status_filter == 'no_show' %}selected{% endif %}>No Show</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-300 mb-2">
+                        <i class="bi bi-controller text-gray-400 mr-1"></i> Game
+                    </label>
+                    <select name="game" class="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all">
+                        <option value="all">All Games</option>
+                        {% for game in all_games %}
+                        <option value="{{ game.id }}" {% if game_filter == game.id|stringformat:"s" %}selected{% endif %}>{{ game.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-300 mb-2">
+                        <i class="bi bi-calendar text-gray-400 mr-1"></i> Date Range
+                    </label>
+                    <select name="date" class="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all">
+                        <option value="all" {% if date_filter == 'all' %}selected{% endif %}>All Time</option>
+                        <option value="today" {% if date_filter == 'today' %}selected{% endif %}>Today</option>
+                        <option value="week" {% if date_filter == 'week' %}selected{% endif %}>This Week</option>
+                        <option value="month" {% if date_filter == 'month' %}selected{% endif %}>This Month</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="flex flex-wrap gap-3 pt-2">
+                <button type="submit" class="btn btn-primary flex items-center gap-2 px-6">
+                    <i class="bi bi-check-circle"></i> Apply Filters
+                </button>
+                <a href="{% url 'authentication:owner_bookings' %}" class="btn btn-secondary flex items-center gap-2 px-6">
+                    <i class="bi bi-arrow-counterclockwise"></i> Reset
+                </a>
+                {% if status_filter != 'all' or game_filter != 'all' or date_filter != 'all' or search_query %}
+                <div class="flex items-center gap-2 px-4 py-2 bg-indigo-500/20 border border-indigo-500/30 rounded-lg text-indigo-300 text-sm">
+                    <i class="bi bi-funnel-fill"></i>
+                    <span>Filters Active</span>
+                </div>
+                {% endif %}
+            </div>
+        </form>
+    </div>
+
+    <!-- Bookings Table -->
+    <div class="owner-card relative z-10 animate-fade-in-up" style="animation-delay: 0.8s;">
+        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-6">
+            <h3 class="text-xl font-bold text-white flex items-center gap-2">
+                <i class="bi bi-calendar-check"></i>
+                All Bookings
+            </h3>
+            <div class="flex items-center gap-3">
+                <span class="px-3 py-1.5 bg-indigo-500/20 border border-indigo-500/30 rounded-lg text-indigo-300 text-sm font-medium">
+                    <i class="bi bi-list-ul mr-1"></i>
+                    {{ total_bookings }} Total
+                </span>
+                <span class="text-gray-400 text-sm">
+                    Showing {{ bookings.start_index }}-{{ bookings.end_index }} of {{ total_bookings }}
+                </span>
+            </div>
+        </div>
+        
+        <div class="overflow-x-auto">
+            <table class="min-w-full">
+                <thead>
+                    <tr class="border-b border-white/10">
+                        <th class="px-4 py-3 text-left text-xs font-semibold text-gray-400 uppercase">ID</th>
+                        <th class="px-4 py-3 text-left text-xs font-semibold text-gray-400 uppercase">Customer</th>
+                        <th class="px-4 py-3 text-left text-xs font-semibold text-gray-400 uppercase">Game</th>
+                        <th class="px-4 py-3 text-left text-xs font-semibold text-gray-400 uppercase">Type</th>
+                        <th class="px-4 py-3 text-left text-xs font-semibold text-gray-400 uppercase">Date & Time</th>
+                        <th class="px-4 py-3 text-left text-xs font-semibold text-gray-400 uppercase">Revenue</th>
+                        <th class="px-4 py-3 text-left text-xs font-semibold text-gray-400 uppercase">Status</th>
+                        <th class="px-4 py-3 text-left text-xs font-semibold text-gray-400 uppercase">Payment</th>
+                        <th class="px-4 py-3 text-left text-xs font-semibold text-gray-400 uppercase">QR Verified</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-white/5">
+                    {% for booking in bookings %}
+                    <tr class="hover:bg-white/5 transition-colors">
+                        <td class="px-4 py-4 text-sm font-mono text-gray-300">
+                            #{{ booking.id|slice:":8" }}
+                        </td>
+                        <td class="px-4 py-4">
+                            <div class="text-sm font-medium text-white">
+                                {{ booking.customer.user.get_full_name|default:booking.customer.user.username }}
+                            </div>
+                            <div class="text-xs text-gray-400">{{ booking.customer.user.email }}</div>
+                        </td>
+                        <td class="px-4 py-4 text-sm text-white">
+                            {{ booking.game.name }}
+                        </td>
+                        <td class="px-4 py-4">
+                            <div class="flex items-center gap-2">
+                                {% if booking.spots_booked == booking.game.capacity %}
+                                    <span class="px-2 py-1 text-xs font-semibold rounded-full bg-purple-500/20 text-purple-400 border border-purple-500/30 whitespace-nowrap">
+                                        <i class="bi bi-lock-fill"></i> Private
+                                    </span>
+                                {% else %}
+                                    <span class="px-2 py-1 text-xs font-semibold rounded-full bg-cyan-500/20 text-cyan-400 border border-cyan-500/30 whitespace-nowrap">
+                                        <i class="bi bi-people-fill"></i> Shared
+                                    </span>
+                                    <span class="text-xs text-gray-400 whitespace-nowrap">({{ booking.spots_booked }}/{{ booking.game.capacity }})</span>
+                                {% endif %}
+                            </div>
+                        </td>
+                        <td class="px-4 py-4">
+                            {% if booking.game_slot %}
+                                <div class="text-sm text-white">{{ booking.game_slot.date|date:"M d, Y" }}</div>
+                                <div class="text-xs text-gray-400">{{ booking.game_slot.start_time|date:"h:i A" }} - {{ booking.game_slot.end_time|date:"h:i A" }}</div>
+                            {% else %}
+                                <div class="text-sm text-gray-500">-</div>
+                            {% endif %}
+                        </td>
+                        <td class="px-4 py-4">
+                            {% if booking.payment_status == 'PAID' %}
+                                <div class="text-sm font-bold text-white">₹{{ booking.owner_payout|floatformat:2 }}</div>
+                                <div class="text-xs text-gray-400">
+                                    Base: ₹{{ booking.subtotal|floatformat:2 }}
+                                    {% if booking.commission_amount > 0 %}
+                                    <span class="text-orange-400">(-₹{{ booking.commission_amount|floatformat:2 }})</span>
+                                    {% endif %}
+                                </div>
+                            {% elif booking.payment_status == 'PENDING' %}
+                                <div class="text-sm text-yellow-400">Pending</div>
+                                <div class="text-xs text-gray-500">Awaiting payment</div>
+                            {% else %}
+                                <div class="text-sm text-gray-500">-</div>
+                            {% endif %}
+                        </td>
+                        <td class="px-4 py-4">
+                            <span class="px-2 py-1 text-xs font-semibold rounded-full
+                                {% if booking.status == 'CONFIRMED' %}bg-green-500/20 text-green-400 border border-green-500/30
+                                {% elif booking.status == 'IN_PROGRESS' %}bg-blue-500/20 text-blue-400 border border-blue-500/30
+                                {% elif booking.status == 'COMPLETED' %}bg-gray-500/20 text-gray-400 border border-gray-500/30
+                                {% elif booking.status == 'CANCELLED' %}bg-red-500/20 text-red-400 border border-red-500/30
+                                {% elif booking.status == 'NO_SHOW' %}bg-orange-500/20 text-orange-400 border border-orange-500/30
+                                {% else %}bg-yellow-500/20 text-yellow-400 border border-yellow-500/30{% endif %}">
+                                {{ booking.status }}
+                            </span>
+                        </td>
+                        <td class="px-4 py-4">
+                            <span class="px-2 py-1 text-xs font-semibold rounded-full
+                                {% if booking.payment_status == 'PAID' %}bg-green-500/20 text-green-400 border border-green-500/30
+                                {% elif booking.payment_status == 'PENDING' %}bg-yellow-500/20 text-yellow-400 border border-yellow-500/30
+                                {% else %}bg-red-500/20 text-red-400 border border-red-500/30{% endif %}">
+                                {% if booking.payment_status == 'PAID' %}
+                                    PAID
+                                {% elif booking.payment_status == 'PENDING' %}
+                                    PENDING
+                                {% else %}
+                                    FAILED
+                                {% endif %}
+                            </span>
+                        </td>
+                        <td class="px-4 py-4 text-center">
+                            {% if booking.is_verified %}
+                                <i class="bi bi-qr-code-scan text-green-400 text-lg" title="Verified at {{ booking.verified_at|date:'M d, h:i A' }}"></i>
+                            {% else %}
+                                <i class="bi bi-qr-code text-gray-600 text-lg" title="Not verified"></i>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="9" class="px-4 py-12 text-center">
+                            <i class="bi bi-calendar-x text-gray-600 text-5xl mb-4"></i>
+                            <p class="text-gray-400">No bookings found matching your criteria</p>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Pagination -->
+        {% if bookings.has_other_pages %}
+        <div class="mt-6 pt-6 border-t border-white/10">
+            <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
+                <div class="text-sm text-gray-400">
+                    Page {{ bookings.number }} of {{ bookings.paginator.num_pages }}
+                </div>
+                
+                <div class="flex items-center gap-2">
+                    {% if bookings.has_previous %}
+                        <a href="?page=1&status={{ status_filter }}&game={{ game_filter }}&date={{ date_filter }}&search={{ search_query }}" 
+                           class="px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-white hover:bg-white/10 transition-colors">
+                            <i class="bi bi-chevron-double-left"></i>
+                        </a>
+                        <a href="?page={{ bookings.previous_page_number }}&status={{ status_filter }}&game={{ game_filter }}&date={{ date_filter }}&search={{ search_query }}" 
+                           class="px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-white hover:bg-white/10 transition-colors">
+                            <i class="bi bi-chevron-left"></i> Previous
+                        </a>
+                    {% else %}
+                        <span class="px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-gray-600 cursor-not-allowed">
+                            <i class="bi bi-chevron-double-left"></i>
+                        </span>
+                        <span class="px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-gray-600 cursor-not-allowed">
+                            <i class="bi bi-chevron-left"></i> Previous
+                        </span>
+                    {% endif %}
+
+                    <!-- Page numbers -->
+                    <div class="hidden sm:flex items-center gap-1">
+                        {% for num in bookings.paginator.page_range %}
+                            {% if num == bookings.number %}
+                                <span class="px-4 py-2 bg-indigo-600 border border-indigo-500 rounded-lg text-white font-bold">
+                                    {{ num }}
+                                </span>
+                            {% elif num > bookings.number|add:'-3' and num < bookings.number|add:'3' %}
+                                <a href="?page={{ num }}&status={{ status_filter }}&game={{ game_filter }}&date={{ date_filter }}&search={{ search_query }}" 
+                                   class="px-4 py-2 bg-white/5 border border-white/10 rounded-lg text-white hover:bg-white/10 transition-colors">
+                                    {{ num }}
+                                </a>
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+
+                    {% if bookings.has_next %}
+                        <a href="?page={{ bookings.next_page_number }}&status={{ status_filter }}&game={{ game_filter }}&date={{ date_filter }}&search={{ search_query }}" 
+                           class="px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-white hover:bg-white/10 transition-colors">
+                            Next <i class="bi bi-chevron-right"></i>
+                        </a>
+                        <a href="?page={{ bookings.paginator.num_pages }}&status={{ status_filter }}&game={{ game_filter }}&date={{ date_filter }}&search={{ search_query }}" 
+                           class="px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-white hover:bg-white/10 transition-colors">
+                            <i class="bi bi-chevron-double-right"></i>
+                        </a>
+                    {% else %}
+                        <span class="px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-gray-600 cursor-not-allowed">
+                            Next <i class="bi bi-chevron-right"></i>
+                        </span>
+                        <span class="px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-gray-600 cursor-not-allowed">
+                            <i class="bi bi-chevron-double-right"></i>
+                        </span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,16 @@
+{
+  "name": "forge-gaming-cafe-booking-system",
+  "version": "1.0.0",
+  "description": "Gaming Cafe Booking System",
+  "scripts": {
+    "build-css": "postcss ./static/css/input.css -o ./static/css/output.css --watch",
+    "build-css-prod": "postcss ./static/css/input.css -o ./static/css/output.css",
+    "build": "npm run build-css-prod && pip3 install -r requirements.txt && python3 manage.py collectstatic --noinput",
+    "vercel-build": "npm run build-css-prod && python3 -m pip install -r requirements.txt && python3 manage.py collectstatic --noinput"
+  },
+  "dependencies": {
+    "postcss": "^8.5.6",
+    "postcss-cli": "^11.0.1",
+    "@tailwindcss/postcss": "^4.1.16"
+  }
+}

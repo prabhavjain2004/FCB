@@ -1,0 +1,979 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}QR Scanner - TapNex Gaming Cafe{% endblock %}
+
+{% block extra_css %}
+<script type="module" src="https://cdn.jsdelivr.net/npm/qr-scanner@1.4.2/qr-scanner.min.js"></script>
+<style>
+    /* Scanner Visual States */
+    #scanner-container {
+        transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        border: 4px solid transparent;
+    }
+    #scanner-container.scanning { 
+        border-color: #06b6d4;
+    }
+    #scanner-container.processing { 
+        border-color: #f59e0b;
+    }
+    #scanner-container.success {
+        border-color: #10b981;
+        animation: success-pulse 0.6s ease-out;
+    }
+    #scanner-container.error {
+        border-color: #ef4444;
+        animation: error-shake 0.5s ease-out;
+    }
+
+    @keyframes success-pulse {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.02); }
+    }
+
+    @keyframes error-shake {
+        0%, 100% { transform: translateX(0); }
+        25% { transform: translateX(-10px); }
+        75% { transform: translateX(10px); }
+    }
+
+    .animate-scan-line {
+        animation: scan-line 2s linear infinite;
+    }
+    
+    @keyframes scan-line {
+        0% { transform: translateY(-10%); opacity: 0; }
+        50% { opacity: 1; }
+        100% { transform: translateY(110%); opacity: 0; }
+    }
+
+    #loading-overlay.hidden { display: none; }
+
+    /* Animated Background */
+    .hero-bg {
+        position: absolute;
+        inset: 0;
+        overflow: hidden;
+        z-index: 0;
+        pointer-events: none;
+    }
+    
+    .gradient-orb {
+        position: absolute;
+        border-radius: 50%;
+        filter: blur(100px);
+        opacity: 0.3;
+        animation: floatOrb 20s ease-in-out infinite;
+    }
+    
+    .orb-1 {
+        width: 500px;
+        height: 500px;
+        background: radial-gradient(circle, rgba(102, 126, 234, 0.4) 0%, transparent 70%);
+        top: -150px;
+        right: -150px;
+    }
+    
+    .orb-2 {
+        width: 400px;
+        height: 400px;
+        background: radial-gradient(circle, rgba(168, 85, 247, 0.3) 0%, transparent 70%);
+        bottom: -100px;
+        left: -100px;
+        animation-delay: 7s;
+    }
+    
+    @keyframes floatOrb {
+        0%, 100% { transform: translate(0, 0) scale(1); }
+        33% { transform: translate(30px, -30px) scale(1.1); }
+        66% { transform: translate(-30px, 30px) scale(0.9); }
+    }
+
+    .grid-pattern {
+        background-image: 
+            linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+        background-size: 50px 50px;
+        position: absolute;
+        inset: 0;
+        z-index: 0;
+    }
+
+    .card-glow {
+        position: relative;
+    }
+    
+    .card-glow::before {
+        content: '';
+        position: absolute;
+        inset: -2px;
+        border-radius: inherit;
+        padding: 2px;
+        background: linear-gradient(135deg, #667eea, #a855f7);
+        -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+        -webkit-mask-composite: xor;
+        mask-composite: exclude;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+        pointer-events: none;
+    }
+    
+    .card-glow:hover::before {
+        opacity: 0.5;
+    }
+
+    /* Button z-index fix */
+    button, .btn, a.btn {
+        position: relative;
+        z-index: 10;
+    }
+
+    .animate-fade-in-up {
+        animation: fadeInUp 0.6s ease-out;
+    }
+
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* Modal Styles */
+    #bookingModal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.8);
+        backdrop-filter: blur(10px);
+        z-index: 9999;
+        align-items: center;
+        justify-content: center;
+        animation: fadeIn 0.3s ease-out;
+    }
+
+    #bookingModal.show {
+        display: flex;
+    }
+
+    .modal-content {
+        background: linear-gradient(135deg, rgba(30, 41, 59, 0.95), rgba(17, 24, 39, 0.95));
+        border: 2px solid rgba(102, 126, 234, 0.3);
+        border-radius: 1.5rem;
+        max-width: 600px;
+        width: 90%;
+        max-height: 90vh;
+        overflow-y: auto;
+        animation: slideUp 0.3s ease-out;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+
+    @keyframes slideUp {
+        from { transform: translateY(50px); opacity: 0; }
+        to { transform: translateY(0); opacity: 1; }
+    }
+
+    .modal-header {
+        padding: 2rem;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .modal-body {
+        padding: 2rem;
+    }
+
+    .modal-footer {
+        padding: 1.5rem 2rem;
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+        display: flex;
+        justify-content: center;
+    }
+
+    .info-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 1rem;
+        border-radius: 0.75rem;
+        margin-bottom: 0.75rem;
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .info-label {
+        color: #9ca3af;
+        font-size: 0.875rem;
+        font-weight: 500;
+    }
+
+    .info-value {
+        color: white;
+        font-weight: 600;
+        text-align: right;
+    }
+
+    .status-badge {
+        display: inline-block;
+        padding: 0.5rem 1rem;
+        border-radius: 0.5rem;
+        font-size: 0.875rem;
+        font-weight: 700;
+    }
+
+    .status-verified {
+        background: rgba(16, 185, 129, 0.2);
+        color: #10b981;
+        border: 1px solid rgba(16, 185, 129, 0.4);
+    }
+
+    .status-new {
+        background: rgba(6, 182, 212, 0.2);
+        color: #06b6d4;
+        border: 1px solid rgba(6, 182, 212, 0.4);
+    }
+
+    .status-warning {
+        background: rgba(245, 158, 11, 0.2);
+        color: #f59e0b;
+        border: 1px solid rgba(245, 158, 11, 0.4);
+    }
+
+    /* Mobile Animation Optimizations */
+    @media (max-width: 768px) {
+      .gradient-orb {
+        animation: floatOrb 40s cubic-bezier(0.4, 0, 0.6, 1) infinite !important;
+      }
+
+      @keyframes success-pulse {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.01); }
+      }
+
+      @keyframes error-shake {
+        0%, 100% { transform: translateX(0); }
+        25% { transform: translateX(-5px); }
+        75% { transform: translateX(5px); }
+      }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+{% csrf_token %}
+<div class="min-h-screen relative py-12" style="background: #111827;">
+    <!-- Animated Background -->
+    <div class="hero-bg">
+        <div class="gradient-orb orb-1"></div>
+        <div class="gradient-orb orb-2"></div>
+        <div class="grid-pattern"></div>
+    </div>
+
+    <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Header -->
+        <div class="card-glow animate-fade-in-up mb-8" style="background: rgba(30, 41, 59, 0.5); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 1.5rem; padding: 2rem;">
+            <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                <div class="flex items-center gap-4">
+                    <div class="w-16 h-16 rounded-2xl flex items-center justify-center" style="background: linear-gradient(135deg, #667eea, #a855f7);">
+                        <i class="bi bi-qr-code-scan text-white text-3xl"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-3xl font-black text-white mb-2" style="font-family: 'Orbitron', sans-serif;">QR Code Scanner</h1>
+                        <p class="text-gray-300">Scan customer booking QR codes for verification</p>
+                    </div>
+                </div>
+                <div class="flex flex-wrap gap-3">
+                    <a href="{% url 'booking:active_bookings' %}" class="px-6 py-3 rounded-xl font-bold transition-all" style="background: rgba(102, 126, 234, 0.2); color: #818cf8; border: 1px solid rgba(102, 126, 234, 0.4); z-index: 10;">
+                        <i class="bi bi-calendar-check mr-2"></i>Active Bookings
+                    </a>
+                    <a href="{% url 'authentication:cafe_owner_dashboard' %}" class="px-6 py-3 rounded-xl font-bold transition-all" style="background: rgba(255, 255, 255, 0.1); color: white; border: 1px solid rgba(255, 255, 255, 0.2); z-index: 10;">
+                        <i class="bi bi-arrow-left mr-2"></i>Dashboard
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- Left Column - Scanner -->
+            <div class="lg:col-span-2 space-y-6">
+                <!-- Scanner Card -->
+                <div class="card-glow animate-fade-in-up" style="background: rgba(30, 41, 59, 0.5); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 1.5rem; padding: 2rem; animation-delay: 0.1s;">
+                    <div class="flex items-center gap-3 mb-6">
+                        <div class="w-10 h-10 rounded-xl flex items-center justify-center" style="background: linear-gradient(135deg, #667eea, #a855f7);">
+                            <i class="bi bi-camera text-white text-xl"></i>
+                        </div>
+                        <h2 class="text-2xl font-black text-white">Camera Scanner</h2>
+                    </div>
+
+                    <div id="scanner-container" class="relative aspect-square bg-black rounded-2xl overflow-hidden shadow-inner mb-6">
+                        <video id="qr-video" class="w-full h-full object-cover"></video>
+                        
+                        <!-- Scanner Frame Overlay -->
+                        <div class="absolute inset-0 pointer-events-none flex items-center justify-center">
+                            <div class="relative w-64 h-64">
+                                <div class="absolute inset-0 border-2 border-cyan-400/60 rounded-2xl animate-pulse"></div>
+                                <div class="absolute inset-2 border border-cyan-300/40 rounded-xl"></div>
+                                <!-- Corner Markers -->
+                                <div class="absolute -top-1 -left-1 w-8 h-8 border-l-4 border-t-4 border-cyan-400 rounded-tl-lg animate-pulse"></div>
+                                <div class="absolute -top-1 -right-1 w-8 h-8 border-r-4 border-t-4 border-cyan-400 rounded-tr-lg animate-pulse" style="animation-delay: 0.2s;"></div>
+                                <div class="absolute -bottom-1 -left-1 w-8 h-8 border-l-4 border-b-4 border-cyan-400 rounded-bl-lg animate-pulse" style="animation-delay: 0.4s;"></div>
+                                <div class="absolute -bottom-1 -right-1 w-8 h-8 border-r-4 border-b-4 border-cyan-400 rounded-br-lg animate-pulse" style="animation-delay: 0.6s;"></div>
+                                <!-- Scan Line -->
+                                <div class="absolute inset-2 rounded-xl overflow-hidden">
+                                    <div class="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-transparent via-cyan-400 to-transparent animate-scan-line"></div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Loading Overlay -->
+                        <div id="loading-overlay" class="absolute inset-0 bg-black/80 flex items-center justify-center">
+                            <div class="text-center">
+                                <div class="w-12 h-12 border-4 border-cyan-400/30 border-t-cyan-400 rounded-full animate-spin mx-auto mb-4"></div>
+                                <p class="text-cyan-300 font-semibold">Initializing camera...</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Scan Status -->
+                    <div id="scan-status" class="mb-6">
+                        <div class="p-4 rounded-xl" style="background: rgba(6, 182, 212, 0.1); border: 1px solid rgba(6, 182, 212, 0.2);">
+                            <div class="flex items-center justify-center space-x-2">
+                                <i class="bi bi-camera text-cyan-400"></i>
+                                <span class="text-cyan-300 font-semibold">Initializing camera...</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Control Buttons -->
+                    <div class="flex justify-center gap-3">
+                        <button id="toggleScanBtn" class="px-8 py-4 rounded-xl font-bold transition-all" style="background: linear-gradient(135deg, #06b6d4, #0891b2); color: white; z-index: 10;">
+                            <i class="bi bi-play-fill mr-2"></i>Start Scanning
+                        </button>
+                        <button id="flashlightBtn" class="px-8 py-4 rounded-xl font-bold transition-all hidden" style="background: rgba(168, 85, 247, 0.2); color: #c084fc; border: 1px solid rgba(168, 85, 247, 0.4); z-index: 10;">
+                            <i class="bi bi-flashlight mr-2"></i>Flash OFF
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Manual Check-in Card -->
+                <div class="card-glow animate-fade-in-up" style="background: rgba(30, 41, 59, 0.5); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 1.5rem; padding: 2rem; animation-delay: 0.2s;">
+                    <div class="flex items-center gap-3 mb-6">
+                        <div class="w-10 h-10 rounded-xl flex items-center justify-center" style="background: linear-gradient(135deg, #f59e0b, #d97706);">
+                            <i class="bi bi-keyboard text-white text-xl"></i>
+                        </div>
+                        <h2 class="text-2xl font-black text-white">Manual Entry</h2>
+                    </div>
+                    <p class="text-gray-300 mb-6">Enter booking ID manually if camera scanning fails</p>
+                    
+                    <form id="manualCheckinForm" class="space-y-4">
+                        <input type="text" 
+                               id="manualBookingId" 
+                               placeholder="Enter booking ID"
+                               class="w-full px-4 py-4 rounded-xl font-mono text-lg text-center"
+                               style="background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.2); color: white;">
+                        <button type="submit" class="w-full px-8 py-4 rounded-xl font-bold transition-all" style="background: linear-gradient(135deg, #f59e0b, #d97706); color: white; z-index: 10;">
+                            <i class="bi bi-check-circle mr-2"></i>Verify Booking
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Right Column - Info & Stats -->
+            <div class="lg:col-span-1 space-y-6">
+                <!-- Stats Card -->
+                <div class="card-glow animate-fade-in-up" style="background: rgba(30, 41, 59, 0.5); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 1.5rem; padding: 2rem; animation-delay: 0.3s;">
+                    <h3 class="text-xl font-black text-white mb-6">Today's Stats</h3>
+                    <div class="space-y-4">
+                        <div class="p-4 rounded-xl" style="background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.2);">
+                            <div class="text-3xl font-black text-green-400 mb-1" id="verifiedCount">0</div>
+                            <div class="text-sm text-gray-400">Verified Today</div>
+                        </div>
+                        <div class="p-4 rounded-xl" style="background: rgba(6, 182, 212, 0.1); border: 1px solid rgba(6, 182, 212, 0.2);">
+                            <div class="text-3xl font-black text-cyan-400 mb-1" id="sessionScanCount">0</div>
+                            <div class="text-sm text-gray-400">Session Scans</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Scans Card -->
+                <div class="card-glow animate-fade-in-up" style="background: rgba(30, 41, 59, 0.5); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 1.5rem; padding: 2rem; animation-delay: 0.4s;">
+                    <h3 class="text-xl font-black text-white mb-6">Recent Scans</h3>
+                    <div id="recentScansContainer" class="space-y-3">
+                        <div class="text-center py-8">
+                            <i class="bi bi-inbox text-4xl text-gray-600 mb-2"></i>
+                            <p class="text-gray-500 text-sm">No scans yet</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Booking Details Modal -->
+<div id="bookingModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <div class="flex items-center justify-between mb-4">
+                <div class="flex items-center gap-3">
+                    <div id="modalIcon" class="w-12 h-12 rounded-xl flex items-center justify-center" style="background: linear-gradient(135deg, #10b981, #059669);">
+                        <i class="bi bi-check-circle-fill text-white text-2xl"></i>
+                    </div>
+                    <div>
+                        <h3 id="modalTitle" class="text-2xl font-black text-white">Booking Verified</h3>
+                        <p id="modalSubtitle" class="text-gray-400 text-sm">Verification successful</p>
+                    </div>
+                </div>
+            </div>
+            <div id="modalStatus" class="text-center">
+                <span class="status-badge status-verified">✓ VERIFIED</span>
+            </div>
+        </div>
+
+        <div class="modal-body">
+            <div class="space-y-3">
+                <!-- Customer Name -->
+                <div class="info-row">
+                    <span class="info-label"><i class="bi bi-person-fill mr-2"></i>Customer Name</span>
+                    <span id="modalCustomerName" class="info-value">-</span>
+                </div>
+
+                <!-- Email -->
+                <div class="info-row">
+                    <span class="info-label"><i class="bi bi-envelope-fill mr-2"></i>Email</span>
+                    <span id="modalEmail" class="info-value">-</span>
+                </div>
+
+                <!-- Game/Station - HIGHLIGHTED -->
+                <div class="info-row" style="background: rgba(102, 126, 234, 0.15); border: 2px solid rgba(102, 126, 234, 0.4);">
+                    <span class="info-label" style="color: #a5b4fc; font-weight: 700;"><i class="bi bi-controller mr-2"></i>Game/Station</span>
+                    <span id="modalGame" class="info-value" style="color: #c7d2fe; font-weight: 700;">-</span>
+                </div>
+
+                <!-- Date - HIGHLIGHTED -->
+                <div class="info-row" style="background: rgba(102, 126, 234, 0.15); border: 2px solid rgba(102, 126, 234, 0.4);">
+                    <span class="info-label" style="color: #a5b4fc; font-weight: 700;"><i class="bi bi-calendar-fill mr-2"></i>Date</span>
+                    <span id="modalDate" class="info-value" style="color: #c7d2fe; font-weight: 700;">-</span>
+                </div>
+
+                <!-- Time Slot - HIGHLIGHTED -->
+                <div class="info-row" style="background: rgba(102, 126, 234, 0.15); border: 2px solid rgba(102, 126, 234, 0.4);">
+                    <span class="info-label" style="color: #a5b4fc; font-weight: 700;"><i class="bi bi-clock-fill mr-2"></i>Time Slot</span>
+                    <span id="modalTime" class="info-value" style="color: #c7d2fe; font-weight: 700;">-</span>
+                </div>
+
+                <!-- Duration -->
+                <div class="info-row">
+                    <span class="info-label"><i class="bi bi-hourglass-split mr-2"></i>Duration</span>
+                    <span id="modalDuration" class="info-value">-</span>
+                </div>
+
+                <!-- Spots Booked - HIGHLIGHTED -->
+                <div class="info-row" style="background: rgba(102, 126, 234, 0.15); border: 2px solid rgba(102, 126, 234, 0.4);">
+                    <span class="info-label" style="color: #a5b4fc; font-weight: 700;"><i class="bi bi-people-fill mr-2"></i>Spots Booked</span>
+                    <span id="modalSpots" class="info-value" style="color: #c7d2fe; font-weight: 700;">-</span>
+                </div>
+
+                <!-- Booking ID -->
+                <div class="info-row">
+                    <span class="info-label"><i class="bi bi-hash mr-2"></i>Booking ID</span>
+                    <span id="modalBookingId" class="info-value" style="font-family: monospace; font-size: 0.75rem;">-</span>
+                </div>
+
+                <!-- Payment Status - HIGHLIGHTED -->
+                <div class="info-row" style="background: rgba(16, 185, 129, 0.15); border: 2px solid rgba(16, 185, 129, 0.4);">
+                    <span class="info-label" style="color: #6ee7b7; font-weight: 700;"><i class="bi bi-credit-card-fill mr-2"></i>Payment Status</span>
+                    <span id="modalPaymentStatus" class="info-value" style="color: #a7f3d0; font-weight: 700;">-</span>
+                </div>
+
+                <!-- Payment ID - HIGHLIGHTED -->
+                <div class="info-row" style="background: rgba(16, 185, 129, 0.15); border: 2px solid rgba(16, 185, 129, 0.4);">
+                    <span class="info-label" style="color: #6ee7b7; font-weight: 700;"><i class="bi bi-receipt mr-2"></i>Payment ID</span>
+                    <span id="modalPaymentId" class="info-value" style="color: #a7f3d0; font-family: monospace; font-size: 0.75rem; font-weight: 700;">-</span>
+                </div>
+
+                <!-- Total Amount -->
+                <div class="info-row" style="background: rgba(168, 85, 247, 0.15); border: 2px solid rgba(168, 85, 247, 0.4);">
+                    <span class="info-label" style="color: #c084fc; font-weight: 700;"><i class="bi bi-currency-rupee mr-2"></i>Total Amount</span>
+                    <span id="modalAmount" class="info-value" style="color: #e9d5ff; font-size: 1.25rem; font-weight: 700;">-</span>
+                </div>
+
+                <!-- Verification Info (only if already verified) -->
+                <div id="verificationInfo" style="display: none;">
+                    <div class="info-row" style="background: rgba(245, 158, 11, 0.15); border: 2px solid rgba(245, 158, 11, 0.4);">
+                        <span class="info-label" style="color: #fbbf24; font-weight: 700;"><i class="bi bi-info-circle-fill mr-2"></i>Previously Verified</span>
+                        <span id="modalVerifiedAt" class="info-value" style="color: #fde68a; font-weight: 700;">-</span>
+                    </div>
+                    <div class="info-row" style="background: rgba(245, 158, 11, 0.15); border: 2px solid rgba(245, 158, 11, 0.4);">
+                        <span class="info-label" style="color: #fbbf24; font-weight: 700;"><i class="bi bi-person-check-fill mr-2"></i>Verified By</span>
+                        <span id="modalVerifiedBy" class="info-value" style="color: #fde68a; font-weight: 700;">-</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal-footer">
+            <button id="closeModalBtn" class="px-8 py-4 rounded-xl font-bold transition-all" style="background: linear-gradient(135deg, #667eea, #764ba2); color: white;">
+                <i class="bi bi-x-circle mr-2"></i>Close
+            </button>
+        </div>
+    </div>
+</div>
+
+<script type="module">
+    import QrScanner from "https://cdn.jsdelivr.net/npm/qr-scanner@1.4.2/qr-scanner.min.js";
+    
+    // Elements
+    const video = document.getElementById('qr-video');
+    const scanStatus = document.getElementById('scan-status');
+    const toggleBtn = document.getElementById('toggleScanBtn');
+    const flashBtn = document.getElementById('flashlightBtn');
+    const manualForm = document.getElementById('manualCheckinForm');
+    const manualBookingId = document.getElementById('manualBookingId');
+    const scannerContainer = document.getElementById('scanner-container');
+    const recentScansContainer = document.getElementById('recentScansContainer');
+    const bookingModal = document.getElementById('bookingModal');
+    const closeModalBtn = document.getElementById('closeModalBtn');
+
+    // State
+    let qrScanner = null;
+    let isScanning = false;
+    let isProcessing = false;
+    let hasFlash = false;
+    let flashEnabled = false;
+    let sessionScanCount = 0;
+    let lastScannedToken = null;
+    let lastScanTime = 0;
+    const SCAN_COOLDOWN = 3000; // 3 seconds cooldown between scans
+
+    // Audio paths - ADD YOUR AUDIO FILES TO: static/audio/
+    const successAudioSrc = "{% static 'audio/success.wav' %}";
+    const errorAudioSrc = "{% static 'audio/error.wav' %}";
+    
+    // Vibration Helper
+    function vibrate(pattern) {
+        if ('vibrate' in navigator) {
+            navigator.vibrate(pattern);
+        }
+    }
+    
+    // Visual Feedback
+    function setScannerVisualState(state) {
+        if (!scannerContainer) return;
+        scannerContainer.classList.remove('scanning', 'success', 'error', 'processing');
+        if (state) scannerContainer.classList.add(state);
+    }
+
+    function showProcessingFeedback() { 
+        setScannerVisualState('processing');
+        vibrate(50); // Short vibration for processing
+    }
+    
+    function showSuccessFeedback() {
+        setScannerVisualState('success');
+        vibrate([100, 50, 100]); // Double vibration for success
+        try {
+            const audio = new Audio(successAudioSrc);
+            audio.volume = 0.7;
+            audio.play().catch(e => {});
+        } catch(e) {}
+        setTimeout(() => {
+            if (isScanning) setScannerVisualState('scanning');
+            isProcessing = false;
+        }, 1200);
+    }
+
+    function showErrorFeedback() {
+        setScannerVisualState('error');
+        vibrate([200, 100, 200, 100, 200]); // Triple vibration for error
+        try {
+            const audio = new Audio(errorAudioSrc);
+            audio.volume = 0.7;
+            audio.play().catch(e => {});
+        } catch(e) {}
+        setTimeout(() => {
+            if (isScanning) setScannerVisualState('scanning');
+            isProcessing = false;
+        }, 2000);
+    }
+
+    // Handle QR Scan
+    async function handleScanResult(qrData) {
+        // Prevent processing if already processing
+        if (isProcessing) return;
+        
+        // Parse QR data (format: booking_id|token|booking)
+        const parts = qrData.split('|');
+        const token = parts[1] || qrData;
+        
+        // Prevent duplicate scans of the same QR code within cooldown period
+        const currentTime = Date.now();
+        if (lastScannedToken === token && (currentTime - lastScanTime) < SCAN_COOLDOWN) {
+            return;
+        }
+        
+        // Set processing state
+        isProcessing = true;
+        lastScannedToken = token;
+        lastScanTime = currentTime;
+        showProcessingFeedback();
+        
+        try {
+            const bookingId = parts[0];
+            
+            const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+            const response = await fetch('{% url "booking:verify_booking_qr" %}', {
+                method: 'POST',
+                headers: { 
+                    'Content-Type': 'application/json', 
+                    'X-CSRFToken': csrfToken 
+                },
+                body: JSON.stringify({ token: token })
+            });
+            
+            const result = await response.json();
+            
+            if (result.success) {
+                showSuccessFeedback();
+                showAlert('success', `✅ ${result.booking.customer_name} verified!`);
+                updateStats();
+                addToRecentScans(result.booking);
+                // Show detailed modal
+                showBookingModal(result.booking, false);
+            } else {
+                showErrorFeedback();
+                
+                // Special handling for already verified bookings
+                if (result.already_verified && result.booking) {
+                    showAlert('warning', `Already Scanned: ${result.message}`);
+                    // Show modal with booking details
+                    showBookingModal(result.booking, true);
+                } else {
+                    showAlert('error', `❌ ${result.message}`);
+                }
+            }
+        } catch (error) {
+            showErrorFeedback();
+            showAlert('error', 'Failed to verify QR code');
+        } finally {
+            // Reset processing state after cooldown
+            setTimeout(() => {
+                isProcessing = false;
+            }, 1000);
+        }
+    }
+
+    // Initialize Scanner
+    async function initScanner() {
+        try {
+            if (!await QrScanner.hasCamera()) {
+                throw new Error('No camera found on this device.');
+            }
+            
+            qrScanner = new QrScanner(
+                video, 
+                result => handleScanResult(result.data),
+                {
+                    highlightScanRegion: true,
+                    highlightCodeOutline: true,
+                    preferredCamera: 'environment',
+                    maxScansPerSecond: 2
+                }
+            );
+            
+            await qrScanner.start();
+            isScanning = true;
+            
+            // Check for flash support after scanner starts
+            try {
+                hasFlash = await qrScanner.hasFlash();
+                if (hasFlash) {
+                    flashBtn.classList.remove('hidden');
+                }
+            } catch (e) {
+                hasFlash = false;
+            }
+            
+            document.getElementById('loading-overlay').classList.add('hidden');
+            setScannerVisualState('scanning');
+            showAlert('info', 'Scanner ready! Point camera at QR code');
+            
+            // Update button state
+            toggleBtn.innerHTML = '<i class="bi bi-pause-fill mr-2"></i>Stop Scanning';
+        } catch (error) {
+            document.getElementById('loading-overlay').classList.add('hidden');
+            let errorMessage = 'Camera Error';
+            let helpText = 'Please use manual entry below.';
+            
+            if (error.name === 'NotAllowedError') {
+                errorMessage = 'Camera Permission Denied';
+                helpText = 'Please allow camera access and refresh.';
+            }
+            
+            scanStatus.innerHTML = `
+                <div class="p-4 rounded-xl" style="background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3);">
+                    <div class="flex items-start gap-3">
+                        <i class="bi bi-exclamation-triangle-fill text-red-400 text-xl"></i>
+                        <div>
+                            <p class="text-red-300 font-semibold">${errorMessage}</p>
+                            <p class="text-red-200 text-sm mt-1">${helpText}</p>
+                        </div>
+                    </div>
+                </div>
+            `;
+            setScannerVisualState('error');
+            vibrate(300); // Long vibration for error
+        }
+    }
+
+    // Toggle Scanning
+    function toggleScanning() {
+        if (!qrScanner) return;
+        
+        isScanning = !isScanning;
+        if (isScanning) {
+            qrScanner.start();
+            toggleBtn.innerHTML = '<i class="bi bi-pause-fill mr-2"></i>Stop Scanning';
+            showAlert('info', 'Scanning for QR codes...');
+            setScannerVisualState('scanning');
+        } else {
+            qrScanner.stop();
+            setScannerVisualState('');
+            toggleBtn.innerHTML = '<i class="bi bi-play-fill mr-2"></i>Start Scanning';
+            showAlert('warning', 'Scanning Paused');
+        }
+    }
+
+    // Show Booking Details Modal
+    function showBookingModal(booking, isAlreadyVerified = false) {
+        // Set modal title and icon based on verification status
+        const modalIcon = document.getElementById('modalIcon');
+        const modalTitle = document.getElementById('modalTitle');
+        const modalSubtitle = document.getElementById('modalSubtitle');
+        const modalStatus = document.getElementById('modalStatus');
+        
+        if (isAlreadyVerified) {
+            modalIcon.style.background = 'linear-gradient(135deg, #f59e0b, #d97706)';
+            modalIcon.innerHTML = '<i class="bi bi-exclamation-triangle-fill text-white text-2xl"></i>';
+            modalTitle.textContent = 'Already Verified';
+            modalSubtitle.textContent = 'This booking was previously scanned';
+            modalStatus.innerHTML = '<span class="status-badge status-warning">⚠ ALREADY SCANNED</span>';
+        } else {
+            modalIcon.style.background = 'linear-gradient(135deg, #10b981, #059669)';
+            modalIcon.innerHTML = '<i class="bi bi-check-circle-fill text-white text-2xl"></i>';
+            modalTitle.textContent = 'Booking Verified';
+            modalSubtitle.textContent = 'Verification successful';
+            modalStatus.innerHTML = '<span class="status-badge status-verified">✓ VERIFIED</span>';
+        }
+        
+        // Fill in booking details
+        document.getElementById('modalCustomerName').textContent = booking.customer_name || '-';
+        document.getElementById('modalEmail').textContent = booking.customer_email || '-';
+        document.getElementById('modalGame').textContent = booking.game_name || '-';
+        document.getElementById('modalDate').textContent = booking.date || '-';
+        document.getElementById('modalTime').textContent = `${booking.start_time} - ${booking.end_time}` || '-';
+        document.getElementById('modalDuration').textContent = `${booking.duration_hours} hour(s)` || '-';
+        document.getElementById('modalSpots').textContent = booking.spots_booked || '-';
+        document.getElementById('modalBookingId').textContent = booking.id || '-';
+        document.getElementById('modalPaymentStatus').textContent = booking.payment_status || '-';
+        document.getElementById('modalPaymentId').textContent = booking.payment_id || '-';
+        document.getElementById('modalAmount').textContent = `₹${booking.total_amount}` || '-';
+        
+        // Show verification info if already verified
+        const verificationInfo = document.getElementById('verificationInfo');
+        if (booking.verified_at && booking.verified_by) {
+            document.getElementById('modalVerifiedAt').textContent = booking.verified_at;
+            document.getElementById('modalVerifiedBy').textContent = booking.verified_by;
+            verificationInfo.style.display = 'block';
+        } else {
+            verificationInfo.style.display = 'none';
+        }
+        
+        // Show modal
+        bookingModal.classList.add('show');
+    }
+    
+    // Close Modal
+    function closeModal() {
+        bookingModal.classList.remove('show');
+    }
+
+    // Show Alert
+    function showAlert(type, message) {
+        const config = {
+            'success': { bg: 'rgba(16, 185, 129, 0.1)', border: 'rgba(16, 185, 129, 0.3)', text: '#34d399', icon: 'bi-check-circle-fill' },
+            'error': { bg: 'rgba(239, 68, 68, 0.1)', border: 'rgba(239, 68, 68, 0.3)', text: '#f87171', icon: 'bi-exclamation-triangle-fill' },
+            'warning': { bg: 'rgba(245, 158, 11, 0.1)', border: 'rgba(245, 158, 11, 0.3)', text: '#fbbf24', icon: 'bi-exclamation-triangle' },
+            'info': { bg: 'rgba(6, 182, 212, 0.1)', border: 'rgba(6, 182, 212, 0.3)', text: '#22d3ee', icon: 'bi-info-circle-fill' }
+        }[type];
+        
+        scanStatus.innerHTML = `
+            <div class="p-4 rounded-xl" style="background: ${config.bg}; border: 1px solid ${config.border};">
+                <div class="flex items-center gap-3">
+                    <i class="bi ${config.icon}" style="color: ${config.text};"></i>
+                    <span class="font-semibold" style="color: ${config.text};">${message}</span>
+                </div>
+            </div>
+        `;
+    }
+
+    // Update Stats
+    function updateStats() {
+        sessionScanCount++;
+        document.getElementById('sessionScanCount').textContent = sessionScanCount;
+        const verifiedCount = document.getElementById('verifiedCount');
+        verifiedCount.textContent = parseInt(verifiedCount.textContent) + 1;
+    }
+
+    // Add to Recent Scans
+    function addToRecentScans(booking) {
+        const time = new Date().toLocaleTimeString();
+        const scanItem = `
+            <div class="p-3 rounded-xl" style="background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.2);">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-white font-bold">${booking.customer_name}</p>
+                        <p class="text-gray-400 text-xs">${booking.game_name}</p>
+                    </div>
+                    <span class="text-gray-500 text-xs">${time}</span>
+                </div>
+            </div>
+        `;
+        
+        if (recentScansContainer.querySelector('.text-center')) {
+            recentScansContainer.innerHTML = '';
+        }
+        recentScansContainer.insertAdjacentHTML('afterbegin', scanItem);
+        
+        // Keep only last 5
+        while (recentScansContainer.children.length > 5) {
+            recentScansContainer.removeChild(recentScansContainer.lastChild);
+        }
+    }
+
+    // Manual Form Submit
+    manualForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const input = manualBookingId.value.trim();
+        
+        if (!input) {
+            showAlert('error', 'Please enter QR data or booking ID');
+            vibrate(200);
+            return;
+        }
+        
+        // Parse input - could be full QR data (booking_id|token|booking) or just booking ID
+        let token;
+        const parts = input.split('|');
+        
+        if (parts.length >= 2) {
+            // Full QR code data format: booking_id|token|booking
+            token = parts[1];
+        } else {
+            // Just the token or booking ID
+            token = input;
+        }
+        
+        // Show processing state
+        showAlert('info', 'Processing manual entry...');
+        vibrate(50);
+        
+        try {
+            const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+            const response = await fetch('{% url "booking:verify_booking_qr" %}', {
+                method: 'POST',
+                headers: { 
+                    'Content-Type': 'application/json', 
+                    'X-CSRFToken': csrfToken 
+                },
+                body: JSON.stringify({ token: token })
+            });
+            
+            const result = await response.json();
+            
+            if (result.success) {
+                showAlert('success', `✅ ${result.booking.customer_name} verified!`);
+                vibrate([100, 50, 100]); // Success vibration
+                updateStats();
+                addToRecentScans(result.booking);
+                manualBookingId.value = ''; // Clear input
+                // Show detailed modal
+                showBookingModal(result.booking, false);
+            } else {
+                // Special handling for already verified bookings
+                if (result.already_verified && result.booking) {
+                    showAlert('warning', `Already Verified: ${result.message}`);
+                    vibrate([200, 100, 200, 100, 200]); // Warning vibration
+                    // Show modal with booking details
+                    showBookingModal(result.booking, true);
+                } else {
+                    showAlert('error', `❌ ${result.message}`);
+                    vibrate([200, 100, 200, 100, 200]); // Error vibration
+                }
+            }
+        } catch (error) {
+            showAlert('error', 'Failed to verify booking. Please check the input.');
+            vibrate([200, 100, 200, 100, 200]); // Error vibration
+        }
+    });
+
+    // Event Listeners
+    document.addEventListener('DOMContentLoaded', initScanner);
+    toggleBtn.addEventListener('click', toggleScanning);
+    flashBtn.addEventListener('click', async () => {
+        if (!qrScanner || !hasFlash) {
+            showAlert('error', 'Flash not available on this device');
+            vibrate(200);
+            return;
+        }
+        
+        try {
+            flashEnabled = !flashEnabled;
+            await qrScanner.toggleFlash();
+            
+            // Update button styling
+            if (flashEnabled) {
+                flashBtn.style.background = 'linear-gradient(135deg, #a855f7, #9333ea)';
+                flashBtn.style.color = 'white';
+                flashBtn.style.border = '1px solid #a855f7';
+                flashBtn.innerHTML = '<i class="bi bi-flashlight-fill mr-2"></i>Flash ON';
+                showAlert('info', '💡 Flashlight enabled');
+            } else {
+                flashBtn.style.background = 'rgba(168, 85, 247, 0.2)';
+                flashBtn.style.color = '#c084fc';
+                flashBtn.style.border = '1px solid rgba(168, 85, 247, 0.4)';
+                flashBtn.innerHTML = '<i class="bi bi-flashlight mr-2"></i>Flash OFF';
+                showAlert('info', 'Flashlight disabled');
+            }
+            
+            vibrate(50); // Short vibration for toggle
+        } catch (error) {
+            showAlert('error', 'Failed to toggle flash');
+            vibrate(200);
+        }
+    });
+    
+    // Close modal button
+    closeModalBtn.addEventListener('click', closeModal);
+    
+    // Close modal on background click
+    bookingModal.addEventListener('click', (e) => {
+        if (e.target === bookingModal) {
+            closeModal();
+        }
+    });
+    
+    window.addEventListener('beforeunload', () => {
+        if (qrScanner) qrScanner.destroy();
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,179 @@
+{% extends "base.html" %}
+
+{% block title %}Logged Out - TapNex{% endblock %}
+
+{% block content %}
+<style>
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    @keyframes scaleIn {
+        from {
+            transform: scale(0);
+        }
+        to {
+            transform: scale(1);
+        }
+    }
+    
+    @keyframes float {
+        0%, 100% {
+            transform: translateY(0px);
+        }
+        50% {
+            transform: translateY(-10px);
+        }
+    }
+    
+    .animate-fade-in {
+        animation: fadeIn 0.5s ease-out;
+    }
+    
+    .animate-scale-in {
+        animation: scaleIn 0.5s ease-out 0.2s both;
+    }
+    
+    .animate-float {
+        animation: float 4.5s cubic-bezier(0.4, 0, 0.6, 1) infinite !important;
+    }
+    
+    /* Mobile optimizations */
+    @media (max-width: 640px) {
+        .logout-container {
+            padding: 1rem;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+        }
+        
+        .logout-card {
+            padding: 1.5rem;
+        }
+        
+        .logout-icon {
+            width: 4rem;
+            height: 4rem;
+        }
+        
+        .logout-title {
+            font-size: 1.5rem;
+            line-height: 2rem;
+        }
+        
+        .logout-text {
+            font-size: 0.875rem;
+        }
+        
+        .logout-btn {
+            padding: 0.875rem 1rem;
+            font-size: 0.9375rem;
+            touch-action: manipulation;
+            -webkit-tap-highlight-color: transparent;
+        }
+    }
+    
+    /* Enhanced button hover effects */
+    .logout-btn {
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .logout-btn::before {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 0;
+        height: 0;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.1);
+        transform: translate(-50%, -50%);
+        transition: width 0.6s, height 0.6s;
+    }
+    
+    .logout-btn:active::before {
+        width: 300px;
+        height: 300px;
+    }
+    
+    /* Gradient background */
+    .logout-bg {
+        background: linear-gradient(135deg, #1a1f2e 0%, #0f1419 100%);
+    }
+</style>
+
+<div class="logout-bg min-h-screen flex items-center justify-center logout-container py-12">
+    <div class="max-w-md w-full animate-fade-in">
+        <div class="card text-center logout-card">
+            <!-- Success Icon with floating animation -->
+            <div class="w-20 h-20 logout-icon bg-gradient-to-br from-green-500/30 to-green-600/20 rounded-full flex items-center justify-center mx-auto mb-6 animate-scale-in animate-float">
+                <svg class="w-10 h-10 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+            </div>
+
+            <h1 class="text-3xl logout-title font-gaming font-bold text-white mb-4">
+                Successfully Logged Out
+            </h1>
+            
+            <p class="text-gray-400 logout-text mb-8 leading-relaxed">
+                Thanks for spending some quality time with TapNex today. We hope to see you again soon!
+            </p>
+
+            <!-- Quick Stats or Fun Message -->
+            <div class="bg-gaming-accent/10 rounded-lg p-4 mb-6">
+                <p class="text-sm text-gray-400">
+                    <i class="bi bi-shield-check text-green-500 mr-2"></i>
+                    Your session has been securely ended
+                </p>
+            </div>
+
+            <div class="space-y-3">
+                <a href="{% url 'home' %}" class="btn-primary w-full block text-center logout-btn">
+                    <i class="bi bi-house-door mr-2"></i>
+                    Return to Home
+                </a>
+                
+                <a href="{% url 'authentication:customer_login' %}" class="btn-secondary w-full block text-center logout-btn">
+                    <i class="bi bi-box-arrow-in-right mr-2"></i>
+                    Log In Again
+                </a>
+            </div>
+
+            <!-- Additional Quick Links -->
+            <div class="mt-6 pt-6 border-t border-gaming-accent">
+                <div class="grid grid-cols-2 gap-3 mb-4">
+                    <a href="{% url 'booking:game_selection' %}" class="text-sm text-gray-400 hover:text-gaming-highlight transition-colors py-2">
+                        <i class="bi bi-controller block text-lg mb-1"></i>
+                        Browse Games
+                    </a>
+                    <a href="{% url 'contact' %}" class="text-sm text-gray-400 hover:text-gaming-highlight transition-colors py-2">
+                        <i class="bi bi-envelope block text-lg mb-1"></i>
+                        Contact Us
+                    </a>
+                </div>
+                
+                <p class="text-gray-500 text-xs">
+                    Need help? Our support team is here for you 24/7
+                </p>
+            </div>
+        </div>
+        
+        <!-- Footer branding -->
+        <div class="text-center mt-6">
+            <p class="text-gray-600 text-sm">
+                Powered by <span class="text-gaming-highlight font-semibold">TapNex</span>
+            </p>
+        </div>
+    </div>
+</div>
+{% endblock %}

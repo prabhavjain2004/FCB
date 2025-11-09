@@ -1,0 +1,72 @@
+{% extends 'base.html' %}
+
+{% block title %}Game Management - TapNex Superuser{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gaming-primary">
+    <div class="bg-gaming-secondary border-b border-gaming-accent">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+            <h1 class="text-3xl font-gaming font-bold text-white">Game Management</h1>
+        </div>
+    </div>
+
+    <div class="bg-gaming-secondary border-b border-gaming-accent">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <nav class="flex space-x-8 overflow-x-auto">
+                <a href="{% url 'authentication:tapnex_dashboard' %}" class="border-b-2 border-transparent text-gray-400 hover:text-white px-1 py-4 text-sm font-medium">Dashboard</a>
+                <a href="{% url 'authentication:manage_users' %}" class="border-b-2 border-transparent text-gray-400 hover:text-white px-1 py-4 text-sm font-medium">Users</a>
+                <a href="{% url 'authentication:manage_bookings' %}" class="border-b-2 border-transparent text-gray-400 hover:text-white px-1 py-4 text-sm font-medium">Bookings</a>
+                <a href="{% url 'authentication:manage_games' %}" class="border-b-2 border-gaming-highlight text-gaming-highlight px-1 py-4 text-sm font-medium">Games</a>
+            </nav>
+        </div>
+    </div>
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div class="bg-gaming-secondary border border-gaming-accent rounded-xl overflow-hidden">
+            <div class="px-6 py-4 border-b border-gaming-accent"><h3 class="text-lg font-semibold text-white">Total Games: {{ total_games }}</h3></div>
+            <table class="w-full">
+                <thead class="bg-gaming-primary">
+                    <tr>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase">Game Name</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase">Booking Type</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase">Private Price</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase">Shared Price</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase">Capacity</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase">Status</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gaming-accent">
+                    {% for game in games %}
+                    <tr class="hover:bg-gaming-accent/10">
+                        <td class="px-6 py-4 text-white font-medium">{{ game.name }}</td>
+                        <td class="px-6 py-4">
+                            <span class="px-2 py-1 text-xs rounded {% if game.booking_type == 'SINGLE' %}bg-purple-900/30 text-purple-400{% else %}bg-blue-900/30 text-blue-400{% endif %}">
+                                {{ game.get_booking_type_display }}
+                            </span>
+                        </td>
+                        <td class="px-6 py-4 text-gaming-highlight font-semibold">₹{{ game.private_price|floatformat:0 }}</td>
+                        <td class="px-6 py-4 text-gray-300">
+                            {% if game.shared_price %}
+                                ₹{{ game.shared_price|floatformat:0 }}
+                            {% else %}
+                                <span class="text-gray-500">N/A</span>
+                            {% endif %}
+                        </td>
+                        <td class="px-6 py-4 text-gray-300">{{ game.capacity }} players</td>
+                        <td class="px-6 py-4">
+                            <span class="px-2 py-1 text-xs rounded {% if game.is_active %}bg-green-900/30 text-green-400{% else %}bg-red-900/30 text-red-400{% endif %}">
+                                {% if game.is_active %}Active{% else %}Inactive{% endif %}
+                            </span>
+                        </td>
+                        <td class="px-6 py-4"><a href="{% url 'authentication:game_detail' game.id %}" class="text-gaming-highlight hover:underline">Manage</a></td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="7" class="px-6 py-12 text-center text-gray-400">No games found</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

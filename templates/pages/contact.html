@@ -1,0 +1,729 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}
+  Contact Us - TapNex Gaming Cafe
+{% endblock %}
+
+{% block extra_css %}
+  <style>
+    .contact-hero {
+      background: linear-gradient(135deg, #111827 0%, #1a202e 100%);
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .contact-hero::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: 
+        radial-gradient(circle at 20% 50%, rgba(168, 237, 234, 0.1) 0%, transparent 50%), 
+        radial-gradient(circle at 80% 80%, rgba(254, 214, 227, 0.1) 0%, transparent 50%);
+      animation: pulse-glow 10s ease infinite;
+    }
+    
+    @keyframes pulse-glow {
+      0%,
+      100% {
+        opacity: 1;
+      }
+      50% {
+        opacity: 0.6;
+      }
+    }
+    
+    .contact-card {
+      background: var(--glass-bg);
+      backdrop-filter: blur(20px);
+      border: 1px solid var(--glass-border);
+      border-radius: 1rem;
+      padding: 2rem;
+      transition: all 0.3s ease;
+    }
+    
+    .contact-card:hover {
+      transform: translateY(-5px);
+      border-color: rgba(168, 237, 234, 0.4);
+    }
+    
+    .contact-icon {
+      width: 4rem;
+      height: 4rem;
+      background: linear-gradient(135deg, #e94560, #00d4aa);
+      border-radius: 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 1.5rem;
+    }
+    
+    .info-card {
+      background: var(--glass-bg);
+      backdrop-filter: blur(20px);
+      border: 1px solid var(--glass-border);
+      border-radius: 1rem;
+      padding: 1.5rem;
+      transition: all 0.3s ease;
+      display: flex;
+      gap: 1rem;
+      align-items: start;
+      margin-bottom: 1.5rem;
+    }
+    
+    .info-card:hover {
+      border-color: rgba(168, 237, 234, 0.4);
+      transform: translateX(5px);
+    }
+    
+    .info-icon-box {
+      width: 3rem;
+      height: 3rem;
+      border-radius: 0.75rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    
+    .support-badge {
+      display: inline-block;
+      padding: 0.5rem 1rem;
+      background: rgba(168, 237, 234, 0.2);
+      border: 1px solid rgba(168, 237, 234, 0.4);
+      border-radius: 2rem;
+      color: #00d4ff !important;
+      font-size: 0.875rem;
+      margin-bottom: 1rem;
+      font-weight: 600;
+      transition: all 0.3s ease;
+    }
+
+    .support-badge:hover {
+      background: rgba(168, 237, 234, 0.3);
+      border-color: rgba(168, 237, 234, 0.6);
+    }
+    
+    .quick-link-card {
+      background: linear-gradient(135deg, rgba(17, 24, 39, 0.7), rgba(26, 32, 46, 0.7));
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(168, 237, 234, 0.3);
+      border-radius: 1rem;
+      padding: 1.5rem;
+      text-align: center;
+      transition: all 0.3s ease;
+      text-decoration: none;
+      display: block;
+      margin-bottom: 1.5rem;
+    }
+    
+    .quick-link-card:hover {
+      transform: translateY(-5px);
+      border-color: rgba(168, 237, 234, 0.6);
+      background: linear-gradient(135deg, rgba(17, 24, 39, 0.9), rgba(26, 32, 46, 0.9));
+    }
+    
+    .quick-link-card h5 {
+      color: #ffffff !important;
+      text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+    }
+    
+    .quick-link-card p {
+      color: #e0e0e0 !important;
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+    }
+    
+    .quick-link-icon {
+      font-size: 2.5rem;
+      background: linear-gradient(135deg, #e94560, #00d4aa);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+    }
+    
+    .text-light-gray {
+      color: #e5e5e5 !important;
+    }
+    
+    .text-muted {
+      color: #b0b0b0 !important;
+    }
+    
+    .faq-text {
+      color: #e0e0e0 !important;
+    }
+    
+    /* FAQ Accordion Styles */
+    .faq-item {
+      background: var(--glass-bg);
+      backdrop-filter: blur(20px);
+      border: 1px solid var(--glass-border);
+      border-radius: 1rem;
+      margin-bottom: 1rem;
+      overflow: hidden;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .faq-item:hover {
+      border-color: rgba(168, 237, 234, 0.4);
+      transform: translateY(-2px);
+    }
+
+    .faq-item.active {
+      border-color: rgba(0, 212, 255, 0.5);
+      background: rgba(0, 212, 255, 0.05);
+    }
+
+    .faq-question {
+      padding: 1.5rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      position: relative;
+      user-select: none;
+      transition: all 0.3s ease;
+    }
+
+    .faq-question:hover {
+      background: rgba(168, 237, 234, 0.05);
+    }
+
+    .faq-question.active {
+      background: rgba(0, 212, 255, 0.08);
+    }
+
+    .faq-icon {
+      width: 2.5rem;
+      height: 2.5rem;
+      border-radius: 0.5rem;
+      background: linear-gradient(135deg, #e94560, #00d4aa);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: all 0.3s ease;
+    }
+
+    .faq-item.active .faq-icon {
+      transform: scale(1.1);
+    }
+
+    .faq-icon i {
+      color: #ffffff;
+      font-size: 1.25rem;
+    }
+
+    .faq-question-text {
+      flex: 1;
+      color: #ffffff;
+      font-weight: 500;
+      font-size: 1.1rem;
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+      transition: all 0.3s ease;
+    }
+
+    .faq-item.active .faq-question-text {
+      color: #00d4ff;
+    }
+
+    .faq-toggle {
+      width: 2rem;
+      height: 2rem;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      flex-shrink: 0;
+    }
+
+    .faq-question:hover .faq-toggle {
+      background: rgba(255, 255, 255, 0.15);
+      transform: scale(1.1);
+    }
+
+    .faq-toggle i {
+      color: #00d4ff;
+      font-size: 1.2rem;
+      transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .faq-item.active .faq-toggle {
+      background: rgba(0, 212, 255, 0.2);
+    }
+
+    .faq-item.active .faq-toggle i {
+      transform: rotate(180deg);
+    }
+
+    .faq-answer {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+                  padding 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+                  opacity 0.3s ease;
+      opacity: 0;
+      padding: 0 1.5rem;
+    }
+
+    .faq-item.active .faq-answer {
+      max-height: 500px;
+      padding: 0 1.5rem 1.5rem 1.5rem;
+      opacity: 1;
+    }
+
+    .faq-answer-content {
+      padding-top: 0.5rem;
+      padding-left: 3.5rem;
+      color: #e5e5e5;
+      line-height: 1.7;
+      font-size: 1rem;
+    }
+
+    @media (max-width: 768px) {
+      .faq-question {
+        padding: 1.25rem;
+      }
+
+      .faq-icon {
+        width: 2rem;
+        height: 2rem;
+      }
+
+      .faq-icon i {
+        font-size: 1rem;
+      }
+
+      .faq-question-text {
+        font-size: 1rem;
+      }
+
+      /* Slow down animations on mobile */
+      @keyframes pulse-glow {
+        0%, 100% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0.8;
+        }
+      }
+
+      .contact-hero::before {
+        animation: pulse-glow 15s cubic-bezier(0.4, 0, 0.6, 1) infinite !important;
+      }
+
+      .faq-answer-content {
+        padding-left: 1rem;
+        font-size: 0.95rem;
+      }
+    }
+  </style>
+{% endblock %}
+
+{% block content %}
+  <!-- Hero Section -->
+  <section class="contact-hero py-20">
+    <div class="container">
+      <div class="text-center" style="position: relative; z-index: 1;">
+        <div class="mb-6">
+          <div class="inline-flex items-center justify-center w-20 h-20 rounded-full" 
+               style="background: rgba(168, 237, 234, 0.2); backdrop-filter: blur(10px); border: 2px solid rgba(168, 237, 234, 0.4);">
+            <i class="bi bi-envelope text-cyan" style="font-size: 2.5rem;"></i>
+          </div>
+        </div>
+        <h1 class="display-3 fw-bold text-white mb-4" data-scroll-reveal>Contact Us</h1>
+        <p class="lead text-white mb-5" style="max-width: 600px; margin: 0 auto; opacity: 0.9;" data-scroll-reveal data-scroll-delay="100">
+          Get in touch with the TapNex team - we're here to help!
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Contact Information -->
+  <section class="py-5 bg-dark">
+    <div class="container py-5">
+      <div class="row g-5">
+        <!-- Contact Cards -->
+        <div class="col-lg-8">
+          <div class="mb-5" data-scroll-reveal>
+            <h2 class="display-6 fw-bold text-white mb-3">Get In Touch</h2>
+            <p class="text-light-gray">Have questions? Need support? Want to partner with us? We'd love to hear from you!</p>
+          </div>
+
+          <div class="row g-4">
+            <!-- Email -->
+            <div class="col-md-6" data-scroll-reveal>
+              <div class="info-card">
+                <div class="info-icon-box" style="background: linear-gradient(135deg, #e94560, #00d4aa);">
+                  <i class="bi bi-envelope-fill text-white" style="font-size: 1.5rem;"></i>
+                </div>
+                <div>
+                  <h5 class="text-white mb-2">Email</h5>
+                  <p class="text-light-gray mb-2">info@tapnex.tech</p>
+                  <a href="mailto:info@tapnex.tech" class="text-cyan text-decoration-none hover-glow">Send us an email <i class="bi bi-arrow-right"></i></a>
+                </div>
+              </div>
+            </div>
+
+            <!-- Phone -->
+            <div class="col-md-6" data-scroll-reveal data-scroll-delay="50">
+              <div class="info-card">
+                <div class="info-icon-box" style="background: linear-gradient(135deg, #e94560, #00d4aa);">
+                  <i class="bi bi-telephone-fill text-white" style="font-size: 1.5rem;"></i>
+                </div>
+                <div>
+                  <h5 class="text-white mb-2">Phone</h5>
+                  <p class="text-light-gray mb-2">+91 88230 04349</p>
+                  <a href="tel:+918823004349" class="text-cyan text-decoration-none hover-glow">Call us now <i class="bi bi-arrow-right"></i></a>
+                </div>
+              </div>
+            </div>
+
+            <!-- Website -->
+            <div class="col-md-6" data-scroll-reveal data-scroll-delay="100">
+              <div class="info-card">
+                <div class="info-icon-box" style="background: linear-gradient(135deg, #e94560, #00d4aa);">
+                  <i class="bi bi-globe text-white" style="font-size: 1.5rem;"></i>
+                </div>
+                <div>
+                  <h5 class="text-white mb-2">Website</h5>
+                  <p class="text-light-gray mb-2">forge.tapnex.tech</p>
+                  <a href="https://forge.tapnex.tech" target="_blank" class="text-cyan text-decoration-none hover-glow">Visit website <i class="bi bi-arrow-right"></i></a>
+                </div>
+              </div>
+            </div>
+
+            <!-- Business -->
+            <div class="col-md-6" data-scroll-reveal data-scroll-delay="150">
+              <div class="info-card">
+                <div class="info-icon-box" style="background: linear-gradient(135deg, #e94560, #00d4aa);">
+                  <i class="bi bi-building text-white" style="font-size: 1.5rem;"></i>
+                </div>
+                <div>
+                  <h5 class="text-white mb-2">Business</h5>
+                  <p class="text-light-gray mb-2">TapNex Technologies</p>
+                  <p class="text-light-gray mb-0" style="font-size: 0.875rem;">Gaming Cafe Platform</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Operating Hours -->
+            <div class="col-md-6" data-scroll-reveal data-scroll-delay="200">
+              <div class="info-card">
+                <div class="info-icon-box" style="background: linear-gradient(135deg, #e94560, #00d4aa);">
+                  <i class="bi bi-clock-fill text-white" style="font-size: 1.5rem;"></i>
+                </div>
+                <div>
+                  <h5 class="text-white mb-2">Operating Hours</h5>
+                  <p class="text-light-gray mb-1">Monday - Friday</p>
+                  <p class="text-light-gray mb-0">10:00 AM - 06:00 PM IST</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Support Information -->
+        <div class="col-lg-4">
+          <!-- Support -->
+          <div class="contact-card mb-4" data-scroll-reveal data-scroll-delay="100">
+            <span class="support-badge"><i class="bi bi-headset me-1"></i>Customer Support</span>
+            <h3 class="text-white mb-4">We're Here to Help</h3>
+            <p class="text-light-gray mb-4">Our support team is available to assist you with:</p>
+            <ul class="list-unstyled mb-0">
+              <li class="mb-3 text-light-gray">
+                <i class="bi bi-check-circle text-success me-2"></i>
+                Booking assistance
+              </li>
+              <li class="mb-3 text-light-gray">
+                <i class="bi bi-check-circle text-success me-2"></i>
+                Payment issues
+              </li>
+              <li class="mb-3 text-light-gray">
+                <i class="bi bi-check-circle text-success me-2"></i>
+                Account management
+              </li>
+              <li class="mb-3 text-light-gray">
+                <i class="bi bi-check-circle text-success me-2"></i>
+                Technical support
+              </li>
+              <li class="mb-3 text-light-gray">
+                <i class="bi bi-check-circle text-success me-2"></i>
+                Partnership inquiries
+              </li>
+              <li class="mb-0 text-light-gray">
+                <i class="bi bi-check-circle text-success me-2"></i>
+                General questions
+              </li>
+            </ul>
+          </div>
+
+          <!-- Response Time -->
+          <div class="glass-card p-4" data-scroll-reveal data-scroll-delay="150">
+            <div class="d-flex align-items-center mb-3">
+              <i class="bi bi-lightning-charge text-cyan" style="font-size: 2rem;"></i>
+              <div class="ms-3">
+                <h5 class="text-white mb-0">Quick Response</h5>
+                <p class="text-light-gray mb-0" style="font-size: 0.875rem;">We respond fast</p>
+              </div>
+            </div>
+            <p class="text-light-gray mb-0">
+              We typically respond to all inquiries within <span class="text-cyan fw-bold">24 hours</span> during business days.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Quick Links -->
+  <section class="py-5" style="background: linear-gradient(180deg, #0d0d1a 0%, #1a0d2e 100%);">
+    <div class="container py-5">
+      <div class="text-center mb-5" data-scroll-reveal>
+        <h2 class="display-6 fw-bold text-white mb-3">Quick Links</h2>
+        <p class="text-light-gray">Find what you're looking for</p>
+      </div>
+
+      <div class="row g-4">
+        <div class="col-md-3 col-sm-6" data-scroll-reveal>
+          <a href="{% url 'booking:game_selection' %}" class="quick-link-card">
+            <i class="bi bi-controller quick-link-icon d-block mb-3"></i>
+            <h5 class="text-white mb-2">Book a Slot</h5>
+            <p class="text-light-gray mb-0" style="font-size: 0.875rem;">Reserve your gaming session</p>
+          </a>
+        </div>
+
+        <div class="col-md-3 col-sm-6" data-scroll-reveal data-scroll-delay="50">
+          <a href="/about/" class="quick-link-card">
+            <i class="bi bi-info-circle quick-link-icon d-block mb-3"></i>
+            <h5 class="text-white mb-2">About Us</h5>
+            <p class="text-light-gray mb-0" style="font-size: 0.875rem;">Learn more about TapNex</p>
+          </a>
+        </div>
+
+        <div class="col-md-3 col-sm-6" data-scroll-reveal data-scroll-delay="100">
+          <a href="/privacy/" class="quick-link-card">
+            <i class="bi bi-shield-check quick-link-icon d-block mb-3"></i>
+            <h5 class="text-white mb-2">Privacy Policy</h5>
+            <p class="text-light-gray mb-0" style="font-size: 0.875rem;">How we protect your data</p>
+          </a>
+        </div>
+
+        <div class="col-md-3 col-sm-6" data-scroll-reveal data-scroll-delay="150">
+          <a href="/terms/" class="quick-link-card">
+            <i class="bi bi-file-text quick-link-icon d-block mb-3"></i>
+            <h5 class="text-white mb-2">Terms & Conditions</h5>
+            <p class="text-light-gray mb-0" style="font-size: 0.875rem;">Read our terms</p>
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FAQ Section -->
+  <section class="py-5 bg-dark">
+    <div class="container py-5">
+      <div class="text-center mb-5" data-scroll-reveal>
+        <h2 class="display-6 fw-bold text-white mb-3">Frequently Asked Questions</h2>
+        <p class="text-light-gray">Find answers to common questions</p>
+      </div>
+
+      <div class="row justify-content-center">
+        <div class="col-lg-8">
+          <div id="faqAccordion">
+            <!-- FAQ Item 1 -->
+            <div class="faq-item active" data-scroll-reveal>
+              <div class="faq-question">
+                <div class="faq-icon">
+                  <i class="bi bi-question-circle"></i>
+                </div>
+                <div class="faq-question-text">How do I book a gaming slot?</div>
+                <div class="faq-toggle">
+                  <i class="bi bi-chevron-down"></i>
+                </div>
+              </div>
+              <div class="faq-answer">
+                <div class="faq-answer-content">
+                  Simply browse available games, select your preferred date and time slot, choose between private or shared gaming, and complete the payment. You'll receive instant confirmation!
+                </div>
+              </div>
+            </div>
+
+            <!-- FAQ Item 2 -->
+            <div class="faq-item" data-scroll-reveal data-scroll-delay="50">
+              <div class="faq-question">
+                <div class="faq-icon">
+                  <i class="bi bi-credit-card"></i>
+                </div>
+                <div class="faq-question-text">What payment methods do you accept?</div>
+                <div class="faq-toggle">
+                  <i class="bi bi-chevron-down"></i>
+                </div>
+              </div>
+              <div class="faq-answer">
+                <div class="faq-answer-content">
+                  We accept all major payment methods through Razorpay including credit/debit cards, UPI, net banking, and popular wallets like Paytm, PhonePe, and Google Pay.
+                </div>
+              </div>
+            </div>
+
+            <!-- FAQ Item 3 -->
+            <div class="faq-item" data-scroll-reveal data-scroll-delay="100">
+              <div class="faq-question">
+                <div class="faq-icon">
+                  <i class="bi bi-arrow-counterclockwise"></i>
+                </div>
+                <div class="faq-question-text">Can I cancel or modify my booking?</div>
+                <div class="faq-toggle">
+                  <i class="bi bi-chevron-down"></i>
+                </div>
+              </div>
+              <div class="faq-answer">
+                <div class="faq-answer-content">
+                  Yes! You can cancel or modify bookings from your dashboard. Please check our refund policy for details on cancellation timelines and refund eligibility.
+                </div>
+              </div>
+            </div>
+
+            <!-- FAQ Item 4 -->
+            <div class="faq-item" data-scroll-reveal data-scroll-delay="150">
+              <div class="faq-question">
+                <div class="faq-icon">
+                  <i class="bi bi-clock-history"></i>
+                </div>
+                <div class="faq-question-text">What if I'm late for my booking?</div>
+                <div class="faq-toggle">
+                  <i class="bi bi-chevron-down"></i>
+                </div>
+              </div>
+              <div class="faq-answer">
+                <div class="faq-answer-content">
+                  We recommend arriving on time to get your full gaming session. Late arrivals may result in reduced gaming time. If you're running late, please contact support immediately.
+                </div>
+              </div>
+            </div>
+
+            <!-- FAQ Item 5 -->
+            <div class="faq-item" data-scroll-reveal data-scroll-delay="200">
+              <div class="faq-question">
+                <div class="faq-icon">
+                  <i class="bi bi-people"></i>
+                </div>
+                <div class="faq-question-text">What's the difference between private and shared gaming?</div>
+                <div class="faq-toggle">
+                  <i class="bi bi-chevron-down"></i>
+                </div>
+              </div>
+              <div class="faq-answer">
+                <div class="faq-answer-content">
+                  Private gaming gives you exclusive access to the gaming station, while shared gaming allows multiple players to book the same slot at a discounted rate. Choose based on your preference!
+                </div>
+              </div>
+            </div>
+
+            <!-- FAQ Item 6 -->
+            <div class="faq-item" data-scroll-reveal data-scroll-delay="250">
+              <div class="faq-question">
+                <div class="faq-icon">
+                  <i class="bi bi-shield-check"></i>
+                </div>
+                <div class="faq-question-text">Is my payment information secure?</div>
+                <div class="faq-toggle">
+                  <i class="bi bi-chevron-down"></i>
+                </div>
+              </div>
+              <div class="faq-answer">
+                <div class="faq-answer-content">
+                  Absolutely! We use Razorpay's secure payment gateway with industry-standard encryption. We never store your card details on our servers.
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA Section -->
+  <section class="py-5" style="background: linear-gradient(135deg, #111827 0%, #1a202e 100%);">
+    <div class="container py-5">
+      <div class="text-center" data-scroll-reveal>
+        <h2 class="display-5 fw-bold text-white mb-4">Still Have Questions?</h2>
+        <p class="lead text-white mb-5" style="opacity: 0.9;">Don't hesitate to reach out - we're always happy to help!</p>
+        <div class="d-flex justify-content-center gap-3">
+          <a href="mailto:info@tapnex.tech" class="btn btn-light btn-lg"><i class="bi bi-envelope me-2"></i>Email Us</a>
+          <a href="{% url 'home' %}" class="btn btn-outline-light btn-lg"><i class="bi bi-house me-2"></i>Back to Home</a>
+        </div>
+      </div>
+    </div>
+  </section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // FAQ Accordion functionality
+    const faqItems = document.querySelectorAll('.faq-item');
+    
+    faqItems.forEach(item => {
+      const question = item.querySelector('.faq-question');
+      
+      question.addEventListener('click', function(e) {
+        e.preventDefault();
+        
+        // Check if this item is already active
+        const isActive = item.classList.contains('active');
+        
+        // Close all FAQ items
+        faqItems.forEach(faqItem => {
+          faqItem.classList.remove('active');
+          const faqQuestion = faqItem.querySelector('.faq-question');
+          if (faqQuestion) {
+            faqQuestion.classList.remove('active');
+          }
+        });
+        
+        // If the clicked item wasn't active, open it
+        if (!isActive) {
+          item.classList.add('active');
+          question.classList.add('active');
+        }
+      });
+    });
+    
+    // Smooth scroll reveal animation
+    const observerOptions = {
+      threshold: 0.1,
+      rootMargin: '0px 0px -50px 0px'
+    };
+    
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.style.opacity = '1';
+          entry.target.style.transform = 'translateY(0)';
+        }
+      });
+    }, observerOptions);
+    
+    document.querySelectorAll('[data-scroll-reveal]').forEach(el => {
+      el.style.opacity = '0';
+      el.style.transform = 'translateY(20px)';
+      el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+      
+      const delay = el.getAttribute('data-scroll-delay');
+      if (delay) {
+        el.style.transitionDelay = delay + 'ms';
+      }
+      
+      observer.observe(el);
+    });
+  });
+</script>
+{% endblock %}

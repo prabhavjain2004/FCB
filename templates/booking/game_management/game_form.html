@@ -1,0 +1,1449 @@
+{% extends 'authentication/owner_base.html' %}
+{% load static %}
+
+{% block title %}{{ title }}{% endblock %}
+{% block page_title %}{{ title }}{% endblock %}
+{% block page_subtitle %}{% if game %}Update game settings and configuration{% else %}Configure your game with schedule, pricing, and booking options{% endif %}{% endblock %}
+
+{% block header_actions %}
+{% if game %}
+<a href="{% url 'booking:game_management:game_detail' game.id %}" class="flex w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-gray-600 hover:bg-gray-700 items-center justify-center text-white transition-all flex-shrink-0">
+    <i class="bi bi-arrow-left text-sm"></i>
+</a>
+{% endif %}
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .hero-bg {
+        position: absolute;
+        inset: 0;
+        overflow: hidden;
+        z-index: 0;
+        pointer-events: none;
+    }
+    
+    .gradient-orb {
+        position: absolute;
+        border-radius: 50%;
+        filter: blur(100px);
+        opacity: 0.2;
+        animation: floatOrb 20s ease-in-out infinite;
+    }
+    
+    .orb-1 {
+        width: 400px;
+        height: 400px;
+        background: radial-gradient(circle, rgba(102, 126, 234, 0.4) 0%, transparent 70%);
+        top: -100px;
+        right: -100px;
+    }
+    
+    .orb-2 {
+        width: 350px;
+        height: 350px;
+        background: radial-gradient(circle, rgba(168, 85, 247, 0.3) 0%, transparent 70%);
+        bottom: -80px;
+        left: -80px;
+        animation-delay: 7s;
+    }
+    
+    @keyframes floatOrb {
+        0%, 100% { transform: translate(0, 0) scale(1); }
+        33% { transform: translate(20px, -20px) scale(1.05); }
+        66% { transform: translate(-20px, 20px) scale(0.95); }
+    }
+    
+    .grid-pattern {
+        background-image: 
+            linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+        background-size: 50px 50px;
+        position: absolute;
+        inset: 0;
+        z-index: 0;
+    }
+    
+    .form-section {
+        background: rgba(30, 41, 59, 0.6);
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 1.5rem;
+        padding: 2rem;
+        margin-bottom: 1.5rem;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .form-section::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background: linear-gradient(90deg, #667eea, #a855f7);
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+    
+    .form-section:hover::before {
+        opacity: 1;
+    }
+    
+    .form-section:hover {
+        border-color: rgba(102, 126, 234, 0.3);
+        background: rgba(30, 41, 59, 0.7);
+        transform: translateY(-2px);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    }
+    
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+    
+    .form-label {
+        display: block;
+        font-size: 0.9375rem;
+        font-weight: 600;
+        color: rgba(255, 255, 255, 0.95);
+        margin-bottom: 0.625rem;
+        letter-spacing: 0.01em;
+    }
+    
+    .form-label i {
+        margin-right: 0.375rem;
+        opacity: 0.8;
+    }
+    
+    .form-input, .form-select, .form-textarea {
+        width: 100%;
+        padding: 0.875rem 1.125rem;
+        background: rgba(255, 255, 255, 0.05);
+        border: 2px solid rgba(255, 255, 255, 0.1);
+        border-radius: 0.875rem;
+        color: white;
+        font-size: 0.9375rem;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        font-weight: 500;
+    }
+    
+    .form-input:hover, .form-select:hover, .form-textarea:hover {
+        border-color: rgba(102, 126, 234, 0.3);
+        background: rgba(255, 255, 255, 0.07);
+    }
+    
+    .form-input:focus, .form-select:focus, .form-textarea:focus {
+        outline: none;
+        border-color: rgba(102, 126, 234, 0.6);
+        background: rgba(255, 255, 255, 0.1);
+        box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.15), 0 4px 12px rgba(102, 126, 234, 0.2);
+        transform: translateY(-1px);
+    }
+    
+    .form-input::placeholder, .form-textarea::placeholder {
+        color: rgba(255, 255, 255, 0.3);
+    }
+    
+    /* Dark theme for select options */
+    select option {
+        background-color: #1e293b;
+        color: #ffffff;
+        padding: 8px;
+    }
+    
+    .form-help {
+        margin-top: 0.5rem;
+        font-size: 0.75rem;
+        color: rgba(255, 255, 255, 0.5);
+    }
+    
+    .form-error {
+        margin-top: 0.5rem;
+        font-size: 0.75rem;
+        color: #ef4444;
+    }
+    
+    .checkbox-group {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 0.75rem;
+    }
+    
+    .checkbox-item {
+        display: flex;
+        align-items: center;
+        padding: 1rem;
+        background: rgba(255, 255, 255, 0.05);
+        border: 2px solid rgba(255, 255, 255, 0.1);
+        border-radius: 0.875rem;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        cursor: pointer;
+        position: relative;
+    }
+    
+    .checkbox-item:hover {
+        background: rgba(102, 126, 234, 0.15);
+        border-color: rgba(102, 126, 234, 0.4);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
+    }
+    
+    .checkbox-item:has(input:checked) {
+        background: linear-gradient(135deg, rgba(102, 126, 234, 0.2), rgba(168, 85, 247, 0.2));
+        border-color: rgba(102, 126, 234, 0.5);
+    }
+    
+    .checkbox-input {
+        width: 1.25rem;
+        height: 1.25rem;
+        cursor: pointer;
+    }
+    
+    .checkbox-label {
+        margin-left: 0.75rem;
+        font-size: 0.875rem;
+        font-weight: 500;
+        color: white;
+        cursor: pointer;
+    }
+    
+    .info-box {
+        padding: 1rem;
+        background: rgba(59, 130, 246, 0.1);
+        border: 1px solid rgba(59, 130, 246, 0.3);
+        border-radius: 0.75rem;
+        margin-top: 1rem;
+    }
+    
+    .info-box h4 {
+        font-weight: 600;
+        color: #60a5fa;
+        margin-bottom: 0.5rem;
+    }
+    
+    .info-box ul {
+        font-size: 0.875rem;
+        color: rgba(255, 255, 255, 0.8);
+        list-style: none;
+        padding: 0;
+    }
+    
+    .info-box li {
+        margin-bottom: 0.25rem;
+    }
+    
+    .preview-section {
+        background: rgba(59, 130, 246, 0.1);
+        border: 1px solid rgba(59, 130, 246, 0.3);
+        border-radius: 1rem;
+        padding: 1.5rem;
+        margin-top: 1rem;
+    }
+    
+    .slot-preview {
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 0.5rem;
+        padding: 0.75rem;
+        margin-bottom: 0.5rem;
+    }
+    
+    /* Section Headers */
+    .form-section h2 {
+        position: relative;
+        padding-bottom: 0.75rem;
+        margin-bottom: 1.5rem !important;
+    }
+    
+    .form-section h2::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 60px;
+        height: 3px;
+        background: linear-gradient(90deg, #667eea, #a855f7);
+        border-radius: 2px;
+    }
+    
+    /* Stat Cards */
+    .stat-card-mini {
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .stat-card-mini::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 2px;
+        background: linear-gradient(90deg, currentColor, transparent);
+        opacity: 0.5;
+    }
+    
+    .stat-card-mini:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+    }
+    
+    /* Button Enhancements */
+    .btn {
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        font-weight: 600;
+        letter-spacing: 0.01em;
+    }
+    
+    .btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+    }
+    
+    .btn:active {
+        transform: translateY(0);
+    }
+    
+    /* Info Box Enhancement */
+    .info-box {
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .info-box::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 4px;
+        height: 100%;
+        background: linear-gradient(180deg, #667eea, #a855f7);
+    }
+    
+    @media (max-width: 768px) {
+        .orb-1, .orb-2 {
+            width: 250px;
+            height: 250px;
+            filter: blur(60px);
+        }
+        
+        .checkbox-group {
+            grid-template-columns: 1fr;
+        }
+        
+        .form-section {
+            padding: 1.5rem;
+        }
+        
+        .form-section h2 {
+            font-size: 1.125rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="relative">
+    <!-- Background Elements -->
+    <div class="hero-bg">
+        <div class="gradient-orb orb-1"></div>
+        <div class="gradient-orb orb-2"></div>
+        <div class="grid-pattern"></div>
+    </div>
+    
+    <div class="relative z-10">
+
+        <!-- Form Messages -->
+        {% if messages %}
+        <div class="mb-6 space-y-3">
+            {% for message in messages %}
+            <div class="p-4 rounded-lg animate-fade-in-up {% if message.tags == 'success' %}bg-green-500/20 border border-green-500/30 text-green-300{% elif message.tags == 'error' %}bg-red-500/20 border border-red-500/30 text-red-300{% else %}bg-blue-500/20 border border-blue-500/30 text-blue-300{% endif %}">
+                <i class="bi bi-{% if message.tags == 'success' %}check-circle{% elif message.tags == 'error' %}x-circle{% else %}info-circle{% endif %} mr-2"></i>
+                {{ message }}
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <!-- Progress Indicator -->
+        <div class="mb-8 p-6 rounded-2xl" style="background: rgba(30, 41, 59, 0.6); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.1);">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-bold text-white">Form Progress</h3>
+                <span id="progressText" class="text-sm font-semibold text-indigo-400">0% Complete</span>
+            </div>
+            <div class="w-full bg-gray-700 rounded-full h-3 overflow-hidden">
+                <div id="progressBarFill" class="h-full rounded-full transition-all duration-500 ease-out" style="width: 0%; background: linear-gradient(90deg, #667eea, #a855f7);"></div>
+            </div>
+            <div class="grid grid-cols-2 md:grid-cols-5 gap-2 mt-4">
+                <div class="flex items-center gap-2 text-xs">
+                    <div id="step1" class="w-5 h-5 rounded-full border-2 border-gray-500 flex items-center justify-center">
+                        <i class="bi bi-check text-xs hidden"></i>
+                    </div>
+                    <span class="text-gray-400">Basic Info</span>
+                </div>
+                <div class="flex items-center gap-2 text-xs">
+                    <div id="step2" class="w-5 h-5 rounded-full border-2 border-gray-500 flex items-center justify-center">
+                        <i class="bi bi-check text-xs hidden"></i>
+                    </div>
+                    <span class="text-gray-400">Booking</span>
+                </div>
+                <div class="flex items-center gap-2 text-xs">
+                    <div id="step3" class="w-5 h-5 rounded-full border-2 border-gray-500 flex items-center justify-center">
+                        <i class="bi bi-check text-xs hidden"></i>
+                    </div>
+                    <span class="text-gray-400">Schedule</span>
+                </div>
+                <div class="flex items-center gap-2 text-xs">
+                    <div id="step4" class="w-5 h-5 rounded-full border-2 border-gray-500 flex items-center justify-center">
+                        <i class="bi bi-check text-xs hidden"></i>
+                    </div>
+                    <span class="text-gray-400">Pricing</span>
+                </div>
+                <div class="flex items-center gap-2 text-xs">
+                    <div id="step5" class="w-5 h-5 rounded-full border-2 border-gray-500 flex items-center justify-center">
+                        <i class="bi bi-check text-xs hidden"></i>
+                    </div>
+                    <span class="text-gray-400">Image</span>
+                </div>
+            </div>
+        </div>
+
+        <form method="post" enctype="multipart/form-data" id="gameForm">
+            {% csrf_token %}
+
+            <!-- Basic Information Section -->
+            <div class="form-section animate-fade-in-up">
+                <h2 class="text-xl font-bold text-white mb-6 flex items-center gap-2">
+                    <i class="bi bi-info-circle text-indigo-400"></i>
+                    Basic Information
+                </h2>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="form-group">
+              <label for="{{ form.name.id_for_label }}" class="form-label">
+                <i class="bi bi-controller text-indigo-400"></i> {{ form.name.label }}
+              </label>
+              <div class="relative">
+                {{ form.name }}
+                <div class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none">
+                  <i class="bi bi-pencil-square text-sm"></i>
+                </div>
+              </div>
+              {% if form.name.help_text %}
+                <p class="form-help"><i class="bi bi-info-circle text-xs"></i> {{ form.name.help_text }}</p>
+              {% endif %}
+              {% if form.name.errors %}
+                <div class="form-error"><i class="bi bi-exclamation-circle"></i> {{ form.name.errors.0 }}</div>
+              {% endif %}
+            </div>
+
+            <div class="form-group">
+              <label for="{{ form.capacity.id_for_label }}" class="form-label">
+                <i class="bi bi-people-fill text-green-400"></i> {{ form.capacity.label }}
+              </label>
+              <div class="relative">
+                {{ form.capacity }}
+                <div class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none">
+                  <i class="bi bi-person-plus text-sm"></i>
+                </div>
+              </div>
+              {% if form.capacity.help_text %}
+                <p class="form-help"><i class="bi bi-info-circle text-xs"></i> {{ form.capacity.help_text }}</p>
+              {% endif %}
+              {% if form.capacity.errors %}
+                <div class="form-error"><i class="bi bi-exclamation-circle"></i> {{ form.capacity.errors.0 }}</div>
+              {% endif %}
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="{{ form.description.id_for_label }}" class="form-label">
+              <i class="bi bi-card-text text-purple-400"></i> {{ form.description.label }}
+            </label>
+            {{ form.description }}
+            {% if form.description.help_text %}
+              <p class="form-help"><i class="bi bi-info-circle text-xs"></i> {{ form.description.help_text }}</p>
+            {% endif %}
+            {% if form.description.errors %}
+              <div class="form-error"><i class="bi bi-exclamation-circle"></i> {{ form.description.errors.0 }}</div>
+            {% endif %}
+          </div>
+        </div>
+
+            <!-- Booking Configuration Section -->
+            <div class="form-section animate-fade-in-up" style="animation-delay: 0.1s;">
+                <h2 class="text-xl font-bold text-white mb-6 flex items-center gap-2">
+                    <i class="bi bi-gear text-green-400"></i>
+                    Booking Configuration
+                </h2>
+
+          <div class="form-group">
+            <label for="{{ form.booking_type.id_for_label }}" class="form-label">
+              <i class="bi bi-diagram-3 text-green-400"></i> {{ form.booking_type.label }}
+            </label>
+            <div class="relative">
+              {{ form.booking_type }}
+              <div class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none">
+                <i class="bi bi-chevron-down text-sm"></i>
+              </div>
+            </div>
+            {% if form.booking_type.help_text %}
+              <p class="form-help"><i class="bi bi-info-circle text-xs"></i> {{ form.booking_type.help_text }}</p>
+            {% endif %}
+            {% if form.booking_type.errors %}
+              <div class="form-error"><i class="bi bi-exclamation-circle"></i> {{ form.booking_type.errors.0 }}</div>
+            {% endif %}
+
+                <div class="info-box">
+                    <h4>Booking Type Explanation:</h4>
+                    <ul>
+                <li>
+                  <strong>Single (Private Only):</strong> Customers can only book the entire game capacity at once
+                </li>
+                <li>
+                  <strong>Hybrid (Private + Shared):</strong> Customers can choose between booking the entire capacity (private) or individual spots (shared)
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+            <!-- Schedule Settings Section -->
+            <div class="form-section animate-fade-in-up" style="animation-delay: 0.2s;">
+                <h2 class="text-xl font-bold text-white mb-6 flex items-center gap-2">
+                    <i class="bi bi-calendar-range text-purple-400"></i>
+                    Schedule Settings
+                </h2>
+
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+            <div class="form-group">
+              <label for="{{ form.opening_time.id_for_label }}" class="form-label">
+                <i class="bi bi-sunrise text-yellow-400"></i> {{ form.opening_time.label }}
+              </label>
+              <div class="relative">
+                {{ form.opening_time }}
+                <div class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none">
+                  <i class="bi bi-clock text-sm"></i>
+                </div>
+              </div>
+              {% if form.opening_time.help_text %}
+                <p class="form-help"><i class="bi bi-info-circle text-xs"></i> {{ form.opening_time.help_text }}</p>
+              {% endif %}
+              {% if form.opening_time.errors %}
+                <div class="form-error"><i class="bi bi-exclamation-circle"></i> {{ form.opening_time.errors.0 }}</div>
+              {% endif %}
+            </div>
+
+            <div class="form-group">
+              <label for="{{ form.closing_time.id_for_label }}" class="form-label">
+                <i class="bi bi-sunset text-orange-400"></i> {{ form.closing_time.label }}
+              </label>
+              <div class="relative">
+                {{ form.closing_time }}
+                <div class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none">
+                  <i class="bi bi-clock text-sm"></i>
+                </div>
+              </div>
+              {% if form.closing_time.help_text %}
+                <p class="form-help"><i class="bi bi-info-circle text-xs"></i> {{ form.closing_time.help_text }}</p>
+              {% endif %}
+              {% if form.closing_time.errors %}
+                <div class="form-error"><i class="bi bi-exclamation-circle"></i> {{ form.closing_time.errors.0 }}</div>
+              {% endif %}
+            </div>
+
+            <div class="form-group">
+              <label for="{{ form.slot_duration_minutes.id_for_label }}" class="form-label">
+                <i class="bi bi-hourglass-split text-cyan-400"></i> {{ form.slot_duration_minutes.label }}
+              </label>
+              <div class="relative">
+                {{ form.slot_duration_minutes }}
+                <div class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none">
+                  <i class="bi bi-stopwatch text-sm"></i>
+                </div>
+              </div>
+              {% if form.slot_duration_minutes.help_text %}
+                <p class="form-help"><i class="bi bi-info-circle text-xs"></i> {{ form.slot_duration_minutes.help_text }}</p>
+              {% endif %}
+              {% if form.slot_duration_minutes.errors %}
+                <div class="form-error"><i class="bi bi-exclamation-circle"></i> {{ form.slot_duration_minutes.errors.0 }}</div>
+              {% endif %}
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">{{ form.available_days.label }}</label>
+
+                <!-- Select All Days Checkbox -->
+                <div class="mb-4 p-4 rounded-lg" style="background: rgba(102, 126, 234, 0.15); border: 1px solid rgba(102, 126, 234, 0.3);">
+                    <div class="flex items-center">
+                        <input type="checkbox" id="selectAllDays" class="h-6 w-6 cursor-pointer" />
+                        <label for="selectAllDays" class="ml-3 text-base font-semibold text-white cursor-pointer">
+                            <i class="bi bi-calendar-week mr-2"></i>Select All Days (Open 7 Days a Week)
+                        </label>
+                    </div>
+                </div>
+
+            <div class="checkbox-group">
+              {% for choice in form.available_days %}
+                <div class="checkbox-item">
+                  {{ choice.tag }}
+                  <label for="{{ choice.id_for_label }}" class="checkbox-label">{{ choice.choice_label }}</label>
+                </div>
+              {% endfor %}
+            </div>
+            {% if form.available_days.help_text %}
+              <p class="form-help">{{ form.available_days.help_text }}</p>
+            {% endif %}
+            {% if form.available_days.errors %}
+              <div class="form-error">{{ form.available_days.errors.0 }}</div>
+            {% endif %}
+          </div>
+
+                <!-- Slot Preview -->
+                <div id="slotPreview" class="preview-section" style="display: none;">
+                    <h4 class="font-semibold text-blue-300 mb-3">Slot Preview (Next 7 Days)</h4>
+            <div id="previewContent"></div>
+                    <button type="button" onclick="generatePreview()" class="mt-3 btn btn-primary">
+                        <i class="bi bi-arrow-clockwise"></i> Update Preview
+                    </button>
+                </div>
+            </div>
+
+            <!-- Pricing Section -->
+            <div class="form-section animate-fade-in-up" style="animation-delay: 0.3s;">
+                <h2 class="text-xl font-bold text-white mb-6 flex items-center gap-2">
+                    <i class="bi bi-currency-rupee text-yellow-400"></i>
+                    Pricing Configuration
+                </h2>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="form-group">
+              <label for="{{ form.private_price.id_for_label }}" class="form-label">
+                <i class="bi bi-cash-stack text-yellow-400"></i> {{ form.private_price.label }}
+              </label>
+              <div class="relative">
+                <div class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 font-bold pointer-events-none">₹</div>
+                <div style="padding-left: 2rem;">{{ form.private_price }}</div>
+              </div>
+              {% if form.private_price.help_text %}
+                <p class="form-help"><i class="bi bi-info-circle text-xs"></i> {{ form.private_price.help_text }}</p>
+              {% endif %}
+              {% if form.private_price.errors %}
+                <div class="form-error"><i class="bi bi-exclamation-circle"></i> {{ form.private_price.errors.0 }}</div>
+              {% endif %}
+            </div>
+
+            <div class="form-group" id="sharedPriceGroup">
+              <label for="{{ form.shared_price.id_for_label }}" class="form-label">
+                <i class="bi bi-currency-rupee text-green-400"></i> {{ form.shared_price.label }}
+              </label>
+              <div class="relative">
+                <div class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 font-bold pointer-events-none">₹</div>
+                <div style="padding-left: 2rem;">{{ form.shared_price }}</div>
+              </div>
+              {% if form.shared_price.help_text %}
+                <p class="form-help"><i class="bi bi-info-circle text-xs"></i> {{ form.shared_price.help_text }}</p>
+              {% endif %}
+              {% if form.shared_price.errors %}
+                <div class="form-error"><i class="bi bi-exclamation-circle"></i> {{ form.shared_price.errors.0 }}</div>
+              {% endif %}
+            </div>
+          </div>
+
+                <!-- Pricing Calculator -->
+                <div id="pricingCalculator" class="mt-6 p-4 rounded-lg" style="background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3);">
+                    <h4 class="font-semibold text-green-300 mb-3">Pricing Calculator</h4>
+                    <div id="calculatorContent" class="text-sm text-gray-300"></div>
+                </div>
+            </div>
+
+            <!-- Current Game Info (for existing games) -->
+            {% if game %}
+            <div class="form-section animate-fade-in-up" style="animation-delay: 0.4s;">
+                <h2 class="text-xl font-bold text-white mb-6 flex items-center gap-2">
+                    <i class="bi bi-info-circle text-blue-400"></i>
+                    Current Game Information
+                </h2>
+                
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                    <div class="stat-card-mini p-5 rounded-xl" style="background: rgba(59, 130, 246, 0.12); border: 2px solid rgba(59, 130, 246, 0.3); color: #60a5fa;">
+                        <div class="flex items-center justify-between mb-3">
+                            <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Status</p>
+                            <div class="w-10 h-10 rounded-lg flex items-center justify-center" style="background: rgba(59, 130, 246, 0.2);">
+                                <i class="bi bi-{% if game.is_active %}check-circle{% else %}wrench{% endif %} text-xl"></i>
+                            </div>
+                        </div>
+                        <p class="text-2xl font-bold text-white">
+                            {% if game.is_active %}
+                                <span class="text-green-400">Active</span>
+                            {% else %}
+                                <span class="text-yellow-400">Maintenance</span>
+                            {% endif %}
+                        </p>
+                    </div>
+                    
+                    <div class="stat-card-mini p-5 rounded-xl" style="background: rgba(16, 185, 129, 0.12); border: 2px solid rgba(16, 185, 129, 0.3); color: #34d399;">
+                        <div class="flex items-center justify-between mb-3">
+                            <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Total Bookings</p>
+                            <div class="w-10 h-10 rounded-lg flex items-center justify-center" style="background: rgba(16, 185, 129, 0.2);">
+                                <i class="bi bi-calendar-check text-xl"></i>
+                            </div>
+                        </div>
+                        <p class="text-3xl font-bold text-white">{{ game.bookings.count }}</p>
+                    </div>
+                    
+                    <div class="stat-card-mini p-5 rounded-xl" style="background: rgba(168, 85, 247, 0.12); border: 2px solid rgba(168, 85, 247, 0.3); color: #c084fc;">
+                        <div class="flex items-center justify-between mb-3">
+                            <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Active Slots</p>
+                            <div class="w-10 h-10 rounded-lg flex items-center justify-center" style="background: rgba(168, 85, 247, 0.2);">
+                                <i class="bi bi-clock-history text-xl"></i>
+                            </div>
+                        </div>
+                        <p class="text-3xl font-bold text-white">{{ active_slots_count|default:0 }}</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Update Options -->
+            <div class="form-section animate-fade-in-up" style="animation-delay: 0.45s;">
+                <h2 class="text-xl font-bold text-white mb-6 flex items-center gap-2">
+                    <i class="bi bi-arrow-repeat text-orange-400"></i>
+                    Update Options
+                </h2>
+
+                <div class="p-4 rounded-lg mb-4" style="background: rgba(34, 197, 94, 0.1); border: 1px solid rgba(34, 197, 94, 0.3);">
+                    <div class="flex items-start gap-3">
+                        <i class="bi bi-check-circle text-green-400 text-xl mt-1"></i>
+                        <div>
+                            <h4 class="font-semibold text-green-300 mb-2">Automatic Updates</h4>
+                            <p class="text-sm text-gray-300">
+                                • <strong>Capacity changes:</strong> Automatically updates all future slots<br>
+                                • <strong>Schedule changes:</strong> Automatically regenerates slots when you change opening/closing time, slot duration, or available days<br>
+                                • Existing bookings are always preserved
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <div class="flex items-center p-4 rounded-lg cursor-pointer hover:bg-white/5 transition-all" style="background: rgba(255, 255, 255, 0.03); border: 2px solid rgba(255, 255, 255, 0.1);">
+                        {{ form.regenerate_slots }}
+                        <label for="{{ form.regenerate_slots.id_for_label }}" class="ml-3 cursor-pointer">
+                            <span class="text-base font-semibold text-white">{{ form.regenerate_slots.label }}</span>
+                            {% if form.regenerate_slots.help_text %}
+                                <p class="text-xs text-gray-400 mt-1">{{ form.regenerate_slots.help_text }}</p>
+                            {% endif %}
+                        </label>
+                    </div>
+                    {% if form.regenerate_slots.errors %}
+                        <div class="form-error">{{ form.regenerate_slots.errors.0 }}</div>
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Image Upload Section -->
+            <div class="form-section animate-fade-in-up" style="animation-delay: {% if game %}0.5{% else %}0.4{% endif %}s;">
+                <h2 class="text-xl font-bold text-white mb-6 flex items-center gap-2">
+                    <i class="bi bi-image text-pink-400"></i>
+                    Game Image
+                </h2>
+                
+                {% if game and game.image %}
+                <div class="mb-4">
+                    <p class="text-sm text-gray-400 mb-2">Current Image:</p>
+                    <div class="relative inline-block">
+                        <img src="{{ game.image.url }}" alt="{{ game.name }}" class="w-48 h-48 object-cover rounded-lg border-2 border-white/10">
+                        <div class="absolute top-2 right-2 bg-green-500 text-white px-2 py-1 rounded text-xs font-bold">
+                            <i class="bi bi-check"></i> Uploaded
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+                
+                <div class="form-group">
+                    <label class="form-label">
+                        <i class="bi bi-image-fill text-pink-400"></i> {% if game and game.image %}Change Image{% else %}Upload Image{% endif %} (Optional)
+                    </label>
+                    <div class="relative">
+                        <input type="file" name="image" accept="image/*" id="imageInput" class="hidden">
+                        <label for="imageInput" class="group flex flex-col items-center justify-center gap-4 p-8 rounded-xl border-2 border-dashed border-white/20 hover:border-indigo-500/60 cursor-pointer transition-all duration-300" style="background: rgba(255, 255, 255, 0.03);">
+                            <div class="w-16 h-16 rounded-full flex items-center justify-center transition-all duration-300 group-hover:scale-110" style="background: linear-gradient(135deg, #667eea, #a855f7);">
+                                <i class="bi bi-cloud-upload text-3xl text-white"></i>
+                            </div>
+                            <div class="text-center">
+                                <p class="text-white font-semibold text-lg mb-1">Click to upload or drag and drop</p>
+                                <p class="text-sm text-gray-400">PNG, JPG, GIF up to 10MB</p>
+                                <p class="text-xs text-gray-500 mt-2">Recommended: 800x800px or higher</p>
+                            </div>
+                        </label>
+                    </div>
+                    <div id="imagePreview" class="mt-6 hidden">
+                        <p class="text-sm font-semibold text-gray-300 mb-3 flex items-center gap-2">
+                            <i class="bi bi-eye text-indigo-400"></i> New Image Preview:
+                        </p>
+                        <div class="relative inline-block">
+                            <img id="previewImg" class="w-64 h-64 object-cover rounded-xl border-2 border-indigo-500 shadow-lg">
+                            <div class="absolute top-2 right-2 bg-indigo-500 text-white px-3 py-1 rounded-lg text-xs font-bold flex items-center gap-1">
+                                <i class="bi bi-check-circle"></i> Ready
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Form Actions -->
+            <div class="flex flex-col sm:flex-row justify-between items-center gap-4 animate-fade-in-up p-6 rounded-2xl" style="animation-delay: {% if game %}0.6{% else %}0.5{% endif %}s; background: rgba(30, 41, 59, 0.6); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.1);">
+                <div class="flex flex-wrap gap-3 justify-center sm:justify-start">
+                    <a href="{% if game %}{% url 'authentication:owner_games' %}{% else %}{% url 'booking:game_management:dashboard' %}{% endif %}" class="btn btn-secondary flex items-center gap-2 px-6 py-3 rounded-xl font-semibold transition-all hover:scale-105" style="background: rgba(239, 68, 68, 0.15); border: 2px solid rgba(239, 68, 68, 0.3); color: #fca5a5;">
+                        <i class="bi bi-x-circle"></i> Cancel
+                    </a>
+                    {% if game %}
+                    <a href="{% url 'booking:game_management:game_detail' game.id %}" class="btn btn-secondary flex items-center gap-2 px-6 py-3 rounded-xl font-semibold transition-all hover:scale-105" style="background: rgba(59, 130, 246, 0.15); border: 2px solid rgba(59, 130, 246, 0.3); color: #93c5fd;">
+                        <i class="bi bi-eye"></i> View Details
+                    </a>
+                    {% endif %}
+                </div>
+                <button type="submit" id="submitBtn" class="btn btn-primary flex items-center gap-2 px-8 py-4 rounded-xl font-bold text-lg transition-all hover:scale-105 shadow-lg" style="background: linear-gradient(135deg, #667eea, #a855f7); border: none; color: white;">
+                    <i class="bi bi-check-circle-fill"></i> 
+                    <span id="submitBtnText">{{ submit_text|default:"Save Game" }}</span>
+                    <i class="bi bi-arrow-right ml-1"></i>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+      <!-- Progress Modal - Improved Styling -->
+      <div id="progressModal" class="fixed inset-0 bg-black bg-opacity-60 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-lg w-full transform transition-all">
+          <!-- Modal Header -->
+          <div class="bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-6 py-4 rounded-t-2xl">
+            <h3 class="text-2xl font-bold flex items-center">
+              <i class="fas fa-cog fa-spin mr-3"></i>
+              Generating Time Slots
+            </h3>
+          </div>
+
+          <!-- Modal Body -->
+          <div class="p-6">
+            <!-- Current Status -->
+            <div class="mb-6">
+              <p id="progressStatus" class="text-gray-700 text-lg font-medium mb-2">Starting slot generation...</p>
+              <p id="progressDate" class="text-sm text-gray-500"></p>
+            </div>
+
+            <!-- Progress Bar -->
+            <div class="mb-6">
+              <div class="flex justify-between items-center mb-2">
+                <span id="progressPercent" class="text-2xl font-bold text-indigo-600">0%</span>
+                <span id="slotsCreated" class="text-sm font-semibold text-gray-600 bg-gray-100 px-3 py-1 rounded-full">0 slots created</span>
+              </div>
+              <div class="w-full bg-gray-200 rounded-full h-6 overflow-hidden shadow-inner">
+                <div id="progressBar" class="bg-gradient-to-r from-indigo-500 to-purple-500 h-6 rounded-full transition-all duration-500 ease-out flex items-center justify-end pr-2" style="width: 0%">
+                  <span class="text-white text-xs font-bold opacity-0" id="barPercent"></span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="flex space-x-3">
+              <!-- Cancel Button (shown during generation) -->
+              <button id="cancelBtn" class="flex-1 px-6 py-3 bg-red-600 hover:bg-red-700 text-white rounded-lg font-medium transition-colors duration-200 flex items-center justify-center"><i class="fas fa-times-circle mr-2"></i>Cancel Generation</button>
+
+              <!-- Success Button (hidden initially) -->
+              <button id="continueBtn" class="hidden flex-1 px-6 py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition-colors duration-200 flex items-center justify-center"><i class="fas fa-check-circle mr-2"></i>Continue to Game Details</button>
+            </div>
+
+            <!-- Warning Text -->
+            <p class="text-xs text-gray-500 mt-4 text-center">
+              <i class="fas fa-info-circle mr-1"></i>Please don't close this window while slots are being generated
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Confirmation Modal for Cancel -->
+      <div id="confirmCancelModal" class="fixed inset-0 bg-black bg-opacity-60 backdrop-blur-sm z-60 hidden items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full transform transition-all">
+          <div class="p-6">
+            <div class="text-center mb-6">
+              <div class="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-red-100 mb-4">
+                <i class="fas fa-exclamation-triangle text-red-600 text-3xl"></i>
+              </div>
+              <h3 class="text-xl font-bold text-gray-900 mb-2">Cancel Slot Generation?</h3>
+              <p class="text-gray-600">
+                This will stop the generation process and delete all <span id="deleteSlotsCount" class="font-semibold text-red-600">0</span> slots that were created.
+              </p>
+              <p class="text-sm text-gray-500 mt-2">This action cannot be undone.</p>
+            </div>
+
+            <div class="flex space-x-3">
+              <button id="confirmCancelNo" class="flex-1 px-6 py-3 border-2 border-gray-300 hover:bg-gray-50 text-gray-700 rounded-lg font-medium transition-colors duration-200">No, Continue</button>
+              <button id="confirmCancelYes" class="flex-1 px-6 py-3 bg-red-600 hover:bg-red-700 text-white rounded-lg font-medium transition-colors duration-200">Yes, Cancel & Delete</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+// Toggle shared price field based on booking type
+function toggleSharedPriceField(bookingType) {
+    const sharedPriceGroup = document.getElementById('sharedPriceGroup');
+    const sharedPriceInput = document.getElementById('{{ form.shared_price.id_for_label }}');
+    
+    if (bookingType === 'HYBRID') {
+        sharedPriceGroup.style.display = 'block';
+        sharedPriceInput.required = true;
+    } else {
+        sharedPriceGroup.style.display = 'none';
+        sharedPriceInput.required = false;
+        sharedPriceInput.value = '';
+    }
+    
+    updatePricingCalculator();
+}
+
+// Update pricing calculator
+function updatePricingCalculator() {
+    const capacity = document.getElementById('{{ form.capacity.id_for_label }}').value;
+    const privatePrice = document.getElementById('{{ form.private_price.id_for_label }}').value;
+    const sharedPrice = document.getElementById('{{ form.shared_price.id_for_label }}').value;
+    const bookingType = document.getElementById('{{ form.booking_type.id_for_label }}').value;
+    
+    const calculatorContent = document.getElementById('calculatorContent');
+    
+    if (capacity && privatePrice) {
+        let content = `<div class="grid grid-cols-1 md:grid-cols-2 gap-4">`;
+        
+        // Private booking calculation
+        const pricePerPerson = privatePrice / capacity;
+        content += `
+            <div>
+                <h5 class="font-medium mb-2">Private Booking</h5>
+                <ul class="space-y-1">
+                    <li>Full capacity: ${capacity} players</li>
+                    <li>Total price: ₹${privatePrice}</li>
+                    <li>Per person: ₹${pricePerPerson.toFixed(2)}</li>
+                </ul>
+            </div>
+        `;
+        
+        // Shared booking calculation (if hybrid)
+        if (bookingType === 'HYBRID' && sharedPrice) {
+            const totalSharedRevenue = sharedPrice * capacity;
+            const revenueDifference = totalSharedRevenue - privatePrice;
+            const percentageDifference = ((revenueDifference / privatePrice) * 100).toFixed(1);
+            
+            content += `
+                <div>
+                    <h5 class="font-medium mb-2">Shared Booking</h5>
+                    <ul class="space-y-1">
+                        <li>Per person: ₹${sharedPrice}</li>
+                        <li>Max revenue: ₹${totalSharedRevenue} (if full)</li>
+                        <li>Difference: ₹${revenueDifference} (${percentageDifference}%)</li>
+                    </ul>
+                </div>
+            `;
+        }
+        
+        content += `</div>`;
+        calculatorContent.innerHTML = content;
+    } else {
+        calculatorContent.innerHTML = '<p class="text-gray-500">Enter capacity and pricing to see calculations</p>';
+    }
+}
+
+// Generate slot preview
+function generatePreview() {
+    const openingTime = document.getElementById('{{ form.opening_time.id_for_label }}').value;
+    const closingTime = document.getElementById('{{ form.closing_time.id_for_label }}').value;
+    const slotDuration = document.getElementById('{{ form.slot_duration_minutes.id_for_label }}').value;
+    const availableDays = Array.from(document.querySelectorAll('input[name="{{ form.available_days.html_name }}"]:checked')).map(cb => cb.value);
+    
+    if (openingTime && closingTime && slotDuration && availableDays.length > 0) {
+        fetch('/booking/games/slot-preview/', {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: new URLSearchParams({
+                opening_time: openingTime,
+                closing_time: closingTime,
+                slot_duration_minutes: slotDuration,
+                'available_days[]': availableDays
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                displaySlotPreview(data.preview_slots, data.statistics);
+            }
+        })
+        .catch(error => {
+            // Silently handle preview errors
+        });
+    }
+}
+
+// Display slot preview
+function displaySlotPreview(previewSlots, statistics) {
+    const previewSection = document.getElementById('slotPreview');
+    const previewContent = document.getElementById('previewContent');
+    
+    let content = `
+        <div class="mb-4 p-3 bg-white rounded border">
+            <h5 class="font-medium mb-2">Statistics</h5>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                <div>Total Slots (7 days): <strong>${statistics.total_slots_7_days}</strong></div>
+                <div>Avg per day: <strong>${statistics.average_slots_per_day}</strong></div>
+                <div>Operating days: <strong>${statistics.operating_days}</strong></div>
+                <div>Slot duration: <strong>${statistics.slot_duration_minutes} min</strong></div>
+            </div>
+        </div>
+    `;
+    
+    previewSlots.forEach(day => {
+        content += `
+            <div class="slot-preview">
+                <h5 class="font-medium mb-2">${day.day_name} (${day.date}) - ${day.slot_count} slots</h5>
+                <div class="grid grid-cols-3 md:grid-cols-6 gap-2 text-xs">
+        `;
+        
+        day.slots.forEach(slot => {
+            content += `<div class="bg-blue-100 text-blue-800 px-2 py-1 rounded">${slot.start_time}-${slot.end_time}</div>`;
+        });
+        
+        content += `</div></div>`;
+    });
+    
+    previewContent.innerHTML = content;
+    previewSection.style.display = 'block';
+}
+
+// Image preview functionality
+const imageInput = document.getElementById('imageInput');
+const imagePreview = document.getElementById('imagePreview');
+const previewImg = document.getElementById('previewImg');
+
+if (imageInput) {
+    imageInput.addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (file) {
+            // Validate file size (10MB)
+            if (file.size > 10 * 1024 * 1024) {
+                alert('File size must be less than 10MB');
+                imageInput.value = '';
+                return;
+            }
+            
+            // Validate file type
+            if (!file.type.startsWith('image/')) {
+                alert('Please select an image file');
+                imageInput.value = '';
+                return;
+            }
+            
+            // Show preview
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                previewImg.src = e.target.result;
+                imagePreview.classList.remove('hidden');
+            };
+            reader.readAsDataURL(file);
+        }
+    });
+}
+
+// Initialize form
+document.addEventListener('DOMContentLoaded', function() {
+    // Set initial state for shared price field
+    const bookingTypeSelect = document.getElementById('{{ form.booking_type.id_for_label }}');
+    if (bookingTypeSelect) {
+        toggleSharedPriceField(bookingTypeSelect.value);
+    }
+    
+    // Add event listeners
+    bookingTypeSelect.addEventListener('change', function() {
+        toggleSharedPriceField(this.value);
+    });
+    
+    // Add event listeners for pricing calculator
+    ['{{ form.capacity.id_for_label }}', '{{ form.private_price.id_for_label }}', '{{ form.shared_price.id_for_label }}'].forEach(id => {
+        const element = document.getElementById(id);
+        if (element) {
+            element.addEventListener('input', updatePricingCalculator);
+        }
+    });
+    
+    // Initial calculator update
+    updatePricingCalculator();
+    
+    // Auto-generate preview when schedule fields change
+    ['{{ form.opening_time.id_for_label }}', '{{ form.closing_time.id_for_label }}', '{{ form.slot_duration_minutes.id_for_label }}'].forEach(id => {
+        const element = document.getElementById(id);
+        if (element) {
+            element.addEventListener('change', function() {
+                setTimeout(generatePreview, 500); // Delay to allow for multiple field changes
+            });
+        }
+    });
+    
+    // Available days checkboxes
+    const dayCheckboxes = document.querySelectorAll('input[name="{{ form.available_days.html_name }}"]');
+    const selectAllCheckbox = document.getElementById('selectAllDays');
+    
+    // Select All Days functionality
+    if (selectAllCheckbox) {
+        selectAllCheckbox.addEventListener('change', function() {
+            dayCheckboxes.forEach(checkbox => {
+                checkbox.checked = this.checked;
+            });
+            setTimeout(generatePreview, 500);
+        });
+    }
+    
+    // Update Select All checkbox state when individual days change
+    dayCheckboxes.forEach(checkbox => {
+        checkbox.addEventListener('change', function() {
+            // Check if all day checkboxes are checked
+            const allChecked = Array.from(dayCheckboxes).every(cb => cb.checked);
+            if (selectAllCheckbox) {
+                selectAllCheckbox.checked = allChecked;
+            }
+            setTimeout(generatePreview, 500);
+        });
+    });
+    
+    // Initialize Select All checkbox state on page load
+    if (selectAllCheckbox) {
+        const allChecked = Array.from(dayCheckboxes).every(cb => cb.checked);
+        selectAllCheckbox.checked = allChecked;
+    }
+    
+    // Handle form submission with AJAX for progress tracking
+    const gameForm = document.getElementById('gameForm');
+    const submitBtn = document.getElementById('submitBtn');
+    const progressModal = document.getElementById('progressModal');
+    const progressBar = document.getElementById('progressBar');
+    const barPercent = document.getElementById('barPercent');
+    const progressPercent = document.getElementById('progressPercent');
+    const progressStatus = document.getElementById('progressStatus');
+    const progressDate = document.getElementById('progressDate');
+    const slotsCreated = document.getElementById('slotsCreated');
+    const continueBtn = document.getElementById('continueBtn');
+    const cancelBtn = document.getElementById('cancelBtn');
+    const confirmCancelModal = document.getElementById('confirmCancelModal');
+    const confirmCancelYes = document.getElementById('confirmCancelYes');
+    const confirmCancelNo = document.getElementById('confirmCancelNo');
+    const deleteSlotsCount = document.getElementById('deleteSlotsCount');
+    
+    let currentGameId = null;
+    let currentEventSource = null;
+    let currentSlotsCreated = 0;
+    
+    {% if not game %}  {# Only for game creation, not updates #}
+    gameForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        // Validate form before submission
+        if (!validateForm()) {
+            return;
+        }
+        
+        // Disable submit button
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="bi bi-hourglass-split animate-spin mr-2"></i>Creating Game...';
+        
+        // Submit form via AJAX
+        const formData = new FormData(gameForm);
+        
+        fetch(gameForm.action, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Show progress modal with flex display
+                progressModal.classList.remove('hidden');
+                progressModal.classList.add('flex');
+                
+                // Start slot generation with progress tracking
+                currentGameId = data.game_id;
+                generateSlotsWithProgress(data.game_id, data.game_name);
+            } else {
+                alert('Error creating game: ' + (data.error || JSON.stringify(data.errors)));
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<i class="bi bi-check-circle"></i> {{ submit_text }}';
+            }
+        })
+        .catch(error => {
+            alert('Error: ' + error);
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = '<i class="bi bi-check-circle"></i> {{ submit_text }}';
+        });
+    });
+    {% else %}
+    // For updates, show loading state
+    gameForm.addEventListener('submit', function(e) {
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="bi bi-hourglass-split animate-spin mr-2"></i>Updating...';
+    });
+    {% endif %}
+    
+    // Form validation function
+    function validateForm() {
+        const name = document.getElementById('{{ form.name.id_for_label }}').value.trim();
+        const capacity = document.getElementById('{{ form.capacity.id_for_label }}').value;
+        const openingTime = document.getElementById('{{ form.opening_time.id_for_label }}').value;
+        const closingTime = document.getElementById('{{ form.closing_time.id_for_label }}').value;
+        const privatePrice = document.getElementById('{{ form.private_price.id_for_label }}').value;
+        const bookingType = document.getElementById('{{ form.booking_type.id_for_label }}').value;
+        const sharedPrice = document.getElementById('{{ form.shared_price.id_for_label }}').value;
+        const availableDays = document.querySelectorAll('input[name="{{ form.available_days.html_name }}"]:checked');
+        
+        if (!name) {
+            alert('Please enter a game name');
+            return false;
+        }
+        
+        if (!capacity || capacity < 1) {
+            alert('Please enter a valid capacity (minimum 1)');
+            return false;
+        }
+        
+        if (!openingTime || !closingTime) {
+            alert('Please set opening and closing times');
+            return false;
+        }
+        
+        if (openingTime >= closingTime) {
+            alert('Closing time must be after opening time');
+            return false;
+        }
+        
+        if (!privatePrice || privatePrice <= 0) {
+            alert('Please enter a valid private booking price');
+            return false;
+        }
+        
+        if (bookingType === 'HYBRID' && (!sharedPrice || sharedPrice <= 0)) {
+            alert('Hybrid games require a shared booking price');
+            return false;
+        }
+        
+        if (availableDays.length === 0) {
+            alert('Please select at least one available day');
+            return false;
+        }
+        
+        return true;
+    }
+    
+    // Cancel button click
+    cancelBtn.addEventListener('click', function() {
+        // Update confirmation modal with current slots count
+        deleteSlotsCount.textContent = currentSlotsCreated;
+        
+        // Show confirmation modal
+        confirmCancelModal.classList.remove('hidden');
+        confirmCancelModal.classList.add('flex');
+    });
+    
+    // Confirmation - No, continue
+    confirmCancelNo.addEventListener('click', function() {
+        confirmCancelModal.classList.add('hidden');
+        confirmCancelModal.classList.remove('flex');
+    });
+    
+    // Confirmation - Yes, cancel and delete
+    confirmCancelYes.addEventListener('click', function() {
+        // Close event source
+        if (currentEventSource) {
+            currentEventSource.close();
+        }
+        
+        // Delete the game and its slots
+        if (currentGameId) {
+            fetch(`/booking/games/manage/${currentGameId}/delete-with-slots/`, {
+                method: 'POST',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Hide both modals
+                    confirmCancelModal.classList.add('hidden');
+                    confirmCancelModal.classList.remove('flex');
+                    progressModal.classList.add('hidden');
+                    progressModal.classList.remove('flex');
+                    
+                    // Re-enable submit button
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = '{{ submit_text }}';
+                    
+                    // Show success message
+                    alert('Slot generation cancelled. Game and slots have been deleted.');
+                } else {
+                    alert('Error deleting game: ' + data.error);
+                }
+            })
+            .catch(error => {
+                alert('Error: ' + error);
+            });
+        }
+    });
+    
+    function generateSlotsWithProgress(gameId, gameName) {
+        const days = 7;  // Generate slots for 7 days
+        currentEventSource = new EventSource(`/booking/games/manage/api/generate-slots/${gameId}/?days=${days}`);
+        
+        currentEventSource.onmessage = function(event) {
+            const data = JSON.parse(event.data);
+            
+            // Update progress bar
+            progressBar.style.width = data.progress + '%';
+            progressPercent.textContent = data.progress + '%';
+            barPercent.textContent = data.progress >= 10 ? data.progress + '%' : '';
+            barPercent.style.opacity = data.progress >= 10 ? '1' : '0';
+            progressStatus.textContent = data.status;
+            
+            if (data.date) {
+                progressDate.textContent = 'Processing: ' + data.date;
+            }
+            
+            if (data.slots_created !== undefined) {
+                currentSlotsCreated = data.slots_created;
+                slotsCreated.textContent = data.slots_created + ' slots created';
+            }
+            
+            // Check if complete
+            if (data.complete) {
+                currentEventSource.close();
+                
+                // Hide cancel button, show success button
+                cancelBtn.classList.add('hidden');
+                continueBtn.classList.remove('hidden');
+                progressStatus.textContent = `✨ ${data.slots_created} time slots generated successfully!`;
+                progressStatus.classList.add('text-green-600', 'font-semibold');
+                
+                // Redirect on button click
+                continueBtn.addEventListener('click', function() {
+                    window.location.href = `/booking/games/manage/${gameId}/`;
+                });
+            }
+        };
+        
+        currentEventSource.onerror = function(error) {
+            currentEventSource.close();
+            progressStatus.textContent = 'Error generating slots. Please try again.';
+            progressStatus.classList.add('text-red-600');
+            cancelBtn.classList.add('hidden');
+            
+            setTimeout(() => {
+                progressModal.classList.add('hidden');
+                progressModal.classList.remove('flex');
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '{{ submit_text }}';
+            }, 3000);
+        };
+    }
+});
+
+// Progress Tracker
+function updateProgress() {
+    const fields = {
+        step1: ['{{ form.name.id_for_label }}', '{{ form.capacity.id_for_label }}'],
+        step2: ['{{ form.booking_type.id_for_label }}'],
+        step3: ['{{ form.opening_time.id_for_label }}', '{{ form.closing_time.id_for_label }}', '{{ form.slot_duration_minutes.id_for_label }}'],
+        step4: ['{{ form.private_price.id_for_label }}'],
+        step5: ['imageInput']
+    };
+    
+    let totalSteps = 5;
+    let completedSteps = 0;
+    
+    Object.keys(fields).forEach(step => {
+        const stepElement = document.getElementById(step);
+        const checkIcon = stepElement.querySelector('i');
+        const isComplete = fields[step].every(fieldId => {
+            const field = document.getElementById(fieldId);
+            return field && field.value && field.value.trim() !== '';
+        });
+        
+        if (isComplete) {
+            completedSteps++;
+            stepElement.style.background = 'linear-gradient(135deg, #667eea, #a855f7)';
+            stepElement.style.borderColor = '#667eea';
+            checkIcon.classList.remove('hidden');
+            checkIcon.style.color = 'white';
+        } else {
+            stepElement.style.background = 'transparent';
+            stepElement.style.borderColor = '#6b7280';
+            checkIcon.classList.add('hidden');
+        }
+    });
+    
+    const percentage = Math.round((completedSteps / totalSteps) * 100);
+    document.getElementById('progressBarFill').style.width = percentage + '%';
+    document.getElementById('progressText').textContent = percentage + '% Complete';
+    
+    // Update submit button state
+    const submitBtn = document.getElementById('submitBtn');
+    if (percentage === 100) {
+        submitBtn.classList.add('pulse-animation');
+    } else {
+        submitBtn.classList.remove('pulse-animation');
+    }
+}
+
+// Add pulse animation CSS
+const style = document.createElement('style');
+style.textContent = `
+    @keyframes pulse-glow {
+        0%, 100% { box-shadow: 0 0 20px rgba(102, 126, 234, 0.5); }
+        50% { box-shadow: 0 0 40px rgba(168, 85, 247, 0.8); }
+    }
+    .pulse-animation {
+        animation: pulse-glow 2s ease-in-out infinite;
+    }
+`;
+document.head.appendChild(style);
+
+// Listen to all form inputs
+document.querySelectorAll('#gameForm input, #gameForm select, #gameForm textarea').forEach(input => {
+    input.addEventListener('input', updateProgress);
+    input.addEventListener('change', updateProgress);
+});
+
+// Initial progress check
+updateProgress();
+
+// Image preview enhancement
+document.getElementById('imageInput').addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            document.getElementById('previewImg').src = e.target.result;
+            document.getElementById('imagePreview').classList.remove('hidden');
+            updateProgress();
+        };
+        reader.readAsDataURL(file);
+    }
+});
+</script>
+{% endblock %}

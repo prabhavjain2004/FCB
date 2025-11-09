@@ -1,0 +1,429 @@
+{% extends 'base.html' %}
+
+{% block title %}System Settings - TapNex Superuser{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gaming-primary">
+    <div class="bg-gaming-secondary border-b border-gaming-accent">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+            <h1 class="text-3xl font-gaming font-bold text-white">System Settings</h1>
+        </div>
+    </div>
+
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {% if messages %}
+        <div class="mb-6">
+            {% for message in messages %}
+            <div class="bg-green-900/30 border border-green-600 text-green-200 px-4 py-3 rounded-lg mb-2">{{ message }}</div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <!-- Commission Settings -->
+        <div class="bg-gaming-secondary border border-gaming-accent rounded-xl p-8 mb-6">
+            <h2 class="text-2xl font-bold text-white mb-6">Commission Settings</h2>
+            
+            <!-- Razorpay Limit Warning -->
+            <div class="bg-yellow-900/30 border border-yellow-600 rounded-lg p-4 mb-6" id="razorpayWarning" style="display: none;">
+                <div class="flex items-start">
+                    <svg class="w-6 h-6 text-yellow-400 mr-3 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+                    </svg>
+                    <div class="flex-1">
+                        <h3 class="text-yellow-300 font-semibold mb-2">⚠️ Razorpay Transfer Limit Warning</h3>
+                        <div id="warningMessages" class="text-yellow-200 text-sm space-y-1"></div>
+                        <p class="text-yellow-200 text-xs mt-2">
+                            Razorpay requires minimum ₹1.00 for transfers. High commission rates may cause transfer failures for low-value bookings.
+                        </p>
+                    </div>
+                </div>
+            </div>
+            
+            <form method="post">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="update_commission">
+                <div class="grid grid-cols-3 gap-6 mb-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-2">Commission Rate (%)</label>
+                        <input type="number" step="0.01" name="commission_rate" id="commissionRateInput" value="{{ tapnex_user.commission_rate }}" class="w-full px-4 py-2 bg-gaming-primary border border-gaming-accent rounded-lg text-white">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-2">Platform Fee Type</label>
+                        <select name="platform_fee_type" class="w-full px-4 py-2 bg-gaming-primary border border-gaming-accent rounded-lg text-white">
+                            <option value="PERCENT" {% if tapnex_user.platform_fee_type == 'PERCENT' %}selected{% endif %}>Percentage (%)</option>
+                            <option value="FIXED" {% if tapnex_user.platform_fee_type == 'FIXED' %}selected{% endif %}>Fixed Amount (₹)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-2">Platform Fee <span id="fee-unit">({{ tapnex_user.platform_fee_type|default:"PERCENT" }})</span></label>
+                        <input type="number" step="0.01" name="platform_fee" value="{{ tapnex_user.platform_fee }}" class="w-full px-4 py-2 bg-gaming-primary border border-gaming-accent rounded-lg text-white">
+                        <p class="text-xs text-gray-400 mt-1">Current: {{ tapnex_user.platform_fee }}{% if tapnex_user.platform_fee_type == 'PERCENT' %}%{% else %} ₹{% endif %}</p>
+                    </div>
+                </div>
+                <button type="submit" class="bg-gaming-highlight hover:bg-opacity-90 text-white font-semibold py-2 px-6 rounded-lg">Save Commission Settings</button>
+            </form>
+        </div>
+        
+        <script>
+        // Update fee unit display when type changes
+        document.querySelector('select[name="platform_fee_type"]').addEventListener('change', function() {
+            const feeUnit = document.getElementById('fee-unit');
+            feeUnit.textContent = this.value === 'PERCENT' ? '(%)' : '(₹)';
+        });
+        
+        // Check Razorpay limits in real-time
+        function checkRazorpayLimits() {
+            const commissionRate = parseFloat(document.getElementById('commissionRateInput').value) || 0;
+            const testAmounts = [10, 40, 100]; // Test with common booking amounts
+            const warnings = [];
+            
+            testAmounts.forEach(amount => {
+                const commission = (amount * commissionRate) / 100;
+                const ownerPayout = amount - commission;
+                
+                if (ownerPayout < 1.00) {
+                    warnings.push(
+                        `For ₹${amount.toFixed(2)} bookings, owner receives ₹${ownerPayout.toFixed(2)} (below ₹1.00 minimum)`
+                    );
+                }
+            });
+            
+            const warningDiv = document.getElementById('razorpayWarning');
+            const messagesDiv = document.getElementById('warningMessages');
+            
+            if (warnings.length > 0) {
+                messagesDiv.innerHTML = warnings.map(w => `<p>• ${w}</p>`).join('');
+                warningDiv.style.display = 'block';
+            } else {
+                warningDiv.style.display = 'none';
+            }
+        }
+        
+        // Check on page load and when commission rate changes
+        document.addEventListener('DOMContentLoaded', checkRazorpayLimits);
+        document.getElementById('commissionRateInput').addEventListener('input', checkRazorpayLimits);
+        </script>
+
+        <!-- Telegram Notification Settings -->
+        <div class="bg-gaming-secondary border border-gaming-accent rounded-xl p-8 mb-6">
+            <h2 class="text-2xl font-bold text-white mb-2">📱 Telegram Notifications</h2>
+            <p class="text-gray-400 mb-6">Get instant notifications for new bookings via Telegram</p>
+            
+            <form method="post" id="telegramForm">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="update_telegram">
+                
+                <div class="mb-6">
+                    <label class="flex items-center cursor-pointer">
+                        <input type="checkbox" name="telegram_enabled" 
+                               {% if tapnex_user.telegram_enabled %}checked{% endif %}
+                               class="w-5 h-5 text-gaming-highlight bg-gaming-primary border-gaming-accent rounded focus:ring-gaming-highlight">
+                        <span class="ml-3 text-white font-medium">Enable Telegram Notifications</span>
+                    </label>
+                </div>
+                
+                <div class="grid grid-cols-1 gap-6 mb-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-2">
+                            Bot Token 
+                            <span class="text-gray-500 text-xs">(Get from @BotFather)</span>
+                        </label>
+                        <input type="password" 
+                               name="telegram_bot_token" 
+                               value="{{ tapnex_user.telegram_bot_token }}" 
+                               placeholder="1234567890:ABCdefGHIjklMNOpqrsTUVwxyz"
+                               class="w-full px-4 py-2 bg-gaming-primary border border-gaming-accent rounded-lg text-white font-mono text-sm">
+                        <p class="text-xs text-gray-400 mt-1">Create a bot via Telegram's @BotFather and paste the token here</p>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-2">
+                            Chat ID 
+                            <span class="text-gray-500 text-xs">(Your personal or group chat ID)</span>
+                        </label>
+                        <input type="text" 
+                               name="telegram_chat_id" 
+                               value="{{ tapnex_user.telegram_chat_id }}" 
+                               placeholder="123456789 or -987654321"
+                               class="w-full px-4 py-2 bg-gaming-primary border border-gaming-accent rounded-lg text-white font-mono text-sm">
+                        <p class="text-xs text-gray-400 mt-1">Send a message to your bot, then visit: <code class="bg-gaming-primary px-1 rounded">https://api.telegram.org/bot&lt;TOKEN&gt;/getUpdates</code></p>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-2">Notification Type</label>
+                        <div class="flex space-x-4">
+                            <label class="flex items-center cursor-pointer">
+                                <input type="radio" 
+                                       name="telegram_notification_type" 
+                                       value="PERSONAL" 
+                                       {% if tapnex_user.telegram_notification_type == 'PERSONAL' %}checked{% endif %}
+                                       class="w-4 h-4 text-gaming-highlight bg-gaming-primary border-gaming-accent focus:ring-gaming-highlight">
+                                <span class="ml-2 text-white">Personal Chat</span>
+                            </label>
+                            <label class="flex items-center cursor-pointer">
+                                <input type="radio" 
+                                       name="telegram_notification_type" 
+                                       value="GROUP" 
+                                       {% if tapnex_user.telegram_notification_type == 'GROUP' %}checked{% endif %}
+                                       class="w-4 h-4 text-gaming-highlight bg-gaming-primary border-gaming-accent focus:ring-gaming-highlight">
+                                <span class="ml-2 text-white">Group Chat</span>
+                            </label>
+                        </div>
+                        <p class="text-xs text-gray-400 mt-1">Choose whether notifications go to your personal chat or a group</p>
+                    </div>
+                </div>
+                
+                <div class="flex space-x-4">
+                    <button type="submit" 
+                            class="bg-gaming-highlight hover:bg-opacity-90 text-white font-semibold py-2 px-6 rounded-lg transition-colors">
+                        💾 Save Telegram Settings
+                    </button>
+                    <button type="button" 
+                            onclick="testTelegramConnection()"
+                            class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-6 rounded-lg transition-colors">
+                        🧪 Test Connection
+                    </button>
+                </div>
+            </form>
+            
+            <div id="testResult" class="mt-4 hidden"></div>
+        </div>
+        
+        <script>
+        async function testTelegramConnection() {
+            const resultDiv = document.getElementById('testResult');
+            resultDiv.className = 'mt-4 p-4 rounded-lg bg-blue-900/30 border border-blue-600';
+            resultDiv.innerHTML = '<p class="text-blue-200">🔄 Testing Telegram connection...</p>';
+            resultDiv.classList.remove('hidden');
+            
+            try {
+                const response = await fetch('{% url "authentication:test_telegram_notification" %}', {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': '{{ csrf_token }}',
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    resultDiv.className = 'mt-4 p-4 rounded-lg bg-green-900/30 border border-green-600';
+                    resultDiv.innerHTML = `<p class="text-green-200">✅ ${data.message}</p>`;
+                } else {
+                    resultDiv.className = 'mt-4 p-4 rounded-lg bg-red-900/30 border border-red-600';
+                    resultDiv.innerHTML = `<p class="text-red-200">❌ ${data.message}</p>`;
+                }
+            } catch (error) {
+                resultDiv.className = 'mt-4 p-4 rounded-lg bg-red-900/30 border border-red-600';
+                resultDiv.innerHTML = `<p class="text-red-200">❌ Error: ${error.message}</p>`;
+            }
+        }
+        </script>
+
+        <!-- Razorpay Account Settings -->
+        <div class="bg-gaming-secondary border border-gaming-accent rounded-xl p-8 mb-6">
+            <h2 class="text-2xl font-bold text-white mb-2">💳 Razorpay Route Configuration</h2>
+            <p class="text-gray-400 mb-6">Configure cafe owner's Razorpay account for automatic payment transfers</p>
+            
+            {% if not cafe_owner %}
+            <div class="bg-yellow-900/30 border border-yellow-600 text-yellow-200 px-4 py-3 rounded-lg mb-4">
+                ⚠️ No cafe owner account found. Please create a cafe owner account first.
+            </div>
+            {% else %}
+            <form method="post">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="update_razorpay">
+                
+                <div class="grid grid-cols-1 gap-6 mb-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-2">
+                            Razorpay Account ID / Route ID
+                            <span class="text-gray-500 text-xs">(Format: acc_xxxxx or route_xxxxx)</span>
+                        </label>
+                        <input type="text" 
+                               name="razorpay_account_id" 
+                               value="{{ cafe_owner.razorpay_account_id|default:'' }}" 
+                               placeholder="acc_ABCDEFxxxxxx or route_ABCDEFxxxxxx"
+                               class="w-full px-4 py-2 bg-gaming-primary border border-gaming-accent rounded-lg text-white font-mono text-sm">
+                        <p class="text-xs text-gray-400 mt-1">
+                            Enter the Razorpay Linked Account ID where owner payments should be transferred
+                        </p>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-2">
+                            Account Email
+                        </label>
+                        <input type="email" 
+                               name="razorpay_account_email" 
+                               value="{{ cafe_owner.razorpay_account_email|default:cafe_owner.contact_email }}" 
+                               placeholder="owner@example.com"
+                               class="w-full px-4 py-2 bg-gaming-primary border border-gaming-accent rounded-lg text-white">
+                        <p class="text-xs text-gray-400 mt-1">
+                            Email associated with the Razorpay account
+                        </p>
+                    </div>
+                    
+                    <div class="bg-gaming-primary border border-gaming-accent rounded-lg p-6">
+                        <h3 class="text-white font-semibold mb-4 flex items-center">
+                            <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                                <path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z"/>
+                                <path fill-rule="evenodd" d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm3 4a1 1 0 000 2h.01a1 1 0 100-2H7zm3 0a1 1 0 000 2h3a1 1 0 100-2h-3zm-3 4a1 1 0 100 2h.01a1 1 0 100-2H7zm3 0a1 1 0 100 2h3a1 1 0 100-2h-3z" clip-rule="evenodd"/>
+                            </svg>
+                            Payment Split Breakdown
+                        </h3>
+                        <div class="space-y-3 text-sm">
+                            <div class="flex justify-between items-center py-2 border-b border-gaming-accent">
+                                <span class="text-gray-300">Commission Rate:</span>
+                                <span class="text-gaming-highlight font-bold text-lg">{{ tapnex_user.commission_rate }}%</span>
+                            </div>
+                            <div class="flex justify-between items-center py-2 border-b border-gaming-accent">
+                                <span class="text-gray-300">Platform Fee:</span>
+                                <span class="text-gaming-highlight font-bold text-lg">{{ tapnex_user.platform_fee }}{% if tapnex_user.platform_fee_type == 'PERCENT' %}%{% else %} ₹{% endif %}</span>
+                            </div>
+                            
+                            <div class="bg-gaming-secondary rounded-lg p-4 mt-4" id="exampleCalculation">
+                                <p class="text-gray-300 font-semibold mb-3">💡 Example Calculation:</p>
+                                <div class="space-y-2 text-xs">
+                                    <div class="flex justify-between text-gray-400">
+                                        <span>Booking Amount:</span>
+                                        <span class="text-white font-mono">₹<span id="baseAmount">100.00</span></span>
+                                    </div>
+                                    <div class="flex justify-between text-gray-400">
+                                        <span>Platform Fee (<span id="platformFeeRateDisplay">{{ tapnex_user.platform_fee }}</span><span id="platformFeeUnit">{% if tapnex_user.platform_fee_type == 'PERCENT' %}%{% else %} ₹{% endif %}</span>):</span>
+                                        <span class="text-yellow-400 font-mono">+ ₹<span id="platformFeeAmount">0.00</span></span>
+                                    </div>
+                                    <div class="flex justify-between font-semibold border-t border-gaming-accent pt-2">
+                                        <span class="text-blue-400">User Pays:</span>
+                                        <span class="text-blue-400 font-mono">₹<span id="totalPays">0.00</span></span>
+                                    </div>
+                                    
+                                    <div class="border-t border-gaming-accent mt-3 pt-3">
+                                        <div class="flex justify-between text-gray-400">
+                                            <span>Booking Amount:</span>
+                                            <span class="text-white font-mono">₹<span id="baseAmount2">100.00</span></span>
+                                        </div>
+                                        <div class="flex justify-between text-gray-400">
+                                            <span>Commission (<span id="commissionRateDisplay">{{ tapnex_user.commission_rate }}</span>%):</span>
+                                            <span class="text-red-400 font-mono">- ₹<span id="commissionAmount">0.00</span></span>
+                                        </div>
+                                        <div class="flex justify-between font-semibold border-t border-gaming-accent pt-2 mt-2">
+                                            <span class="text-green-400">Owner Receives:</span>
+                                            <span class="text-green-400 font-mono text-lg">₹<span id="ownerReceives">0.00</span></span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <script>
+                            // Real-time calculation update
+                            function updateExampleCalculation() {
+                                const commissionRateInput = document.querySelector('input[name="commission_rate"]');
+                                const platformFeeInput = document.querySelector('input[name="platform_fee"]');
+                                const platformFeeTypeSelect = document.querySelector('select[name="platform_fee_type"]');
+                                
+                                if (!commissionRateInput || !platformFeeInput || !platformFeeTypeSelect) {
+                                    return; // Elements not ready yet
+                                }
+                                
+                                const commissionRate = parseFloat(commissionRateInput.value) || 0;
+                                const platformFee = parseFloat(platformFeeInput.value) || 0;
+                                const platformFeeType = platformFeeTypeSelect.value;
+                                const baseAmount = 100;
+                                
+                                // Calculate platform fee
+                                const platformFeeAmount = platformFeeType === 'PERCENT' ? (baseAmount * platformFee / 100) : platformFee;
+                                const totalPays = baseAmount + platformFeeAmount;
+                                
+                                // Calculate commission (from base amount, not total)
+                                const commissionAmount = baseAmount * commissionRate / 100;
+                                const ownerReceives = baseAmount - commissionAmount;
+                                
+                                // Update display
+                                document.getElementById('platformFeeRateDisplay').textContent = platformFee.toFixed(2);
+                                document.getElementById('platformFeeUnit').textContent = platformFeeType === 'PERCENT' ? '%' : ' ₹';
+                                document.getElementById('platformFeeAmount').textContent = platformFeeAmount.toFixed(2);
+                                document.getElementById('totalPays').textContent = totalPays.toFixed(2);
+                                document.getElementById('commissionRateDisplay').textContent = commissionRate.toFixed(2);
+                                document.getElementById('commissionAmount').textContent = commissionAmount.toFixed(2);
+                                document.getElementById('ownerReceives').textContent = ownerReceives.toFixed(2);
+                            }
+                            
+                            // Wait for DOM to be ready
+                            document.addEventListener('DOMContentLoaded', function() {
+                                const commissionRateInput = document.querySelector('input[name="commission_rate"]');
+                                const platformFeeInput = document.querySelector('input[name="platform_fee"]');
+                                const platformFeeTypeSelect = document.querySelector('select[name="platform_fee_type"]');
+                                
+                                if (commissionRateInput && platformFeeInput && platformFeeTypeSelect) {
+                                    // Add event listeners
+                                    commissionRateInput.addEventListener('input', updateExampleCalculation);
+                                    platformFeeInput.addEventListener('input', updateExampleCalculation);
+                                    platformFeeTypeSelect.addEventListener('change', updateExampleCalculation);
+                                    
+                                    // Initial calculation
+                                    updateExampleCalculation();
+                                }
+                            });
+                            </script>
+                        </div>
+                    </div>
+                    
+                    {% if cafe_owner.razorpay_account_id %}
+                    <div class="bg-blue-900/20 border border-blue-600/50 rounded-lg p-4">
+                        <div class="flex items-start">
+                            <svg class="w-5 h-5 text-blue-400 mt-0.5 mr-3" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
+                            </svg>
+                            <div>
+                                <p class="text-blue-300 font-semibold mb-1">Account Configured</p>
+                                <p class="text-blue-200 text-sm">Account ID: <code class="bg-gaming-primary px-2 py-1 rounded">{{ cafe_owner.razorpay_account_id }}</code></p>
+                                <p class="text-blue-200 text-sm mt-1">Status: <span class="px-2 py-1 rounded {% if cafe_owner.razorpay_account_status == 'ACTIVE' %}bg-green-600{% else %}bg-yellow-600{% endif %}">{{ cafe_owner.razorpay_account_status }}</span></p>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+                
+                <div class="flex gap-4">
+                    <button type="submit" class="bg-gaming-highlight hover:bg-opacity-90 text-white font-semibold py-3 px-8 rounded-lg transition-all">
+                        💾 Save Razorpay Settings
+                    </button>
+                </div>
+            </form>
+            {% endif %}
+        </div>
+
+        <!-- Profile Settings -->
+        <div class="bg-gaming-secondary border border-gaming-accent rounded-xl p-8 mb-6">
+            <h2 class="text-2xl font-bold text-white mb-6">Profile Settings</h2>
+            <form method="post">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="update_profile">
+                <div class="grid grid-cols-2 gap-6 mb-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-2">Contact Email</label>
+                        <input type="email" name="contact_email" value="{{ tapnex_user.contact_email }}" class="w-full px-4 py-2 bg-gaming-primary border border-gaming-accent rounded-lg text-white">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-2">Phone</label>
+                        <input type="text" name="phone" value="{{ tapnex_user.phone }}" class="w-full px-4 py-2 bg-gaming-primary border border-gaming-accent rounded-lg text-white">
+                    </div>
+                </div>
+                <button type="submit" class="bg-gaming-highlight hover:bg-opacity-90 text-white font-semibold py-2 px-6 rounded-lg">Update Profile</button>
+            </form>
+        </div>
+
+        <!-- System Information -->
+        <div class="bg-gaming-secondary border border-gaming-accent rounded-xl p-8">
+            <h2 class="text-2xl font-bold text-white mb-6">System Information</h2>
+            <div class="space-y-4">
+                <div class="flex justify-between py-3 border-b border-gaming-accent"><span class="text-gray-400">Total Revenue</span><span class="text-white font-semibold">₹{{ system_stats.total_revenue|floatformat:0 }}</span></div>
+                <div class="flex justify-between py-3 border-b border-gaming-accent"><span class="text-gray-400">Database Size</span><span class="text-white">{{ system_stats.database_size }}</span></div>
+                <div class="flex justify-between py-3"><span class="text-gray-400">Last Backup</span><span class="text-white">{{ system_stats.last_backup }}</span></div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

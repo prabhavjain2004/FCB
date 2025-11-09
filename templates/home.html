@@ -1,0 +1,1330 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}TapNex Arena - Professional Pool & Table Tennis Tables{% endblock %}
+
+{% block description %}TapNex Arena - Premium sports venue powered by TapNex. Experience professional 8-ball pool tables and championship-grade table tennis. Book your perfect gaming session today!{% endblock %}
+
+{% block extra_css %}
+<style>
+  /* Enhanced Animations */
+  @keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-10px); }
+  }
+  
+  @keyframes shimmer {
+    0% { background-position: -1000px 0; }
+    100% { background-position: 1000px 0; }
+  }
+  
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(30px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  .animate-fade-in-up {
+    animation: fadeInUp 0.6s ease-out;
+  }
+  
+  .float-animation {
+    animation: float 3s ease-in-out infinite;
+  }
+  
+  .shimmer-effect {
+    background: linear-gradient(
+      90deg,
+      rgba(255, 255, 255, 0) 0%,
+      rgba(255, 255, 255, 0.1) 50%,
+      rgba(255, 255, 255, 0) 100%
+    );
+    background-size: 1000px 100%;
+    animation: shimmer 2s infinite;
+  }
+  
+  /* Hero Background with Orbs */
+  .hero-bg {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    z-index: 0;
+    pointer-events: none;
+  }
+  
+  .gradient-orb {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(100px);
+    opacity: 0.3;
+    animation: floatOrb 20s ease-in-out infinite;
+  }
+  
+  .orb-1 {
+    width: 500px;
+    height: 500px;
+    background: radial-gradient(circle, rgba(102, 126, 234, 0.4) 0%, transparent 70%);
+    top: -150px;
+    right: -150px;
+    animation-delay: 0s;
+  }
+  
+  .orb-2 {
+    width: 400px;
+    height: 400px;
+    background: radial-gradient(circle, rgba(168, 85, 247, 0.3) 0%, transparent 70%);
+    bottom: -100px;
+    left: -100px;
+    animation-delay: 7s;
+  }
+  
+  .orb-3 {
+    width: 450px;
+    height: 450px;
+    background: radial-gradient(circle, rgba(0, 245, 255, 0.25) 0%, transparent 70%);
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    animation-delay: 14s;
+  }
+  
+  @keyframes floatOrb {
+    0%, 100% { transform: translate(0, 0) scale(1); }
+    33% { transform: translate(30px, -30px) scale(1.1); }
+    66% { transform: translate(-30px, 30px) scale(0.9); }
+  }
+  
+  /* Mobile Optimizations */
+  @media (max-width: 767px) {
+    /* Reduce orb sizes on mobile for better performance */
+    .orb-1 {
+      width: 300px;
+      height: 300px;
+      filter: blur(60px);
+    }
+    
+    .orb-2 {
+      width: 250px;
+      height: 250px;
+      filter: blur(60px);
+    }
+    
+    .orb-3 {
+      width: 280px;
+      height: 280px;
+      filter: blur(60px);
+    }
+    
+    /* Reduce backdrop blur on mobile for performance */
+    .feature-card,
+    .game-card {
+      backdrop-filter: blur(10px);
+    }
+    
+    /* Disable hover effects on mobile */
+    .feature-card:hover,
+    .game-card:hover {
+      transform: none !important;
+    }
+    
+    .game-card:hover .game-card-image {
+      transform: none !important;
+    }
+    
+    /* Adjust game card for mobile */
+    .game-card {
+      min-height: 320px !important;
+    }
+    
+    .game-card-image {
+      height: 100%;
+      min-height: 320px !important;
+      object-fit: cover;
+    }
+    
+    /* Reduce padding on mobile */
+    .feature-card {
+      padding: 1.25rem !important;
+    }
+    
+    .game-card-content {
+      padding: 1rem !important;
+      background: linear-gradient(180deg, transparent 0%, rgba(0, 0, 0, 0.4) 30%, rgba(0, 0, 0, 0.75) 100%);
+    }
+    
+    /* Hero Section Mobile */
+    .min-h-screen {
+      padding-top: 2rem !important;
+      padding-bottom: 2rem !important;
+    }
+    
+    .container.mx-auto {
+      padding-left: 1rem !important;
+      padding-right: 1rem !important;
+    }
+    
+    /* Status Badge Mobile */
+    .status-badge {
+      padding: 0.5rem 1rem !important;
+      font-size: 0.75rem !important;
+    }
+    
+    .status-badge .pulse-dot {
+      width: 6px !important;
+      height: 6px !important;
+    }
+    
+    /* Hero Heading Mobile */
+    h1 .block:first-child {
+      font-size: 1.5rem !important;
+      margin-bottom: 0.5rem !important;
+    }
+    
+    h1 .gradient-text-neon {
+      font-size: 2.25rem !important;
+    }
+    
+    /* Hero Subheading Mobile */
+    .text-lg.sm\:text-xl {
+      font-size: 0.9375rem !important;
+      padding-left: 1rem !important;
+      padding-right: 1rem !important;
+    }
+    
+    /* CTA Buttons Mobile */
+    .btn-xl {
+      padding: 0.75rem 1.25rem !important;
+      font-size: 0.875rem !important;
+    }
+    
+    .btn-xl i {
+      font-size: 0.875rem !important;
+    }
+    
+    /* Trust Badges Mobile */
+    .flex.flex-wrap.justify-center {
+      gap: 1rem !important;
+      font-size: 0.75rem !important;
+    }
+    
+    .flex.flex-wrap.justify-center i {
+      font-size: 0.875rem !important;
+    }
+    
+    /* Section Headers Mobile */
+    h2.text-4xl {
+      font-size: 1.75rem !important;
+    }
+    
+    h2.text-4xl + p {
+      font-size: 0.9375rem !important;
+    }
+    
+    /* Game Card Content Mobile */
+    .game-card-content h3 {
+      font-size: 1.5rem !important;
+      margin-bottom: 0.5rem !important;
+    }
+    
+    .game-card-content p {
+      font-size: 0.875rem !important;
+      margin-bottom: 1rem !important;
+    }
+    
+    .game-card-content .badge {
+      font-size: 0.625rem !important;
+      padding: 0.25rem 0.5rem !important;
+    }
+    
+    .game-card-content .btn {
+      padding: 0.625rem 1rem !important;
+      font-size: 0.8125rem !important;
+    }
+    
+    /* Feature Card Mobile */
+    .feature-card h3 {
+      font-size: 1.25rem !important;
+    }
+    
+    .feature-card p {
+      font-size: 0.875rem !important;
+    }
+    
+    .feature-card ul {
+      font-size: 0.8125rem !important;
+    }
+    
+    .feature-card i.text-5xl {
+      font-size: 2.5rem !important;
+    }
+    
+    /* CTA Card Mobile */
+    .cta-card {
+      padding: 2rem 1.5rem !important;
+    }
+    
+    .cta-card h2 {
+      font-size: 1.75rem !important;
+    }
+    
+    .cta-card p {
+      font-size: 0.9375rem !important;
+    }
+    
+    .cta-card i.text-6xl {
+      font-size: 3rem !important;
+    }
+    
+    /* Scroll Indicator Mobile */
+    .animate-bounce i {
+      font-size: 1.5rem !important;
+    }
+    
+    /* Pool Balls Decoration Mobile */
+    .game-card-image .w-16.h-16 {
+      width: 2.5rem !important;
+      height: 2.5rem !important;
+    }
+    
+    .game-card-image .w-16.h-16 .text-2xl {
+      font-size: 1.25rem !important;
+    }
+    
+    .game-card-image .gap-4 {
+      gap: 0.5rem !important;
+    }
+    
+    /* Table Tennis Paddles Mobile */
+    .game-card-image .w-20.h-24 {
+      width: 3rem !important;
+      height: 3.5rem !important;
+    }
+    
+    .game-card-image .w-12.h-12 {
+      width: 2rem !important;
+      height: 2rem !important;
+    }
+    
+    .game-card-image .gap-8 {
+      gap: 1rem !important;
+    }
+    
+    .game-card-image .gap-6 {
+      gap: 0.75rem !important;
+    }
+  }
+  
+  /* Grid Pattern */
+  .grid-pattern {
+    background-image: 
+      linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+    background-size: 50px 50px;
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+  }
+  
+  /* Card Glow Effect */
+  .card-glow {
+    position: relative;
+  }
+  
+  .card-glow::before {
+    content: '';
+    position: absolute;
+    inset: -2px;
+    border-radius: inherit;
+    padding: 2px;
+    background: linear-gradient(135deg, #667eea, #a855f7);
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    z-index: -1;
+  }
+  
+  .card-glow:hover::before {
+    opacity: 0.5;
+  }
+  
+  /* Feature Card Hover Effect */
+  .feature-card {
+    position: relative;
+    overflow: hidden;
+    background: rgba(30, 41, 59, 0.5);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 1.5rem;
+    padding: 2rem;
+    transition: all 0.3s ease;
+  }
+  
+  .feature-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.05), transparent);
+    transition: left 0.7s ease;
+  }
+  
+  .feature-card:hover {
+    transform: translateY(-8px);
+  }
+  
+  .feature-card:hover::before {
+    left: 100%;
+  }
+  
+  /* Game Card Styles - Enhanced */
+  .game-card {
+    position: relative;
+    overflow: hidden;
+    border-radius: 1.5rem;
+    transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    background: rgba(30, 41, 59, 0.5);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    min-height: 450px;
+    display: block;
+    cursor: pointer;
+    text-decoration: none;
+  }
+  
+  .game-card::before {
+    content: '';
+    position: absolute;
+    inset: -2px;
+    border-radius: inherit;
+    padding: 2px;
+    background: linear-gradient(135deg, #667eea, #a855f7);
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    z-index: 0;
+  }
+  
+  .game-card:hover {
+    transform: translateY(-12px);
+  }
+  
+  .game-card:hover::before {
+    opacity: 0.5;
+  }
+  
+  .game-card-image {
+    width: 100%;
+    height: 100%;
+    min-height: 450px;
+    object-fit: cover;
+    transition: transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 1;
+  }
+  
+  .game-card:hover .game-card-image {
+    transform: scale(1.05);
+  }
+  
+  .game-card-content {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 2rem;
+    z-index: 2;
+    background: linear-gradient(180deg, transparent 0%, rgba(0, 0, 0, 0.3) 40%, rgba(0, 0, 0, 0.75) 100%);
+    pointer-events: none;
+  }
+  
+  .game-card-content > * {
+    pointer-events: auto;
+  }
+  
+  /* Badge Styles */
+  .status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    border-radius: 2rem;
+    font-size: 0.875rem;
+    font-weight: 700;
+    background: rgba(16, 185, 129, 0.15);
+    color: #34d399;
+    border: 1px solid rgba(16, 185, 129, 0.3);
+    backdrop-filter: blur(10px);
+  }
+  
+  .status-badge .pulse-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #34d399;
+    animation: pulse 2s ease-in-out infinite;
+  }
+  
+  @keyframes pulse {
+    0%, 100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.8;
+    }
+  }
+  
+  /* Improved gradient text */
+  .gradient-text-neon {
+    background: linear-gradient(135deg, #00f5ff, #b537f2, #ff006e);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    line-height: 1.2;
+    font-weight: 900;
+    display: inline-block;
+  }
+  
+  /* CTA Section Enhancement */
+  .cta-card {
+    background: rgba(30, 41, 59, 0.5);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 2rem;
+    padding: 3rem;
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .cta-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(168, 85, 247, 0.1));
+    pointer-events: none;
+  }
+  
+  /* Button Hover Effects */
+  .hover-glow {
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .hover-glow::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.2);
+    transform: translate(-50%, -50%);
+    transition: width 0.6s, height 0.6s;
+  }
+  
+  .hover-glow:hover::after {
+    width: 300px;
+    height: 300px;
+  }
+  
+  /* Ensure no horizontal scroll */
+  body {
+    overflow-x: hidden;
+  }
+  
+  /* Hero heading improvements */
+  h1 {
+    line-height: 1.1;
+  }
+  
+  /* Responsive adjustments */
+  @media (max-width: 640px) {
+    .gradient-text-neon {
+      font-size: 2rem !important;
+      line-height: 1.1;
+    }
+    
+    .game-card {
+      min-height: 280px !important;
+    }
+    
+    .game-card-image {
+      min-height: 280px !important;
+    }
+    
+    .feature-card {
+      padding: 1rem !important;
+    }
+    
+    /* Smaller Forge logo on mobile */
+    .float-animation img {
+      height: 6rem !important;
+      max-height: 6rem !important;
+    }
+    
+    /* Hero Section Extra Compact */
+    h1 .block:first-child {
+      font-size: 1.25rem !important;
+    }
+    
+    h1 .gradient-text-neon {
+      font-size: 2rem !important;
+    }
+    
+    /* Buttons Extra Compact */
+    .btn-xl {
+      padding: 0.625rem 1rem !important;
+      font-size: 0.8125rem !important;
+    }
+    
+    /* Section Spacing */
+    .py-24 {
+      padding-top: 3rem !important;
+      padding-bottom: 3rem !important;
+    }
+    
+    /* Game Grid Single Column */
+    .grid.md\:grid-cols-2 {
+      grid-template-columns: 1fr !important;
+      gap: 1.5rem !important;
+    }
+    
+    /* Feature Grid Single Column */
+    .grid.lg\:grid-cols-3 {
+      grid-template-columns: 1fr !important;
+      gap: 1rem !important;
+    }
+  }
+  
+  /* Extra small screens */
+  @media (max-width: 375px) {
+    .gradient-text-neon {
+      font-size: 1.75rem !important;
+    }
+    
+    h1 .block:first-child {
+      font-size: 1.125rem !important;
+    }
+    
+    .game-card {
+      min-height: 260px !important;
+    }
+    
+    .game-card-image {
+      min-height: 260px !important;
+    }
+    
+    .game-card-content {
+      padding: 0.875rem !important;
+    }
+    
+    .game-card-content h3 {
+      font-size: 1.25rem !important;
+    }
+    
+    .feature-card {
+      padding: 0.875rem !important;
+    }
+    
+    .feature-card i.text-5xl {
+      font-size: 2rem !important;
+    }
+    
+    .cta-card {
+      padding: 1.5rem 1rem !important;
+    }
+    
+    .btn-xl {
+      padding: 0.5rem 0.875rem !important;
+      font-size: 0.75rem !important;
+    }
+    
+    .status-badge {
+      padding: 0.375rem 0.75rem !important;
+      font-size: 0.6875rem !important;
+    }
+    
+    /* Pool Balls Extra Small */
+    .game-card-image .w-16.h-16 {
+      width: 2rem !important;
+      height: 2rem !important;
+    }
+    
+    .game-card-image .w-16.h-16 .text-2xl {
+      font-size: 1rem !important;
+    }
+    
+    /* Table Tennis Extra Small */
+    .game-card-image .w-20.h-24 {
+      width: 2.5rem !important;
+      height: 3rem !important;
+    }
+    
+    .game-card-image .w-12.h-12 {
+      width: 1.5rem !important;
+      height: 1.5rem !important;
+    }
+  }
+  
+  /* Force Forge logo size on all screens */
+  .float-animation img[alt*="Forge"] {
+    max-height: 240px !important;
+  }
+  
+  @media (max-width: 640px) {
+    .float-animation img[alt*="Forge"] {
+      max-height: 120px !important;
+    }
+  }
+
+  /* Mobile Animation Optimizations */
+  @media (max-width: 768px) {
+    .float-animation {
+      animation: float 8s cubic-bezier(0.4, 0, 0.6, 1) infinite !important;
+    }
+
+    .gradient-orb {
+      animation: floatOrb 40s cubic-bezier(0.4, 0, 0.6, 1) infinite !important;
+    }
+
+    .shimmer-effect {
+      animation: shimmer 4s cubic-bezier(0.4, 0, 0.6, 1) infinite !important;
+    }
+
+    @keyframes pulse {
+      0%, 100% {
+        opacity: 1;
+      }
+      50% {
+        opacity: 0.9;
+      }
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-5px); }
+    }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="relative min-h-screen flex items-center justify-center overflow-hidden pt-16" style="background: #111827;">
+  <!-- Animated Background -->
+  <div class="hero-bg">
+    <div class="gradient-orb orb-1"></div>
+    <div class="gradient-orb orb-2"></div>
+    <div class="gradient-orb orb-3"></div>
+    <div class="grid-pattern"></div>
+  </div>
+  
+  <!-- Hero Content -->
+  <div class="relative z-10 container mx-auto px-6 py-12 text-center max-w-7xl">
+    <!-- Forge Logo -->
+    <div data-reveal="fadeIn" class="mb-12 float-animation">
+      <img src="{% static 'images/forge_logo.png' %}" alt="Forge Gaming Cafe" class="h-44 md:h-52 lg:h-60 w-auto mx-auto max-h-60" onerror="this.style.display='none'" style="max-height: 240px;">
+    </div>
+    
+    <!-- Badge -->
+    <div data-reveal="fadeIn" class="status-badge mb-8 animate-fade-in-up">
+      <span class="pulse-dot"></span>
+      <span> Now Open - Professional Tables Available</span>
+    </div>
+    
+    <!-- Main Heading -->
+    <h1 data-reveal="fadeInUp" data-reveal-delay="100" 
+        class="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black text-white mb-6 leading-tight text-center"
+        style="font-family: 'Orbitron', sans-serif;">
+      <span class="block text-3xl sm:text-4xl md:text-5xl font-normal mb-3" style="font-family: inherit;">Welcome to</span>
+      <span class="block gradient-text-neon font-gaming text-5xl sm:text-6xl md:text-7xl lg:text-8xl">
+        Forge Gaming Cafe
+      </span>
+    </h1>
+    
+    <!-- Subheading -->
+    <p data-reveal="fadeInUp" data-reveal-delay="200" 
+       class="text-lg sm:text-xl md:text-2xl text-gray-300 max-w-3xl mx-auto mb-12 leading-relaxed text-center px-6">
+      Professional 8-ball pool and championship table tennis.<br>
+      <span style="background: linear-gradient(135deg, #667eea, #a855f7); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; font-weight: 700;">Perfect your skills</span> at our premium sports venue.
+    </p>
+    
+    <!-- CTA Buttons -->
+    <div data-reveal="fadeInUp" data-reveal-delay="300" 
+         class="flex flex-col sm:flex-row gap-4 justify-center items-center mb-16">
+      {% if user.is_authenticated %}
+        <a href="{% url 'booking:game_selection' %}" 
+           class="btn btn-primary btn-xl btn-ripple group hover-glow">
+          <i class="bi bi-calendar-check"></i>
+          Book Your Table
+          <i class="bi bi-arrow-right ml-2 group-hover:translate-x-1 transition-transform"></i>
+        </a>
+        <a href="{% url 'authentication:customer_dashboard' %}" 
+           class="btn btn-secondary btn-xl group">
+          <i class="bi bi-grid-fill"></i>
+          My Dashboard
+        </a>
+      {% else %}
+        <a href="{% url 'authentication:customer_login' %}" 
+           class="btn btn-primary btn-xl btn-ripple group hover-glow">
+          <i class="bi bi-rocket-takeoff"></i>
+          Get Started Free
+          <i class="bi bi-arrow-right ml-2 group-hover:translate-x-1 transition-transform"></i>
+        </a>
+        <a href="#features" class="btn btn-secondary btn-xl group">
+          <i class="bi bi-star-fill"></i>
+          Explore Features
+        </a>
+      {% endif %}
+    </div>
+    
+    <!-- Trust Badges -->
+    <div data-reveal="fadeIn" data-reveal-delay="400" 
+         class="flex flex-wrap justify-center items-center gap-8 text-gray-400 text-sm mb-16">
+      <div class="flex items-center gap-2">
+        <i class="bi bi-shield-check text-success text-xl"></i>
+        <span>Powered by TapNex</span>
+      </div>
+      <div class="flex items-center gap-2">
+        <i class="bi bi-lightning-charge-fill text-warning text-xl"></i>
+        <span>Instant Booking</span>
+      </div>
+      <div class="flex items-center gap-2">
+        <i class="bi bi-people-fill text-info text-xl"></i>
+        <span>500+ Happy Players</span>
+      </div>
+    </div>
+    
+    <!-- Scroll Indicator -->
+    <div data-reveal="fadeIn" data-reveal-delay="500" 
+         class="absolute bottom-10 left-1/2 transform -translate-x-1/2 animate-bounce cursor-pointer" 
+         onclick="document.getElementById('games') ? document.getElementById('games').scrollIntoView({behavior: 'smooth'}) : document.getElementById('features').scrollIntoView({behavior: 'smooth'})">
+      <i class="bi bi-chevron-double-down text-3xl text-gray-500"></i>
+    </div>
+  </div>
+</section>
+
+
+<!-- Games Preview Section -->
+{% if games %}
+<section id="games" class="py-24 mt-16 relative overflow-hidden" style="background: #111827;">
+  <!-- Background Elements -->
+  <div class="hero-bg">
+    <div class="gradient-orb orb-2"></div>
+    <div class="grid-pattern"></div>
+  </div>
+  
+  <div class="container mx-auto px-4 max-w-6xl relative z-10">
+    <!-- Section Header -->
+    <div class="text-center mb-16">
+      <div data-reveal="fadeIn" class="status-badge mb-4" style="background: rgba(102, 126, 234, 0.15); color: #818cf8; border-color: rgba(102, 126, 234, 0.3);">
+        <span class="pulse-dot" style="background: #818cf8;"></span>
+        <span> OUR TABLES</span>
+      </div>
+      <h2 data-reveal="fadeInUp" class="text-4xl sm:text-5xl font-black text-white mb-6" style="font-family: 'Orbitron', sans-serif;">
+        Book Your <span class="gradient-text-neon">Table</span>
+      </h2>
+      <p data-reveal="fadeInUp" data-reveal-delay="100" class="text-xl text-gray-300 max-w-2xl mx-auto">
+        Choose from our selection of professional 8-ball pool and championship table tennis tables
+      </p>
+    </div>
+    
+    <!-- Games Grid - 2 Column for 2 items -->
+    <div class="grid md:grid-cols-2 gap-10 mb-12 max-w-5xl mx-auto">
+      {% for game in games|slice:":6" %}
+      <a href="{% url 'booking:game_detail' game.id %}" data-reveal="fadeInUp" data-reveal-delay="{{ forloop.counter0|add:'00' }}" class="game-card group" style="text-decoration: none; display: block;">
+        {% if game.image %}
+          <img src="{{ game.image.url }}" alt="{{ game.name }}" class="game-card-image">
+        {% else %}
+          <!-- Enhanced Placeholder based on game type -->
+          {% if 'pool' in game.name|lower or '8' in game.name or 'ball' in game.name|lower %}
+            <div class="game-card-image bg-gradient-to-br from-emerald-900 via-teal-800 to-cyan-900 flex items-center justify-center relative overflow-hidden">
+              <!-- Pool table felt texture effect -->
+              <div class="absolute inset-0 opacity-20" style="background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.3) 2px, rgba(0,0,0,0.3) 4px);"></div>
+              <!-- Pool balls decoration -->
+              <div class="relative z-10 flex flex-col items-center">
+                <div class="flex gap-4 mb-4">
+                  <div class="w-16 h-16 rounded-full bg-white shadow-2xl flex items-center justify-center">
+                    <span class="text-2xl font-black text-gray-800">8</span>
+                  </div>
+                  <div class="w-16 h-16 rounded-full bg-gradient-to-br from-red-500 to-red-700 shadow-2xl"></div>
+                </div>
+                <div class="flex gap-4">
+                  <div class="w-16 h-16 rounded-full bg-gradient-to-br from-yellow-400 to-yellow-600 shadow-2xl"></div>
+                  <div class="w-16 h-16 rounded-full bg-gradient-to-br from-blue-500 to-blue-700 shadow-2xl"></div>
+                </div>
+              </div>
+              <!-- Cue stick decoration -->
+              <div class="absolute bottom-10 right-10 w-48 h-2 bg-gradient-to-r from-amber-800 to-amber-600 transform rotate-45 opacity-50 rounded-full"></div>
+            </div>
+          {% elif 'tennis' in game.name|lower or 'table tennis' in game.name|lower or 'ping' in game.name|lower %}
+            <div class="game-card-image bg-gradient-to-br from-blue-900 via-indigo-800 to-purple-900 flex items-center justify-center relative overflow-hidden">
+              <!-- Table tennis table effect -->
+              <div class="absolute inset-0 flex items-center justify-center">
+                <div class="w-4/5 h-3/5 bg-blue-600 opacity-20 rounded-lg border-4 border-white/30"></div>
+                <div class="absolute w-4/5 h-1 bg-white/40 top-1/2 transform -translate-y-1/2"></div>
+              </div>
+              <!-- Ping pong elements -->
+              <div class="relative z-10 flex flex-col items-center gap-6">
+                <!-- Paddles -->
+                <div class="flex gap-8 items-center">
+                  <div class="relative">
+                    <div class="w-20 h-24 rounded-full bg-gradient-to-br from-red-600 to-red-800 shadow-2xl"></div>
+                    <div class="w-6 h-16 bg-amber-700 absolute bottom-0 left-1/2 transform -translate-x-1/2 translate-y-12 rounded"></div>
+                  </div>
+                  <div class="w-12 h-12 rounded-full bg-white shadow-2xl animate-pulse"></div>
+                  <div class="relative">
+                    <div class="w-20 h-24 rounded-full bg-gradient-to-br from-gray-800 to-gray-900 shadow-2xl"></div>
+                    <div class="w-6 h-16 bg-amber-700 absolute bottom-0 left-1/2 transform -translate-x-1/2 translate-y-12 rounded"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          {% else %}
+            <!-- Generic gaming placeholder -->
+            <div class="game-card-image bg-gradient-to-br from-primary-600 via-purple-600 to-secondary-600 flex items-center justify-center relative overflow-hidden">
+              <div class="absolute inset-0 opacity-10" style="background: radial-gradient(circle at 30% 50%, rgba(255,255,255,0.2) 0%, transparent 50%);"></div>
+              <div class="relative z-10">
+                <i class="bi bi-trophy-fill text-white text-7xl opacity-80 drop-shadow-2xl"></i>
+              </div>
+            </div>
+          {% endif %}
+        {% endif %}
+        
+        <div class="game-card-content">
+          <div class="flex items-center gap-2 mb-3">
+            <span class="badge badge-success text-xs">
+              <i class="bi bi-circle-fill text-xs mr-1"></i>Available Now
+            </span>
+            {% if game.is_popular %}
+            <span class="badge badge-warning text-xs">
+              <i class="bi bi-fire text-xs mr-1"></i>Popular
+            </span>
+            {% endif %}
+          </div>
+          <h3 class="text-3xl font-black text-white mb-3">{{ game.name }}</h3>
+          <p class="text-gray-300 text-base mb-6 line-clamp-2">{{ game.description|default:"Professional gaming experience with top-tier equipment"|truncatewords:20 }}</p>
+          <div class="flex gap-3">
+            <span class="btn btn-primary btn-md group-hover:bg-primary-500 transition-all flex-1">
+              <i class="bi bi-calendar-check"></i>
+              Book Now
+              <i class="bi bi-arrow-right ml-2 group-hover:translate-x-1 transition-transform"></i>
+            </span>
+          </div>
+        </div>
+      </a>
+      {% endfor %}
+    </div>
+    
+    <!-- View All Button -->
+    <div class="text-center" data-reveal="fadeInUp">
+      <a href="{% url 'booking:game_selection' %}" id="viewAllTablesBtn" class="btn btn-primary btn-lg btn-ripple hover-glow">
+        <i class="bi bi-grid-3x3-gap-fill"></i>
+        <span class="btn-text">View All Tables</span>
+        <i class="bi bi-arrow-right ml-2"></i>
+      </a>
+    </div>
+  </div>
+</section>
+{% endif %}
+
+<!-- Features Section -->
+<section id="features" class="py-24 relative overflow-hidden" style="background: #111827;">
+  <!-- Background Elements -->
+  <div class="hero-bg">
+    <div class="gradient-orb orb-1"></div>
+    <div class="grid-pattern"></div>
+  </div>
+  
+  <div class="container mx-auto px-4 relative z-10">
+    <!-- Section Header -->
+    <div class="text-center mb-16">
+      <div data-reveal="fadeIn" class="status-badge mb-4" style="background: rgba(168, 85, 247, 0.15); color: #c084fc; border-color: rgba(168, 85, 247, 0.3);">
+        <span class="pulse-dot" style="background: #c084fc;"></span>
+        <span>✨ WHY FORGE GAMING CAFE</span>
+      </div>
+      <h2 data-reveal="fadeInUp" class="text-4xl sm:text-5xl font-black text-white mb-6" style="font-family: 'Orbitron', sans-serif;">
+        Premium Sports <span class="gradient-text-neon">Experience</span>
+      </h2>
+      <p data-reveal="fadeInUp" data-reveal-delay="100" class="text-xl text-gray-300 max-w-3xl mx-auto">
+        Professional equipment, perfect environment, and seamless booking - everything you need to excel at your game
+      </p>
+    </div>
+    
+    <!-- Features Grid -->
+    <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+      <!-- Feature 1 -->
+      <div data-reveal="fadeInUp" class="card feature-card hover-lift">
+        <div class="text-neon-cyan mb-4">
+          <i class="bi bi-trophy-fill text-5xl"></i>
+        </div>
+        <h3 class="text-2xl font-bold text-white mb-3">Professional Tables</h3>
+        <p class="text-gray-400 leading-relaxed mb-4">
+          Tournament-grade pool tables and championship table tennis setups. Experience professional-quality equipment maintained to perfection.
+        </p>
+        <ul class="space-y-2 text-sm text-gray-400">
+          <li class="flex items-center gap-2">
+            <i class="bi bi-check-circle-fill text-success"></i>
+            8-Ball Pool Tables
+          </li>
+          <li class="flex items-center gap-2">
+            <i class="bi bi-check-circle-fill text-success"></i>
+            Professional Table Tennis
+          </li>
+          <li class="flex items-center gap-2">
+            <i class="bi bi-check-circle-fill text-success"></i>
+            Premium Equipment
+          </li>
+        </ul>
+      </div>
+      
+      <!-- Feature 2 -->
+      <div data-reveal="fadeInUp" data-reveal-delay="100" class="card feature-card hover-lift">
+        <div class="text-neon-pink mb-4">
+          <i class="bi bi-lightning-charge-fill text-5xl"></i>
+        </div>
+        <h3 class="text-2xl font-bold text-white mb-3">Perfect Environment</h3>
+        <p class="text-gray-400 leading-relaxed mb-4">
+          Climate-controlled venue with professional lighting and comfortable seating. The ideal atmosphere for focused play.
+        </p>
+        <ul class="space-y-2 text-sm text-gray-400">
+          <li class="flex items-center gap-2">
+            <i class="bi bi-check-circle-fill text-success"></i>
+            Optimal Lighting
+          </li>
+          <li class="flex items-center gap-2">
+            <i class="bi bi-check-circle-fill text-success"></i>
+            Air Conditioned
+          </li>
+          <li class="flex items-center gap-2">
+            <i class="bi bi-check-circle-fill text-success"></i>
+            Comfortable Lounge
+          </li>
+        </ul>
+      </div>
+      
+      <!-- Feature 3 -->
+      <div data-reveal="fadeInUp" data-reveal-delay="200" class="card feature-card hover-lift">
+        <div class="text-neon-purple mb-4">
+          <i class="bi bi-calendar-check-fill text-5xl"></i>
+        </div>
+        <h3 class="text-2xl font-bold text-white mb-3">Easy Booking</h3>
+        <p class="text-gray-400 leading-relaxed mb-4">
+          Reserve your perfect gaming session in seconds. Real-time availability, instant confirmation, and flexible scheduling.
+        </p>
+        <ul class="space-y-2 text-sm text-gray-400">
+          <li class="flex items-center gap-2">
+            <i class="bi bi-check-circle-fill text-success"></i>
+            Instant Confirmation
+          </li>
+          <li class="flex items-center gap-2">
+            <i class="bi bi-check-circle-fill text-success"></i>
+            Flexible Rescheduling
+          </li>
+          <li class="flex items-center gap-2">
+            <i class="bi bi-check-circle-fill text-success"></i>
+            Mobile Friendly
+          </li>
+        </ul>
+      </div>
+      
+      <!-- Feature 4 -->
+      <div data-reveal="fadeInUp" data-reveal-delay="300" class="card feature-card hover-lift">
+        <div class="text-neon-green mb-4">
+          <i class="bi bi-wallet2 text-5xl"></i>
+        </div>
+        <h3 class="text-2xl font-bold text-white mb-3">Transparent Pricing</h3>
+        <p class="text-gray-400 leading-relaxed mb-4">
+          No hidden fees. Hourly, daily, and monthly packages that fit your budget and gaming needs perfectly.
+        </p>
+        <ul class="space-y-2 text-sm text-gray-400">
+          <li class="flex items-center gap-2">
+            <i class="bi bi-check-circle-fill text-success"></i>
+            No Hidden Costs
+          </li>
+          <li class="flex items-center gap-2">
+            <i class="bi bi-check-circle-fill text-success"></i>
+            Flexible Plans
+          </li>
+          <li class="flex items-center gap-2">
+            <i class="bi bi-check-circle-fill text-success"></i>
+            Money-Back Guarantee
+          </li>
+        </ul>
+      </div>
+      
+      <!-- Feature 5 -->
+      <div data-reveal="fadeInUp" data-reveal-delay="400" class="card feature-card hover-lift">
+        <div class="text-cyber-yellow mb-4">
+          <i class="bi bi-trophy-fill text-5xl"></i>
+        </div>
+        <h3 class="text-2xl font-bold text-white mb-3">Tournaments & Events</h3>
+        <p class="text-gray-400 leading-relaxed mb-4">
+          Join weekly tournaments, seasonal leagues, and special events. Compete with other players and win amazing prizes.
+        </p>
+        <ul class="space-y-2 text-sm text-gray-400">
+          <li class="flex items-center gap-2">
+            <i class="bi bi-check-circle-fill text-success"></i>
+            Weekly Tournaments
+          </li>
+          <li class="flex items-center gap-2">
+            <i class="bi bi-check-circle-fill text-success"></i>
+            Cash Prizes
+          </li>
+          <li class="flex items-center gap-2">
+            <i class="bi bi-check-circle-fill text-success"></i>
+            Coaching Available
+          </li>
+        </ul>
+      </div>
+      
+      <!-- Feature 6 -->
+      <div data-reveal="fadeInUp" data-reveal-delay="500" class="card feature-card hover-lift">
+        <div class="text-electric-blue mb-4">
+          <i class="bi bi-headset text-5xl"></i>
+        </div>
+        <h3 class="text-2xl font-bold text-white mb-3">24/7 Support</h3>
+        <p class="text-gray-400 leading-relaxed mb-4">
+          Our staff is always here to help. Booking assistance, equipment support, and playing tips available round the clock.
+        </p>
+        <ul class="space-y-2 text-sm text-gray-400">
+          <li class="flex items-center gap-2">
+            <i class="bi bi-check-circle-fill text-success"></i>
+            Live Chat Support
+          </li>
+          <li class="flex items-center gap-2">
+            <i class="bi bi-check-circle-fill text-success"></i>
+            Equipment Assistance
+          </li>
+          <li class="flex items-center gap-2">
+            <i class="bi bi-check-circle-fill text-success"></i>
+            Quick Response Time
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA Section -->
+<section class="py-24 relative overflow-hidden" style="background: #111827;">
+  <!-- Animated Background -->
+  <div class="hero-bg">
+    <div class="gradient-orb orb-1"></div>
+    <div class="gradient-orb orb-2"></div>
+    <div class="grid-pattern"></div>
+  </div>
+  
+  <div class="container mx-auto px-4 relative z-10">
+    <div data-reveal="scaleIn" class="max-w-4xl mx-auto text-center cta-card">
+      <div class="float-animation mb-6">
+        <i class="bi bi-trophy-fill text-6xl" style="background: linear-gradient(135deg, #667eea, #a855f7); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;"></i>
+      </div>
+      <h2 class="text-4xl sm:text-5xl font-black text-white mb-6" style="font-family: 'Orbitron', sans-serif;">
+        Ready to <span class="gradient-text-neon">Play?</span>
+      </h2>
+      <p class="text-xl text-gray-300 mb-10 max-w-2xl mx-auto leading-relaxed">
+        Join hundreds of players at <span style="background: linear-gradient(135deg, #667eea, #a855f7); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; font-weight: 700;">TapNex Arena</span>. 
+        Perfect your 8-ball pool and table tennis skills today!
+      </p>
+      <div class="flex flex-col sm:flex-row gap-4 justify-center items-center">
+        {% if not user.is_authenticated %}
+        <a href="{% url 'authentication:customer_login' %}" class="btn btn-primary btn-xl btn-ripple hover-glow" style="background: linear-gradient(135deg, #667eea, #764ba2); border: none; position: relative; z-index: 1;">
+          <i class="bi bi-calendar-check"></i>
+          Start Playing Now
+          <i class="bi bi-arrow-right ml-2"></i>
+        </a>
+        {% else %}
+        <a href="{% url 'booking:game_selection' %}" class="btn btn-primary btn-xl btn-ripple hover-glow" style="background: linear-gradient(135deg, #667eea, #764ba2); border: none; position: relative; z-index: 1;">
+          <i class="bi bi-calendar-check"></i>
+          Book Your Table
+          <i class="bi bi-arrow-right ml-2"></i>
+        </a>
+        {% endif %}
+        <a href="{% url 'contact' %}" class="btn btn-secondary btn-xl" style="background: rgba(255, 255, 255, 0.1); border: 2px solid rgba(255, 255, 255, 0.2); position: relative; z-index: 1;">
+          <i class="bi bi-chat-dots-fill"></i>
+          Talk to Us
+        </a>
+      </div>
+      
+      <!-- Trust Indicators -->
+      <div class="mt-10 pt-10" style="border-top: 1px solid rgba(255, 255, 255, 0.1);">
+        <div class="flex flex-wrap justify-center items-center gap-8 text-gray-400 text-sm">
+          <div class="flex items-center gap-2">
+            <i class="bi bi-shield-fill-check text-xl" style="color: #34d399;"></i>
+            <span>Secure Payments</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <i class="bi bi-award-fill text-xl" style="color: #fbbf24;"></i>
+            <span>Premium Quality</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <i class="bi bi-people-fill text-xl" style="color: #60a5fa;"></i>
+            <span>500+ Happy Players</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  // Page-specific JavaScript
+  document.addEventListener('DOMContentLoaded', function() {
+    // Handle hero section CTA buttons
+    const heroCTAButtons = document.querySelectorAll('.hero-bg ~ .container a.btn-primary, .hero-bg ~ .container a.btn-secondary');
+    heroCTAButtons.forEach(btn => {
+      // Skip anchor links (like #features)
+      if (btn.getAttribute('href').startsWith('#')) {
+        return;
+      }
+      
+      btn.addEventListener('click', function(e) {
+        if (this.classList.contains('pointer-events-none')) {
+          e.preventDefault();
+          return;
+        }
+        
+        e.preventDefault(); // Prevent default to show loading state first
+        
+        const href = this.getAttribute('href');
+        const button = this;
+        
+        // Remove animation classes FIRST to prevent interference
+        button.classList.remove('hover-glow', 'btn-ripple', 'group');
+        
+        // Force remove any pseudo-element effects by resetting overflow
+        button.style.overflow = 'visible';
+        
+        // Disable button and change content in same frame
+        button.classList.add('pointer-events-none', 'opacity-75');
+        button.innerHTML = '<i class="bi bi-arrow-repeat animate-spin"></i><span>Loading...</span>';
+        
+        // Navigate after showing loading state
+        setTimeout(() => {
+          window.location.href = href;
+        }, 100);
+      });
+    });
+    
+    // Prevent multiple clicks on View All Tables button
+    const viewAllTablesBtn = document.getElementById('viewAllTablesBtn');
+    if (viewAllTablesBtn) {
+      viewAllTablesBtn.addEventListener('click', function(e) {
+        // Check if already clicked
+        if (this.classList.contains('pointer-events-none')) {
+          e.preventDefault();
+          return;
+        }
+        
+        e.preventDefault(); // Prevent default to show loading state first
+        
+        const href = this.getAttribute('href');
+        const button = this;
+        
+        // Remove animation classes FIRST to prevent interference
+        button.classList.remove('hover-glow', 'btn-ripple', 'group');
+        
+        // Force remove any pseudo-element effects by resetting overflow
+        button.style.overflow = 'visible';
+        
+        // Disable button and change content in same frame
+        button.classList.add('pointer-events-none', 'opacity-75');
+        button.innerHTML = '<i class="bi bi-arrow-repeat animate-spin"></i><span>Loading...</span>';
+        
+        // Navigate after showing loading state
+        setTimeout(() => {
+          window.location.href = href;
+        }, 100);
+      });
+    }
+
+    // Handle all Book Now buttons in game cards
+    const bookNowButtons = document.querySelectorAll('.game-card a[href*="game_detail"]');
+    bookNowButtons.forEach(btn => {
+      btn.addEventListener('click', function(e) {
+        if (this.classList.contains('pointer-events-none')) {
+          e.preventDefault();
+          return;
+        }
+        
+        e.preventDefault(); // Prevent default to show loading state first
+        
+        const href = this.getAttribute('href');
+        const button = this;
+        
+        // Remove animation classes FIRST to prevent interference
+        button.classList.remove('hover-glow', 'btn-ripple', 'group');
+        
+        // Force remove any pseudo-element effects by resetting overflow
+        button.style.overflow = 'visible';
+        
+        // Disable button and change content in same frame
+        button.classList.add('pointer-events-none', 'opacity-75');
+        button.innerHTML = '<i class="bi bi-arrow-repeat animate-spin"></i><span>Loading...</span>';
+        
+        // Navigate after showing loading state
+        setTimeout(() => {
+          window.location.href = href;
+        }, 100);
+      });
+    });
+    
+    // Handle CTA section buttons (Book Your Table / Start Playing Now)
+    const ctaButtons = document.querySelectorAll('.cta-card a.btn-primary, .cta-card a.btn-secondary');
+    ctaButtons.forEach(btn => {
+      btn.addEventListener('click', function(e) {
+        if (this.classList.contains('pointer-events-none')) {
+          e.preventDefault();
+          return;
+        }
+        
+        e.preventDefault(); // Prevent default to show loading state first
+        
+        const href = this.getAttribute('href');
+        const button = this;
+        
+        // Remove animation classes FIRST to prevent interference
+        button.classList.remove('hover-glow', 'btn-ripple', 'group');
+        
+        // Force remove any pseudo-element effects by resetting overflow
+        button.style.overflow = 'visible';
+        
+        // Disable button and change content in same frame
+        button.classList.add('pointer-events-none', 'opacity-75');
+        button.innerHTML = '<i class="bi bi-arrow-repeat animate-spin"></i><span>Loading...</span>';
+        
+        // Navigate after showing loading state
+        setTimeout(() => {
+          window.location.href = href;
+        }, 100);
+      });
+    });
+  });
+</script>
+<style>
+  @keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+  
+  .animate-spin {
+    animation: spin 1s linear infinite;
+  }
+</style>
+{% endblock %}

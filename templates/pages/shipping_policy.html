@@ -1,0 +1,632 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}
+  Shipping & Delivery Policy - TapNex Sports Arena
+{% endblock %}
+
+{% block extra_css %}
+  <style>
+    .shipping-hero {
+      background: linear-gradient(135deg, #111827 0%, #1a202e 100%);
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .shipping-hero::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: radial-gradient(circle at 20% 50%, rgba(168, 237, 234, 0.1) 0%, transparent 50%), radial-gradient(circle at 80% 80%, rgba(254, 214, 227, 0.1) 0%, transparent 50%);
+      animation: pulse-glow 10s ease infinite;
+    }
+    
+    @keyframes pulse-glow {
+      0%,
+      100% {
+        opacity: 1;
+      }
+      50% {
+        opacity: 0.6;
+      }
+    }
+    
+    .shipping-section {
+      background: var(--glass-bg);
+      backdrop-filter: blur(20px);
+      border: 1px solid var(--glass-border);
+      border-radius: 1rem;
+      padding: 2.5rem;
+      margin-bottom: 2rem;
+      transition: all 0.3s ease;
+    }
+    
+    .shipping-section:hover {
+      border-color: rgba(168, 237, 234, 0.4);
+      transform: translateY(-2px);
+    }
+    
+    .info-box {
+      background: linear-gradient(135deg, rgba(0, 212, 255, 0.15), rgba(233, 69, 96, 0.15));
+      border: 2px solid rgba(0, 212, 255, 0.4);
+      border-radius: 1rem;
+      padding: 2.5rem;
+      margin-bottom: 2.5rem;
+      position: relative;
+      overflow: hidden;
+      transition: all 0.3s ease;
+    }
+    
+    .info-box::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle, rgba(0, 212, 255, 0.1) 0%, transparent 70%);
+      animation: rotate-gradient 10s linear infinite;
+    }
+    
+    @keyframes rotate-gradient {
+      0% {
+        transform: rotate(0deg);
+      }
+      100% {
+        transform: rotate(360deg);
+      }
+    }
+    
+    .info-box:hover {
+      border-color: rgba(0, 212, 255, 0.6);
+      transform: scale(1.02);
+    }
+    
+    .text-light-gray {
+      color: #e5e5e5 !important;
+    }
+    
+    .list-item-text {
+      color: #f0f0f0 !important;
+    }
+    
+    .service-card {
+      padding: 1.75rem;
+      border-radius: 1rem;
+      background: rgba(0, 212, 255, 0.1);
+      border: 1px solid rgba(0, 212, 255, 0.3);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      height: 100%;
+      margin-bottom: 1.5rem;
+    }
+    
+    .service-card:hover {
+      background: rgba(0, 212, 255, 0.15);
+      border-color: rgba(0, 212, 255, 0.5);
+      transform: translateY(-5px);
+    }
+    
+    .service-card i {
+      transition: all 0.3s ease;
+    }
+    
+    .service-card:hover i {
+      transform: scale(1.15);
+      filter: drop-shadow(0 0 10px rgba(0, 212, 255, 0.5));
+    }
+    
+    .step-number {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0.5rem 1rem;
+      background: linear-gradient(135deg, #e94560, #00d4aa);
+      border-radius: 0.5rem;
+      color: white;
+      font-weight: bold;
+      font-size: 1.1rem;
+      transition: all 0.3s ease;
+      margin-bottom: 1.5rem;
+    }
+    
+    .step-item {
+      background: rgba(168, 237, 234, 0.05);
+      border: 1px solid rgba(168, 237, 234, 0.2);
+      border-radius: 0.75rem;
+      padding: 2rem;
+      margin-bottom: 1.5rem;
+      transition: all 0.3s ease;
+    }
+    
+    .step-item:hover {
+      background: rgba(168, 237, 234, 0.08);
+      border-color: rgba(168, 237, 234, 0.4);
+      transform: translateX(5px);
+    }
+    
+    .step-item:hover .step-number {
+      transform: scale(1.05);
+    }
+    
+    .step-content {
+      flex: 1;
+    }
+    
+    .step-content h5 {
+      margin-bottom: 0.75rem;
+      font-size: 1.25rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    
+    .step-content h5 i {
+      font-size: 1.25rem;
+      flex-shrink: 0;
+    }
+    
+    .step-content p {
+      line-height: 1.7;
+    }
+    .digital-card {
+      padding: 1.75rem;
+      border-radius: 1rem;
+      background: rgba(168, 237, 234, 0.1);
+      border: 1px solid rgba(168, 237, 234, 0.3);
+      transition: all 0.3s ease;
+      height: 100%;
+      margin-bottom: 1.5rem;
+    }
+    
+    .digital-card:hover {
+      background: rgba(168, 237, 234, 0.15);
+      border-color: rgba(168, 237, 234, 0.5);
+      transform: translateY(-5px);
+    }
+    
+    .digital-card i {
+      transition: all 0.3s ease;
+    }
+    
+    .digital-card:hover i {
+      transform: scale(1.15);
+      filter: drop-shadow(0 0 10px rgba(168, 237, 234, 0.5));
+    }
+    
+    .location-card {
+      padding: 2.5rem;
+      border-radius: 1rem;
+      background: linear-gradient(135deg, rgba(168, 237, 234, 0.12), rgba(254, 214, 227, 0.12));
+      border: 2px solid rgba(168, 237, 234, 0.35);
+      transition: all 0.3s ease;
+    }
+    
+    .location-card:hover {
+      border-color: rgba(168, 237, 234, 0.6);
+      transform: translateY(-3px);
+    }
+    
+    .no-ship-item {
+      padding: 1rem 1.5rem;
+      border-radius: 0.75rem;
+      background: rgba(233, 69, 96, 0.08);
+      border: 1px solid rgba(233, 69, 96, 0.3);
+      margin-bottom: 1rem;
+      transition: all 0.3s ease;
+    }
+    
+    .no-ship-item:hover {
+      background: rgba(233, 69, 96, 0.12);
+      border-color: rgba(233, 69, 96, 0.5);
+      transform: translateX(10px);
+    }
+    
+    .section-icon {
+      width: 3.5rem;
+      height: 3.5rem;
+      border-radius: 0.75rem;
+      background: linear-gradient(135deg, #e94560, #00d4aa);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 1.5rem;
+    }
+    
+    .section-icon i {
+      color: white;
+      font-size: 1.75rem;
+    }
+    
+    .hero-icon-wrapper {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 5rem;
+      height: 5rem;
+      border-radius: 50%;
+      background: rgba(168, 237, 234, 0.2);
+      backdrop-filter: blur(10px);
+      border: 2px solid rgba(168, 237, 234, 0.4);
+      transition: all 0.3s ease;
+      animation: float 3s ease-in-out infinite;
+    }
+    
+    @keyframes float {
+      0%,
+      100% {
+        transform: translateY(0px);
+      }
+      50% {
+        transform: translateY(-10px);
+      }
+    }
+    
+    .hero-icon-wrapper:hover {
+      transform: scale(1.1);
+    }
+
+    /* Mobile Animation Optimizations */
+    @media (max-width: 768px) {
+      @keyframes pulse-glow {
+        0%, 100% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0.8;
+        }
+      }
+
+      @keyframes float {
+        0%, 100% {
+          transform: translateY(0);
+        }
+        50% {
+          transform: translateY(-5px);
+        }
+      }
+
+      .shipping-hero::before {
+        animation: pulse-glow 15s cubic-bezier(0.4, 0, 0.6, 1) infinite !important;
+      }
+
+      .shipping-icon {
+        animation: float 8s cubic-bezier(0.4, 0, 0.6, 1) infinite !important;
+      }
+    }
+  </style>
+{% endblock %}
+
+{% block content %}
+  <!-- Hero Section -->
+  <section class="shipping-hero py-20">
+    <div class="container">
+      <div class="text-center" style="position: relative; z-index: 1;">
+        <div class="mb-6">
+          <div class="hero-icon-wrapper">
+            <i class="bi bi-truck text-cyan" style="font-size: 2.5rem;"></i>
+          </div>
+        </div>
+        <h1 class="display-3 fw-bold text-white mb-4" data-scroll-reveal>
+          Shipping & Delivery Policy
+        </h1>
+        <p class="lead text-white mb-3" style="opacity: 0.9;" data-scroll-reveal data-scroll-delay="100">
+          Understanding our on-premise service delivery model
+        </p>
+        <p class="text-white" style="opacity: 0.8; font-size: 0.875rem;" data-scroll-reveal data-scroll-delay="150">
+          Last Updated: November 1, 2025
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Main Content -->
+  <section class="py-5 bg-dark">
+    <div class="container py-5">
+      <div class="row justify-content-center">
+        <div class="col-lg-10">
+          <!-- Important Notice -->
+          <div class="info-box" data-scroll-reveal>
+            <div class="d-flex align-items-center" style="position: relative; z-index: 1;">
+              <div class="flex-shrink-0 me-4">
+                <div class="d-flex align-items-center justify-content-center rounded-3" style="width: 4rem; height: 4rem; backdrop-filter: blur(10px);">
+                  <i class="bi bi-info-circle text-cyan" style="font-size: 2rem; line-height: 1;"></i>
+                </div>
+              </div>
+              <div>
+                <h3 class="text-white mb-3"><i class="bi bi-megaphone me-2 text-cyan"></i>Important Notice</h3>
+                <p class="text-light-gray mb-0" style="font-size: 1.05rem; line-height: 1.7;">
+                  <strong class="text-white">TapNex (NEXGEN FC)</strong> is an <strong class="text-cyan">on-premise sports venue</strong>. We do not ship or deliver physical products. All services are provided at our physical location where you can enjoy our professional gaming facilities in a premium environment.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Nature of Service -->
+          <div class="shipping-section" data-scroll-reveal>
+            <div class="section-icon">
+              <i class="bi bi-trophy"></i>
+            </div>
+            <h3 class="text-white mb-4">Nature of Service</h3>
+            <p class="text-light-gray mb-4" style="font-size: 1.05rem;">
+              Our business model is based on <strong class="text-white">location-based sports venue services</strong>. Customers book tables online and visit our venue to enjoy:
+            </p>
+            <div class="row g-4">
+              <div class="col-md-6">
+                <div class="service-card">
+                  <i class="bi bi-circle-fill text-cyan d-block mb-3" style="font-size: 2.5rem;"></i>
+                  <h5 class="text-white mb-2">8-Ball Pool Tables</h5>
+                  <p class="text-light-gray mb-0">Professional pool tables with premium equipment for an authentic gaming experience</p>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="service-card">
+                  <i class="bi bi-trophy text-cyan d-block mb-3" style="font-size: 2.5rem;"></i>
+                  <h5 class="text-white mb-2">Table Tennis</h5>
+                  <p class="text-light-gray mb-0">Championship-grade tables for competitive and casual play</p>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="service-card">
+                  <i class="bi bi-house-door text-cyan d-block mb-3" style="font-size: 2.5rem;"></i>
+                  <h5 class="text-white mb-2">Professional Environment</h5>
+                  <p class="text-light-gray mb-0">Climate-controlled venue with comfortable seating and ambient lighting</p>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="service-card">
+                  <i class="bi bi-cup text-cyan d-block mb-3" style="font-size: 2.5rem;"></i>
+                  <h5 class="text-white mb-2">Refreshments</h5>
+                  <p class="text-light-gray mb-0">Snacks and beverages available to keep you energized (where available)</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Service Delivery -->
+          <div class="shipping-section" data-scroll-reveal>
+            <div class="section-icon">
+              <i class="bi bi-clock-history"></i>
+            </div>
+            <h3 class="text-white mb-4">Service Delivery Process</h3>
+            <p class="text-light-gray mb-4" style="font-size: 1.05rem;">Here's how our seamless service delivery works:</p>
+
+            <div class="position-relative">
+              <!-- Step 1 -->
+              <div class="step-item">
+                <div class="step-number">01</div>
+                <div class="step-content">
+                  <h5 class="text-white">
+                    <i class="bi bi-laptop text-cyan"></i>
+                    <span>Online Booking</span>
+                  </h5>
+                  <p class="text-light-gray mb-0">
+                    Book your slot online through our platform at <span class="text-cyan fw-bold">forge.tapnex.tech</span>. Choose your preferred time, game type, and session duration.
+                  </p>
+                </div>
+              </div>
+
+              <!-- Step 2 -->
+              <div class="step-item">
+                <div class="step-number">02</div>
+                <div class="step-content">
+                  <h5 class="text-white">
+                    <i class="bi bi-check-circle text-cyan"></i>
+                    <span>Instant Confirmation</span>
+                  </h5>
+                  <p class="text-light-gray mb-0">Receive booking confirmation via email and on your dashboard immediately. Your QR code will be generated for easy check-in.</p>
+                </div>
+              </div>
+
+              <!-- Step 3 -->
+              <div class="step-item">
+                <div class="step-number">03</div>
+                <div class="step-content">
+                  <h5 class="text-white">
+                    <i class="bi bi-geo-alt text-cyan"></i>
+                    <span>Visit Our Venue</span>
+                  </h5>
+                  <p class="text-light-gray mb-0">Arrive at the scheduled time (we recommend 15 minutes early). Our friendly staff will be ready to welcome you.</p>
+                </div>
+              </div>
+
+              <!-- Step 4 -->
+              <div class="step-item">
+                <div class="step-number">04</div>
+                <div class="step-content">
+                  <h5 class="text-white">
+                    <i class="bi bi-qr-code-scan text-cyan"></i>
+                    <span>QR Verification</span>
+                  </h5>
+                  <p class="text-light-gray mb-0">Show your booking QR code for quick verification. Fast, contactless, and secure check-in process.</p>
+                </div>
+              </div>
+
+              <!-- Step 5 -->
+              <div class="step-item">
+                <div class="step-number">05</div>
+                <div class="step-content">
+                  <h5 class="text-white">
+                    <i class="bi bi-controller text-cyan"></i>
+                    <span>Start Playing!</span>
+                  </h5>
+                  <p class="text-light-gray mb-0">Enjoy your session at our professional sports venue. Premium equipment, great atmosphere, and unforgettable gaming experience!</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- No Physical Shipping -->
+          <div class="shipping-section" data-scroll-reveal>
+            <div class="section-icon" style="background: linear-gradient(135deg, #e94560, #ff6b6b);">
+              <i class="bi bi-x-circle"></i>
+            </div>
+            <h3 class="text-white mb-4">No Physical Shipping</h3>
+            <p class="text-light-gray mb-4" style="font-size: 1.05rem;">
+              Since we provide in-person sports venue services, we do <strong class="text-white">NOT</strong>:
+            </p>
+            <div class="no-ship-item">
+              <div class="d-flex align-items-center">
+                <i class="bi bi-x-lg text-danger me-3" style="font-size: 1.5rem;"></i>
+                <span class="list-item-text">Ship physical products to your address</span>
+              </div>
+            </div>
+            <div class="no-ship-item">
+              <div class="d-flex align-items-center">
+                <i class="bi bi-x-lg text-danger me-3" style="font-size: 1.5rem;"></i>
+                <span class="list-item-text">Provide delivery or courier services</span>
+              </div>
+            </div>
+            <div class="no-ship-item">
+              <div class="d-flex align-items-center">
+                <i class="bi bi-x-lg text-danger me-3" style="font-size: 1.5rem;"></i>
+                <span class="list-item-text">Mail or send any physical items</span>
+              </div>
+            </div>
+            <div class="no-ship-item" style="margin-bottom: 0;">
+              <div class="d-flex align-items-center">
+                <i class="bi bi-x-lg text-danger me-3" style="font-size: 1.5rem;"></i>
+                <span class="list-item-text">Offer remote or virtual services</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Digital Delivery -->
+          <div class="shipping-section" data-scroll-reveal>
+            <div class="section-icon">
+              <i class="bi bi-envelope-check"></i>
+            </div>
+            <h3 class="text-white mb-4">Digital Delivery</h3>
+            <p class="text-light-gray mb-4" style="font-size: 1.05rem;">What you receive digitally after booking:</p>
+            <div class="row g-4">
+              <div class="col-md-6">
+                <div class="digital-card">
+                  <i class="bi bi-envelope text-cyan d-block mb-3" style="font-size: 2.5rem;"></i>
+                  <h5 class="text-white mb-2">Confirmation Email</h5>
+                  <p class="text-light-gray mb-0">Instant email with complete booking details, time slot, and game information</p>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="digital-card">
+                  <i class="bi bi-qr-code text-cyan d-block mb-3" style="font-size: 2.5rem;"></i>
+                  <h5 class="text-white mb-2">QR Code</h5>
+                  <p class="text-light-gray mb-0">Unique QR code for quick and secure check-in verification at our venue</p>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="digital-card">
+                  <i class="bi bi-speedometer2 text-cyan d-block mb-3" style="font-size: 2.5rem;"></i>
+                  <h5 class="text-white mb-2">Dashboard Access</h5>
+                  <p class="text-light-gray mb-0">View and manage all your bookings through our intuitive online dashboard</p>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="digital-card">
+                  <i class="bi bi-bell text-cyan d-block mb-3" style="font-size: 2.5rem;"></i>
+                  <h5 class="text-white mb-2">Reminders</h5>
+                  <p class="text-light-gray mb-0">Timely booking reminders via email and notifications so you never miss a session</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Location Information -->
+          <div class="shipping-section" data-scroll-reveal>
+            <div class="section-icon">
+              <i class="bi bi-geo-alt"></i>
+            </div>
+            <h3 class="text-white mb-4">Visit Our Location</h3>
+            <p class="text-light-gray mb-4" style="font-size: 1.05rem;">To access our gaming services, you need to physically visit our venue:</p>
+            <div class="location-card">
+              <div class="text-center mb-4">
+                <div class="d-inline-flex align-items-center justify-content-center rounded-circle mb-3" style="width: 4rem; height: 4rem; background: linear-gradient(135deg, #e94560, #00d4aa);">
+                  <i class="bi bi-pin-map-fill text-white" style="font-size: 2rem;"></i>
+                </div>
+                <h4 class="text-white mb-2">NEXGEN FC Gaming Cafe</h4>
+                <p class="text-cyan mb-0" style="font-size: 1.1rem;">Powered by TapNex Technologies</p>
+              </div>
+
+              <div class="row g-3">
+                <div class="col-md-4">
+                  <div class="text-center p-3 rounded" style="background: rgba(168, 237, 234, 0.1); border: 1px solid rgba(168, 237, 234, 0.3);">
+                    <i class="bi bi-building text-cyan d-block mb-2" style="font-size: 1.75rem;"></i>
+                    <p class="text-white mb-1 fw-bold" style="font-size: 0.9rem;">Business</p>
+                    <p class="text-light-gray mb-0" style="font-size: 0.875rem;">TapNex Technologies</p>
+                  </div>
+                </div>
+                <div class="col-md-4">
+                  <div class="text-center p-3 rounded" style="background: rgba(168, 237, 234, 0.1); border: 1px solid rgba(168, 237, 234, 0.3);">
+                    <i class="bi bi-envelope text-cyan d-block mb-2" style="font-size: 1.75rem;"></i>
+                    <p class="text-white mb-1 fw-bold" style="font-size: 0.9rem;">Email</p>
+                    <a href="mailto:info@tapnex.tech" class="text-cyan text-decoration-none hover-glow" style="font-size: 0.875rem;">info@tapnex.tech</a>
+                  </div>
+                </div>
+                <div class="col-md-4">
+                  <div class="text-center p-3 rounded" style="background: rgba(168, 237, 234, 0.1); border: 1px solid rgba(168, 237, 234, 0.3);">
+                    <i class="bi bi-globe text-cyan d-block mb-2" style="font-size: 1.75rem;"></i>
+                    <p class="text-white mb-1 fw-bold" style="font-size: 0.9rem;">Website</p>
+                    <a href="https://forge.tapnex.tech" class="text-cyan text-decoration-none hover-glow" style="font-size: 0.875rem;">forge.tapnex.tech</a>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Questions -->
+          <div class="shipping-section" data-scroll-reveal>
+            <div class="section-icon">
+              <i class="bi bi-question-circle"></i>
+            </div>
+            <h3 class="text-white mb-4">Have Questions?</h3>
+            <p class="text-light-gray mb-4" style="font-size: 1.05rem;">If you have any questions about our service delivery process, need assistance with bookings, or want to know more about our venue, our support team is here to help!</p>
+            <div class="d-flex gap-3 flex-wrap">
+              <a href="{% url 'contact' %}" class="btn btn-lg" style="background: linear-gradient(135deg, #e94560, #00d4aa); border: none; color: white; font-weight: 600;"><i class="bi bi-headset me-2"></i>Contact Support</a>
+              <a href="{% url 'booking:game_selection' %}" class="btn btn-outline-light btn-lg"><i class="bi bi-controller me-2"></i>Book a Slot</a>
+            </div>
+          </div>
+
+          <!-- Back to Home -->
+          <div class="text-center mt-5" data-scroll-reveal>
+            <a href="{% url 'home' %}" class="btn btn-outline-light btn-lg" style="border-width: 2px; padding: 0.75rem 2rem;"><i class="bi bi-arrow-left me-2"></i>Back to Home</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+{% endblock %}
+
+{% block extra_js %}
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      // Smooth scroll reveal animation
+      const observerOptions = {
+        threshold: 0.1,
+        rootMargin: '0px 0px -50px 0px'
+      }
+    
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.style.opacity = '1'
+            entry.target.style.transform = 'translateY(0)'
+          }
+        })
+      }, observerOptions)
+    
+      document.querySelectorAll('[data-scroll-reveal]').forEach((el) => {
+        el.style.opacity = '0'
+        el.style.transform = 'translateY(20px)'
+        el.style.transition = 'opacity 0.6s ease, transform 0.6s ease'
+    
+        const delay = el.getAttribute('data-scroll-delay')
+        if (delay) {
+          el.style.transitionDelay = delay + 'ms'
+        }
+    
+        observer.observe(el)
+      })
+    })
+  </script>
+{% endblock %}

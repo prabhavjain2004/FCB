@@ -1,0 +1,862 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="{% block description %}NEXGEN FC - Professional 8-ball pool and table tennis venue. Book your session online with TapNex platform. Powered by NexGen FC.{% endblock %}">
+    <meta name="keywords" content="nexgen fc, pool table booking, table tennis, 8-ball pool, sports venue, table booking, gaming cafe">
+    <meta name="author" content="NEXGEN FC">
+    <title>{% block title %}NEXGEN FC - Book Pool & Table Tennis Tables{% endblock %}</title>
+    
+    {% load static %}
+    
+    <!-- Modern Design System v2.0 -->
+    <link rel="stylesheet" href="{% static 'css/design-system-v2.css' %}">
+    <link rel="stylesheet" href="{% static 'css/animations.css' %}">
+    <link rel="stylesheet" href="{% static 'css/forge-custom.css' %}">
+    
+    <!-- Tailwind Output -->
+    <link rel="stylesheet" href="{% static 'css/output.css' %}">
+    
+    <!-- Mobile Responsive Styles -->
+    <link rel="stylesheet" href="{% static 'css/mobile-variables.css' %}">
+    <link rel="stylesheet" href="{% static 'css/responsive-mobile.css' %}">
+    
+    <!-- Logo Size Fixes -->
+    <link rel="stylesheet" href="{% static 'css/logo-fixes.css' %}">
+    
+    <!-- Google Fonts - Inter & Orbitron -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Orbitron:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="{% static 'images/tapnex_logo.png' %}">
+    <link rel="apple-touch-icon" href="{% static 'images/tapnex_logo.png' %}">
+    
+    <!-- Theme Color -->
+    <meta name="theme-color" content="#111827">
+    
+    <!-- Mobile Web App Capable -->
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="NEXGEN FC">
+    
+    <!-- Disable auto-zoom on input focus (iOS) -->
+    <meta name="format-detection" content="telephone=no">
+    
+    <!-- Preloader Styles -->
+    <style>
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        .spinner-ring {
+            animation: spin 1s linear infinite;
+        }
+        
+        .spinner-pulse {
+            animation: pulse 2s ease-in-out infinite;
+        }
+        
+        /* Slower pulse on mobile - Override all pulse animations */
+        @media (max-width: 768px) {
+            .spinner-pulse,
+            .animate-pulse,
+            .pulse-dot,
+            .animate-pulse-slow,
+            *[class*="animate-pulse"],
+            *[class*="pulse"] {
+                animation: pulse 4.5s cubic-bezier(0.4, 0, 0.6, 1) infinite !important;
+            }
+        }
+        
+        /* Header fixes */
+        .navbar {
+            display: block !important;
+            visibility: visible !important;
+            background: rgba(13, 19, 32, 0.98) !important;
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        
+        .navbar .container {
+            max-width: 1280px;
+            margin: 0 auto;
+        }
+        
+        /* Logo and brand styling */
+        .navbar .logo-text {
+            color: white !important;
+            font-weight: 600;
+        }
+        
+        .navbar .logo-text .gradient-part {
+            background: linear-gradient(135deg, #e94560, #00d4aa);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        /* Responsive logo text */
+        @media (max-width: 640px) {
+            .navbar .logo-text {
+                font-size: 0.875rem;
+            }
+        }
+        
+        @media (min-width: 641px) {
+            .navbar .logo-text {
+                font-size: 1rem;
+            }
+        }
+        
+        /* Navigation links styling - clean and minimal */
+        .nav-link {
+            color: rgba(255, 255, 255, 0.8) !important;
+            font-weight: 500;
+            font-size: 0.875rem;
+            padding: 0.5rem 0.75rem;
+            border-radius: 0.5rem;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            text-decoration: none;
+            white-space: nowrap;
+        }
+        
+        .nav-link:hover {
+            color: white !important;
+            background: rgba(255, 255, 255, 0.08);
+        }
+        
+        .nav-link i {
+            font-size: 1rem;
+        }
+        
+        /* Sign In button styling */
+        .btn-sign-in {
+            background: #4f46e5 !important;
+            color: white !important;
+            border: none;
+            padding: 0.5rem 1.25rem;
+            border-radius: 0.5rem;
+            font-weight: 500;
+            font-size: 0.875rem;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            text-decoration: none;
+        }
+        
+        .btn-sign-in:hover {
+            background: #4338ca !important;
+            transform: translateY(-1px);
+        }
+        
+        .btn-sign-in i {
+            display: none;
+        }
+        
+        /* Desktop navigation visibility - CRITICAL FIX */
+        .nav-items {
+            display: none; /* Hidden by default (mobile) */
+        }
+        
+        @media (min-width: 1024px) {
+            .nav-items {
+                display: flex !important;
+                visibility: visible !important;
+                align-items: center;
+                opacity: 1 !important;
+            }
+        }
+        
+        /* Mobile menu improvements */
+        .mobile-menu {
+        }
+        
+        @media (max-width: 640px) {
+            .mobile-menu {
+                max-width: 85vw;
+            }
+        }
+        
+        /* Smooth scrolling for mobile menu */
+        .mobile-menu .overflow-y-auto {
+            scrollbar-width: thin;
+            scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
+        }
+        
+        .mobile-menu .overflow-y-auto::-webkit-scrollbar {
+            width: 4px;
+        }
+        
+        .mobile-menu .overflow-y-auto::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        
+        .mobile-menu .overflow-y-auto::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 2px;
+        }
+        
+        .mobile-menu .overflow-y-auto::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+        
+        /* Ensure mobile menu and overlay are hidden on desktop */
+        @media (min-width: 1024px) {
+            .mobile-menu,
+            .mobile-menu-overlay {
+                display: none !important;
+            }
+        }
+        
+        /* Modern Hamburger Menu Icon */
+        .hamburger-icon {
+            width: 24px;
+            height: 18px;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        
+        .hamburger-line {
+            width: 100%;
+            height: 2.5px;
+            background: white;
+            border-radius: 2px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: block;
+        }
+        
+        .mobile-menu-toggle:hover .hamburger-line {
+            background: linear-gradient(135deg, #e94560, #00d4aa);
+        }
+        
+        /* Hide hamburger when menu is open (close button in menu header will be used) */
+        .mobile-menu-toggle.active {
+            opacity: 0;
+            pointer-events: none;
+        }
+        
+        /* Mobile menu toggle button enhancement */
+        .mobile-menu-toggle {
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        .mobile-menu-toggle:active {
+            transform: scale(0.95);
+        }
+        
+        /* Ensure mobile menu toggle is hidden on desktop */
+        @media (min-width: 1024px) {
+            .mobile-menu-toggle {
+                display: none !important;
+            }
+        }
+        
+        /* Show only on mobile/tablet */
+        @media (max-width: 1023px) {
+            .mobile-menu-toggle {
+                display: flex !important;
+            }
+        }
+    </style>
+    
+    {% block extra_css %}{% endblock %}
+</head>
+<body class="min-h-screen flex flex-col">
+    
+    <!-- Page Preloader -->
+    <div id="preloader" class="fixed inset-0 flex items-center justify-center z-[9999] transition-opacity duration-500" style="background: rgba(13, 19, 32, 0.85); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);">
+        <div class="text-center">
+            <!-- Simple Circular Spinner -->
+            <div class="relative w-16 h-16 mx-auto mb-4">
+                <div class="absolute inset-0 border-4 border-gray-700/30 rounded-full"></div>
+                <div class="spinner-ring absolute inset-0 rounded-full" style="border: 4px solid transparent; border-top-color: #e94560;"></div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modern Navigation -->
+    <nav class="navbar fixed top-0 left-0 right-0 z-50 backdrop-filter backdrop-blur-lg transition-all duration-300">
+        <div class="container mx-auto px-4 sm:px-6">
+            <div class="flex justify-between items-center h-16">
+                <!-- Logo -->
+                <div class="flex items-center flex-shrink-0">
+                    <a href="{% url 'home' %}" class="flex items-center group">
+                        <img src="{% static 'images/tapnex_logo.png' %}" alt="TapNex Arena" class="h-5 sm:h-6 md:h-7 w-auto" onerror="this.src='{% static 'images/logos/tn-logo.svg' %}'" style="max-height: 28px;">
+                        <span class="logo-text ml-2 text-sm sm:text-base">
+                            TapNex<span class="gradient-part">Arena</span>
+                        </span>
+                    </a>
+                </div>
+                
+                <!-- Desktop Navigation -->
+                <div class="hidden lg:flex items-center nav-items gap-1">
+                    {% if user.is_authenticated %}
+                        {% if user.is_superuser %}
+                            <a href="{% url 'authentication:tapnex_dashboard' %}" class="nav-link">
+                                Dashboard
+                            </a>
+                        {% elif user.customer_profile %}
+                            <a href="{% url 'authentication:customer_dashboard' %}" class="nav-link">
+                                Dashboard
+                            </a>
+                            <a href="{% url 'booking:game_selection' %}" class="nav-link">
+                                Book Tables
+                            </a>
+                            <a href="{% url 'booking:my_bookings' %}" class="nav-link">
+                                My Bookings
+                            </a>
+                        {% elif user.cafeowner %}
+                            <a href="{% url 'authentication:cafe_owner_dashboard' %}" class="nav-link">
+                                Dashboard
+                            </a>
+                        {% endif %}
+                        
+                        <!-- User Menu -->
+                        <div class="flex items-center gap-2 ml-2">
+                            <!-- Notifications (for customers) -->
+                            {% if user.customer_profile %}
+                            <div class="relative">
+                                <button id="notifications-button" class="relative text-gray-300 hover:text-white transition-colors p-2">
+                                    <i class="bi bi-bell text-lg"></i>
+                                    <span id="notification-badge" class="absolute top-0 right-0 bg-red-500 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center hidden font-semibold text-[10px]">0</span>
+                                </button>
+                                
+                                <!-- Notifications Dropdown -->
+                                <div id="notifications-dropdown" class="absolute right-0 mt-2 w-80 glass-strong rounded-xl shadow-2xl hidden animate-fade-in-down">
+                                    <div class="p-4 border-b border-white/10">
+                                        <h3 class="text-white font-semibold">Notifications</h3>
+                                    </div>
+                                    <div id="notifications-list" class="max-h-96 overflow-y-auto"></div>
+                                </div>
+                            </div>
+                            {% endif %}
+                            
+                            <!-- User Avatar & Name -->
+                            <div class="flex items-center gap-2 px-2">
+                                {% if user.customer and user.customer.avatar_url %}
+                                    <img src="{{ user.customer.avatar_url }}" alt="Profile" class="w-8 h-8 rounded-full border-2 border-primary-500 hover:border-secondary-500 transition-colors">
+                                {% else %}
+                                    <div class="w-8 h-8 rounded-full bg-gradient-to-br from-primary-600 to-secondary-600 flex items-center justify-center text-white font-semibold text-sm">
+                                        {{ user.first_name.0|default:user.username.0|upper }}
+                                    </div>
+                                {% endif %}
+                                <div class="hidden xl:block">
+                                    <p class="text-white text-sm font-medium leading-tight">
+                                        {% if user.first_name %}{{ user.first_name }}{% else %}{{ user.username }}{% endif %}
+                                    </p>
+                                </div>
+                            </div>
+                            
+                            <a href="{% url 'authentication:logout' %}" class="nav-link text-red-400 hover:text-red-300 hover:bg-red-500/10">
+                                <i class="bi bi-box-arrow-right"></i>
+                                <span class="hidden xl:inline">Logout</span>
+                            </a>
+                        </div>
+                    {% else %}
+                        <a href="{% url 'home' %}" class="nav-link">
+                            Home
+                        </a>
+                        <a href="{% url 'about' %}" class="nav-link">
+                            About
+                        </a>
+                        <a href="{% url 'contact' %}" class="nav-link">
+                            Contact
+                        </a>
+                        
+                        <a href="{% url 'authentication:customer_login' %}" class="btn-sign-in ml-2">
+                            Sign In
+                        </a>
+                    {% endif %}
+                </div>
+
+                <!-- Mobile Menu Toggle -->
+                <button class="lg:hidden mobile-menu-toggle relative w-10 h-10 flex items-center justify-center rounded-lg hover:bg-white/10 transition-all duration-200 -mr-2" aria-label="Toggle menu">
+                    <div class="hamburger-icon">
+                        <span class="hamburger-line"></span>
+                        <span class="hamburger-line"></span>
+                        <span class="hamburger-line"></span>
+                    </div>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Mobile Menu -->
+    <div class="mobile-menu fixed top-0 right-0 w-full max-w-xs transform translate-x-full transition-transform duration-300 z-50 lg:hidden" style="height: 100vh; height: 100dvh;">
+        <div class="flex flex-col h-full bg-gradient-to-b from-gray-900 via-gray-900 to-gray-950 backdrop-blur-xl shadow-2xl">
+            <!-- Mobile Menu Header -->
+            <div class="flex items-center justify-between px-5 py-4 border-b border-white/10">
+                <span class="text-white font-bold text-lg">Menu</span>
+                <button class="mobile-menu-close w-9 h-9 flex items-center justify-center rounded-lg hover:bg-white/10 transition-all duration-200" aria-label="Close menu">
+                    <i class="bi bi-x-lg text-lg text-white"></i>
+                </button>
+            </div>
+
+            <!-- Mobile Menu Content -->
+            <div class="flex-1 overflow-y-auto px-4 py-5">
+                {% if user.is_authenticated %}
+                    <!-- User Info Card -->
+                    <div class="bg-gradient-to-br from-primary-600/20 to-secondary-600/20 rounded-xl p-4 mb-5 border border-white/10">
+                        <div class="flex items-center gap-3">
+                            {% if user.customer and user.customer.avatar_url %}
+                                <img src="{{ user.customer.avatar_url }}" alt="Profile" class="w-12 h-12 rounded-full border-2 border-primary-500 flex-shrink-0">
+                            {% else %}
+                                <div class="w-12 h-12 rounded-full bg-gradient-to-br from-primary-600 to-secondary-600 flex items-center justify-center text-white font-bold text-base flex-shrink-0 shadow-lg">
+                                    {{ user.first_name.0|default:user.username.0|upper }}
+                                </div>
+                            {% endif %}
+                            <div class="min-w-0 flex-1">
+                                <p class="text-white font-semibold text-base truncate">
+                                    {% if user.first_name %}{{ user.first_name }} {{ user.last_name }}{% else %}{{ user.username }}{% endif %}
+                                </p>
+                                <p class="text-gray-400 text-xs truncate">{{ user.email }}</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Mobile Navigation Links -->
+                    <nav class="space-y-1.5">
+                        {% if user.is_superuser %}
+                            <a href="{% url 'authentication:tapnex_dashboard' %}" class="flex items-center gap-3 text-gray-300 hover:text-white hover:bg-white/10 px-4 py-3.5 rounded-xl transition-all font-medium">
+                                <i class="bi bi-speedometer2 text-lg text-primary-400"></i>
+                                <span>Dashboard</span>
+                            </a>
+                        {% elif user.customer_profile %}
+                            <a href="{% url 'authentication:customer_dashboard' %}" class="flex items-center gap-3 text-gray-300 hover:text-white hover:bg-white/10 px-4 py-3.5 rounded-xl transition-all font-medium">
+                                <i class="bi bi-grid-fill text-lg text-primary-400"></i>
+                                <span>Dashboard</span>
+                            </a>
+                            <a href="{% url 'booking:game_selection' %}" class="flex items-center gap-3 text-gray-300 hover:text-white hover:bg-white/10 px-4 py-3.5 rounded-xl transition-all font-medium">
+                                <i class="bi bi-calendar-check text-lg text-secondary-400"></i>
+                                <span>Book Tables</span>
+                            </a>
+                            <a href="{% url 'booking:my_bookings' %}" class="flex items-center gap-3 text-gray-300 hover:text-white hover:bg-white/10 px-4 py-3.5 rounded-xl transition-all font-medium">
+                                <i class="bi bi-clock-history text-lg text-blue-400"></i>
+                                <span>My Bookings</span>
+                            </a>
+                        {% elif user.cafeowner %}
+                            <a href="{% url 'authentication:cafe_owner_dashboard' %}" class="flex items-center gap-3 text-gray-300 hover:text-white hover:bg-white/10 px-4 py-3.5 rounded-xl transition-all font-medium">
+                                <i class="bi bi-speedometer2 text-lg text-primary-400"></i>
+                                <span>Dashboard</span>
+                            </a>
+                        {% endif %}
+                    </nav>
+                    
+                    <!-- Logout Button -->
+                    <div class="mt-5 pt-5 border-t border-white/10">
+                        <a href="{% url 'authentication:logout' %}" class="flex items-center justify-center gap-2 text-red-400 hover:text-red-300 hover:bg-red-500/10 px-4 py-3.5 rounded-xl transition-all font-medium">
+                            <i class="bi bi-box-arrow-right text-lg"></i>
+                            <span>Logout</span>
+                        </a>
+                    </div>
+                {% else %}
+                    <!-- Primary Navigation Only -->
+                    <nav class="space-y-1.5">
+                        <a href="{% url 'home' %}?view=home" class="flex items-center gap-3 text-gray-300 hover:text-white hover:bg-white/10 px-4 py-3.5 rounded-xl transition-all font-medium">
+                            <i class="bi bi-house-door text-lg text-primary-400"></i>
+                            <span>Home</span>
+                        </a>
+                        <a href="{% url 'about' %}" class="flex items-center gap-3 text-gray-300 hover:text-white hover:bg-white/10 px-4 py-3.5 rounded-xl transition-all font-medium">
+                            <i class="bi bi-info-circle text-lg text-blue-400"></i>
+                            <span>About</span>
+                        </a>
+                        <a href="{% url 'contact' %}" class="flex items-center gap-3 text-gray-300 hover:text-white hover:bg-white/10 px-4 py-3.5 rounded-xl transition-all font-medium">
+                            <i class="bi bi-envelope text-lg text-purple-400"></i>
+                            <span>Contact</span>
+                        </a>
+                    </nav>
+                    
+                    <!-- CTA Buttons -->
+                    <div class="space-y-3 mt-6 pt-6 border-t border-white/10">
+                        <a href="{% url 'authentication:customer_login' %}" class="flex items-center justify-center gap-2 bg-gradient-to-r from-primary-600 to-secondary-600 text-white font-semibold py-3.5 px-4 rounded-xl hover:shadow-lg hover:shadow-primary-500/30 transition-all">
+                            <i class="bi bi-rocket-takeoff text-base"></i>
+                            <span>Get Started</span>
+                        </a>
+                        <a href="{% url 'authentication:customer_login' %}" class="flex items-center justify-center gap-2 bg-white/5 border border-white/10 text-white font-medium py-3.5 px-4 rounded-xl hover:bg-white/10 transition-all">
+                            <i class="bi bi-box-arrow-in-right text-base"></i>
+                            <span>Sign In</span>
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+            
+            <!-- Footer -->
+            <div class="px-5 py-4 border-t border-white/10 bg-black/20">
+                <p class="text-gray-500 text-xs text-center">
+                    © 2025 TapNex Arena
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mobile Menu Overlay -->
+    <div class="mobile-menu-overlay fixed inset-0 bg-black/50 backdrop-blur-sm hidden z-40 lg:hidden"></div>
+
+    <!-- Add spacing for fixed navbar -->
+    <div class="h-16"></div>
+
+    <!-- Alert Messages -->
+    {% if messages %}
+        <div class="container mx-auto px-4 py-4">
+            {% for message in messages %}
+                <div class="alert alert-{% if message.tags == 'error' %}error{% elif message.tags == 'success' %}success{% elif message.tags == 'warning' %}warning{% else %}info{% endif %} animate-fade-in-down">
+                    <div class="flex items-center gap-3">
+                        <i class="bi bi-{% if message.tags == 'error' %}exclamation-circle{% elif message.tags == 'success' %}check-circle{% elif message.tags == 'warning' %}exclamation-triangle{% else %}info-circle{% endif %} text-xl"></i>
+                        <div class="flex-1">{{ message }}</div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <!-- Main Content -->
+    <main class="flex-1">
+        {% block content %}
+        {% endblock %}
+    </main>
+
+    <!-- Footer Component - Fully Responsive & Standalone -->
+    <footer class="bg-[#111827] border-t border-white/10 mt-auto">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8 pt-6 pb-0 sm:py-8 max-w-7xl">
+            
+            <!-- 4-Column Responsive Grid -->
+            <div class="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8 lg:gap-12 items-start">
+                
+                <!-- Column 1: Brand, Description & Social -->
+                <div class="col-span-2 lg:col-span-1 text-left">
+                    <!-- Logo -->
+                    <div class="flex items-center gap-2 mb-2 flex-row">
+                        <img src="{% static 'images/tapnex_logo.png' %}" alt="TapNex Arena Logo" class="h-6 w-auto flex-shrink-0" onerror="this.style.display='none'">
+                        <span class="text-white font-bold text-sm whitespace-nowrap">
+                            TapNex<span style="background: linear-gradient(135deg, #e94560, #00d4aa); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;">Arena</span>
+                        </span>
+                    </div>
+                    
+                    <!-- Description -->
+                    <p class="text-gray-400 text-sm leading-snug mb-3 text-left">
+                        Professional 8-ball pool and table tennis venue. Book your perfect gaming session.
+                    </p>
+                    
+                    <!-- Social Media Icons -->
+                    <div class="flex gap-2 flex-wrap flex-row justify-start">
+                        <a href="https://www.linkedin.com/company/tapnexfc" target="_blank" rel="noopener noreferrer" aria-label="Follow us on LinkedIn" title="LinkedIn" class="w-8 h-8 rounded-lg bg-white/5 hover:bg-blue-600 flex items-center justify-center text-gray-400 hover:text-white transition-all">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path>
+                                <rect x="2" y="9" width="4" height="12"></rect>
+                                <circle cx="4" cy="4" r="2"></circle>
+                            </svg>
+                        </a>
+                        <a href="https://www.instagram.com/tapnex.fc/?hl=en" target="_blank" rel="noopener noreferrer" aria-label="Follow us on Instagram" title="Instagram" class="w-8 h-8 rounded-lg bg-white/5 hover:bg-gradient-to-br hover:from-purple-600 hover:to-pink-600 flex items-center justify-center text-gray-400 hover:text-white transition-all">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
+                                <path d="m16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
+                                <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
+                            </svg>
+                        </a>
+                    </div>
+                </div>
+                
+                <!-- Column 2: Quick Links -->
+                <div>
+                    <h3 class="text-white font-semibold uppercase tracking-wider mb-3" style="font-size: 0.875rem;">Quick Links</h3>
+                    <nav>
+                        <ul class="space-y-1">
+                            <li><a href="{% url 'home' %}?view=home" class="text-gray-400 hover:text-white transition-colors text-sm">Home</a></li>
+                            <li><a href="{% url 'about' %}" class="text-gray-400 hover:text-white transition-colors text-sm">About Us</a></li>
+                            <li><a href="{% url 'contact' %}" class="text-gray-400 hover:text-white transition-colors text-sm">Contact</a></li>
+                            {% if not user.is_authenticated %}
+                            <li><a href="{% url 'authentication:customer_login' %}" class="text-gray-400 hover:text-white transition-colors text-sm">Get Started</a></li>
+                            {% endif %}
+                        </ul>
+                    </nav>
+                </div>
+                
+                <!-- Column 3: Legal -->
+                <div>
+                    <h3 class="text-white font-semibold uppercase tracking-wider mb-3" style="font-size: 0.875rem;">Legal</h3>
+                    <nav>
+                        <ul class="space-y-1">
+                            <li><a href="{% url 'privacy' %}" class="text-gray-400 hover:text-white transition-colors text-sm">Privacy Policy</a></li>
+                            <li><a href="{% url 'terms' %}" class="text-gray-400 hover:text-white transition-colors text-sm">Terms & Conditions</a></li>
+                            <li><a href="{% url 'refund_policy' %}" class="text-gray-400 hover:text-white transition-colors text-sm">Refund Policy</a></li>
+                            <li><a href="{% url 'shipping_policy' %}" class="text-gray-400 hover:text-white transition-colors text-sm">Shipping Policy</a></li>
+                        </ul>
+                    </nav>
+                </div>
+                
+                <!-- Column 4: Contact -->
+                <div>
+                    <h3 class="text-white font-semibold uppercase tracking-wider mb-3" style="font-size: 0.875rem;">Contact</h3>
+                    <ul class="space-y-2">
+                        <li>
+                            <svg style="stroke: #aaa; vertical-align: middle;" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="inline-block flex-shrink-0"><path d="m22 7-8.991 5.727a2 2 0 0 1-2.009 0L2 7"/><rect x="2" y="4" width="20" height="16" rx="2"/></svg>
+                            <a href="mailto:info@tapnex.tech" class="hover:text-white transition-colors text-sm">info@tapnex.tech</a>
+                        </li>
+                        <li>
+                            <svg style="stroke: #aaa; vertical-align: middle;" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="inline-block flex-shrink-0"><path d="M13.832 16.568a1 1 0 0 0 1.213-.303l.355-.465A2 2 0 0 1 17 15h3a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2A18 18 0 0 1 2 4a2 2 0 0 1 2-2h3a2 2 0 0 1 2 2v3a2 2 0 0 1-.8 1.6l-.468.351a1 1 0 0 0-.292 1.233 14 14 0 0 0 6.392 6.384"/></svg>
+                            <a href="tel:+918823004349" class="hover:text-white transition-colors text-sm">+91 88230 04349</a>
+                        </li>
+                    </ul>
+                </div>
+                
+
+            </div>
+            
+            <!-- Copyright Section - Full Width, Centered -->
+            <div class="mt-6 pt-4 border-t border-white/10 flex flex-col sm:flex-row justify-between items-center gap-4">
+                <p class="text-gray-500 text-xs">
+                    © <span id="current-year"></span> TapNex Arena. All rights reserved.
+                </p>
+                <a href="{% url 'authentication:cafe_owner_login' %}" class="inline-flex items-center gap-1 text-gray-600 hover:text-gray-400 text-xs font-medium px-2 py-1 rounded transition-all opacity-60 hover:opacity-100">
+                    <i class="bi bi-person-badge text-xs"></i>
+                    Staff
+                </a>
+            </div>
+            
+        </div>
+    </footer>
+
+    <!-- JavaScript Files -->
+    <!-- Bootstrap Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
+    
+    <!-- QR Code Generator Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js" integrity="sha512-CNgIRecGo7nphbeZ04Sc13ka07paqdeTu0WR1IM4kNcpmBAUSHSQX0FslNhTDadL4O5SAGapGt4FodqL8My0mA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    
+    <script src="{% static 'js/animations.js' %}"></script>
+    <script src="{% static 'js/mobile-enhancements.js' %}"></script>
+    
+    {% block extra_js %}{% endblock %}
+    
+    <!-- Core UI JavaScript -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // ============================================
+            // MOBILE MENU
+            // ============================================
+            const mobileMenuToggle = document.querySelector('.mobile-menu-toggle');
+            const mobileMenuClose = document.querySelector('.mobile-menu-close');
+            const mobileMenu = document.querySelector('.mobile-menu');
+            const mobileMenuOverlay = document.querySelector('.mobile-menu-overlay');
+
+            function openMobileMenu() {
+                mobileMenu.classList.remove('translate-x-full');
+                mobileMenuOverlay.classList.remove('hidden');
+                mobileMenuToggle.classList.add('active');
+                document.body.style.overflow = 'hidden';
+            }
+
+            function closeMobileMenu() {
+                mobileMenu.classList.add('translate-x-full');
+                mobileMenuOverlay.classList.add('hidden');
+                mobileMenuToggle.classList.remove('active');
+                document.body.style.overflow = '';
+            }
+
+            if (mobileMenuToggle) {
+                mobileMenuToggle.addEventListener('click', openMobileMenu);
+            }
+            
+            if (mobileMenuClose) {
+                mobileMenuClose.addEventListener('click', closeMobileMenu);
+            }
+            
+            if (mobileMenuOverlay) {
+                mobileMenuOverlay.addEventListener('click', closeMobileMenu);
+            }
+
+            // Close on escape key
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && !mobileMenu.classList.contains('translate-x-full')) {
+                    closeMobileMenu();
+                }
+            });
+
+            // ============================================
+            // NOTIFICATIONS SYSTEM
+            // ============================================
+            const notificationsButton = document.getElementById('notifications-button');
+            const notificationsDropdown = document.getElementById('notifications-dropdown');
+            const notificationBadge = document.getElementById('notification-badge');
+            const notificationsList = document.getElementById('notifications-list');
+
+            if (notificationsButton && notificationsDropdown) {
+                // Toggle dropdown
+                notificationsButton.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    notificationsDropdown.classList.toggle('hidden');
+                    if (!notificationsDropdown.classList.contains('hidden')) {
+                        loadNotifications();
+                    }
+                });
+
+                // Close when clicking outside
+                document.addEventListener('click', function(event) {
+                    if (!notificationsButton.contains(event.target) && !notificationsDropdown.contains(event.target)) {
+                        notificationsDropdown.classList.add('hidden');
+                    }
+                });
+
+                // Load notifications on page load
+                loadNotifications();
+                
+                // Poll for new notifications every 60 seconds
+                setInterval(loadNotifications, 60000);
+            }
+
+            function loadNotifications() {
+                if (!notificationsList) return;
+                
+                fetch('/booking/api/notifications/')
+                    .then(response => response.json())
+                    .then(data => {
+                        updateNotificationBadge(data.unread_count || 0);
+                        updateNotificationsList(data.notifications || []);
+                    })
+                    .catch(error => {
+                        // Error loading notifications
+                    });
+            }
+
+            function updateNotificationBadge(count) {
+                if (!notificationBadge) return;
+                
+                if (count > 0) {
+                    notificationBadge.textContent = count > 99 ? '99+' : count;
+                    notificationBadge.classList.remove('hidden');
+                } else {
+                    notificationBadge.classList.add('hidden');
+                }
+            }
+
+            function updateNotificationsList(notifications) {
+                if (!notificationsList) return;
+                
+                if (notifications.length === 0) {
+                    notificationsList.innerHTML = '<div class="p-8 text-center">' +
+                        '<i class="bi bi-bell-slash text-4xl text-gray-500 mb-3"></i>' +
+                        '<p class="text-gray-400 text-sm">No new notifications</p>' +
+                        '</div>';
+                    return;
+                }
+
+                let html = '';
+                notifications.forEach(notification => {
+                    const iconMap = {
+                        'success': 'check-circle-fill',
+                        'warning': 'exclamation-triangle-fill',
+                        'error': 'x-circle-fill',
+                        'info': 'info-circle-fill'
+                    };
+                    
+                    const colorMap = {
+                        'success': 'text-success',
+                        'warning': 'text-warning',
+                        'error': 'text-error',
+                        'info': 'text-info'
+                    };
+                    
+                    const timeAgo = getTimeAgo(new Date(notification.created_at));
+                    
+                    html += '<div class="p-4 border-b border-white/10 hover:bg-white/5 cursor-pointer transition-colors" onclick="markNotificationRead(' + notification.id + ')">';
+                    html += '<div class="flex items-start gap-3">';
+                    html += '<i class="bi bi-' + (iconMap[notification.type] || 'info-circle-fill') + ' ' + (colorMap[notification.type] || 'text-info') + ' text-lg flex-shrink-0 mt-0.5"></i>';
+                    html += '<div class="flex-1 min-w-0">';
+                    html += '<p class="text-white font-medium text-sm mb-1">' + (notification.title || 'Notification') + '</p>';
+                    html += '<p class="text-gray-300 text-xs mb-2">' + notification.message + '</p>';
+                    html += '<p class="text-gray-500 text-xs">' + timeAgo + '</p>';
+                    html += '</div>';
+                    html += '</div>';
+                    html += '</div>';
+                });
+
+                notificationsList.innerHTML = html;
+            }
+
+            function getTimeAgo(date) {
+                const now = new Date();
+                const diffInSeconds = Math.floor((now - date) / 1000);
+                
+                if (diffInSeconds < 60) return 'Just now';
+                if (diffInSeconds < 3600) return Math.floor(diffInSeconds / 60) + 'm ago';
+                if (diffInSeconds < 86400) return Math.floor(diffInSeconds / 3600) + 'h ago';
+                if (diffInSeconds < 604800) return Math.floor(diffInSeconds / 86400) + 'd ago';
+                return date.toLocaleDateString();
+            }
+
+            window.markNotificationRead = function(notificationId) {
+                const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]')?.value || '{{ csrf_token }}';
+                
+                fetch('/booking/api/notifications/' + notificationId + '/read/', {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': csrfToken,
+                        'Content-Type': 'application/json'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        loadNotifications();
+                    }
+                })
+                .catch(error => {
+                    // Error marking notification as read
+                });
+            };
+
+            // ============================================
+            // DYNAMIC YEAR
+            // ============================================
+            const yearElement = document.getElementById('current-year');
+            if (yearElement) {
+                yearElement.textContent = new Date().getFullYear();
+            }
+
+            // ============================================
+            // PRELOADER
+            // ============================================
+            window.addEventListener('load', function() {
+                const preloader = document.getElementById('preloader');
+                if (preloader) {
+                    setTimeout(() => {
+                        preloader.style.opacity = '0';
+                        setTimeout(() => {
+                            preloader.style.display = 'none';
+                        }, 500);
+                    }, 300);
+                }
+            });
+
+            // Fallback: Hide preloader after 3 seconds
+            setTimeout(() => {
+                const preloader = document.getElementById('preloader');
+                if (preloader && preloader.style.display !== 'none') {
+                    preloader.style.opacity = '0';
+                    setTimeout(() => {
+                        preloader.style.display = 'none';
+                    }, 500);
+                }
+            }, 3000);
+        });
+    </script>
+</body>
+</html>

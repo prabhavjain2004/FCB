@@ -1,0 +1,91 @@
+<!-- Loading Overlay Component - Can be included in any page -->
+<div id="loadingOverlay" class="fixed inset-0 bg-black/90 backdrop-blur-md z-[9998] hidden items-center justify-center">
+    <div class="text-center">
+        <!-- Spinner -->
+        <div class="inline-block mb-6">
+            <div class="w-24 h-24 border-6 border-indigo-500/30 border-t-indigo-500 rounded-full animate-spin" style="border-width: 6px;"></div>
+        </div>
+        
+        <!-- Loading Icon -->
+        <div class="text-6xl mb-4 animate-bounce">🎮</div>
+        
+        <!-- Loading Text -->
+        <div class="text-white text-2xl font-bold mb-2">
+            <span id="loadingText">Loading</span><span class="loading-dots">
+                <span class="dot-1">.</span><span class="dot-2">.</span><span class="dot-3">.</span>
+            </span>
+        </div>
+        
+        <!-- Optional Message -->
+        <p id="loadingMessage" class="text-gray-300 text-base"></p>
+    </div>
+</div>
+
+<style>
+.loading-dots span {
+    animation: blink 1.4s infinite both;
+}
+.loading-dots .dot-2 {
+    animation-delay: 0.2s;
+}
+.loading-dots .dot-3 {
+    animation-delay: 0.4s;
+}
+@keyframes blink {
+    0%, 80%, 100% { opacity: 0; }
+    40% { opacity: 1; }
+}
+
+/* Ensure loading overlay is always on top */
+#loadingOverlay {
+    z-index: 9998 !important;
+}
+</style>
+
+<script>
+// Loading overlay functions
+window.showLoading = function(message = '') {
+    const overlay = document.getElementById('loadingOverlay');
+    const messageEl = document.getElementById('loadingMessage');
+    
+    if (overlay) {
+        if (message) {
+            messageEl.textContent = message;
+        } else {
+            messageEl.textContent = '';
+        }
+        
+        overlay.classList.remove('hidden');
+        overlay.classList.add('flex');
+        document.body.style.overflow = 'hidden';
+    }
+}
+
+window.hideLoading = function() {
+    const overlay = document.getElementById('loadingOverlay');
+    if (overlay) {
+        overlay.classList.add('hidden');
+        overlay.classList.remove('flex');
+        document.body.style.overflow = 'auto';
+    }
+}
+
+// Optional: Auto-loading for forms and links
+document.addEventListener('DOMContentLoaded', function() {
+    // Intercept form submissions with data-loading attribute
+    document.querySelectorAll('form[data-loading="true"]').forEach(form => {
+        form.addEventListener('submit', function(e) {
+            const message = form.getAttribute('data-loading-message') || 'Processing your request...';
+            showLoading(message);
+        });
+    });
+    
+    // Intercept link clicks with data-loading attribute
+    document.querySelectorAll('a[data-loading="true"]').forEach(link => {
+        link.addEventListener('click', function(e) {
+            const message = link.getAttribute('data-loading-message') || 'Loading...';
+            showLoading(message);
+        });
+    });
+});
+</script>

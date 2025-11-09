@@ -1,0 +1,937 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Select Game - TapNex Arena{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/booking-modal.css' %}">
+<link rel="stylesheet" href="{% static 'css/time-slot-selection.css' %}">
+<style>
+    /* Enhanced Animations */
+    @keyframes float {
+        0%, 100% { transform: translateY(0px); }
+        50% { transform: translateY(-10px); }
+    }
+    
+    @keyframes shimmer {
+        0% { background-position: -1000px 0; }
+        100% { background-position: 1000px 0; }
+    }
+    
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    .animate-fade-in-up {
+        animation: fadeInUp 0.6s ease-out;
+    }
+    
+    .float-animation {
+        animation: float 3s ease-in-out infinite;
+    }
+    
+    .shimmer-effect {
+        background: linear-gradient(
+            90deg,
+            rgba(255, 255, 255, 0) 0%,
+            rgba(255, 255, 255, 0.1) 50%,
+            rgba(255, 255, 255, 0) 100%
+        );
+        background-size: 1000px 100%;
+        animation: shimmer 2s infinite;
+    }
+    
+    /* Hero Background with Orbs */
+    .hero-bg {
+        position: absolute;
+        inset: 0;
+        overflow: hidden;
+        z-index: 0;
+        pointer-events: none;
+    }
+    
+    .gradient-orb {
+        position: absolute;
+        border-radius: 50%;
+        filter: blur(100px);
+        opacity: 0.3;
+        animation: floatOrb 20s ease-in-out infinite;
+    }
+    
+    .orb-1 {
+        width: 500px;
+        height: 500px;
+        background: radial-gradient(circle, rgba(102, 126, 234, 0.4) 0%, transparent 70%);
+        top: -150px;
+        right: -150px;
+        animation-delay: 0s;
+    }
+    
+    .orb-2 {
+        width: 400px;
+        height: 400px;
+        background: radial-gradient(circle, rgba(168, 85, 247, 0.3) 0%, transparent 70%);
+        bottom: -100px;
+        left: -100px;
+        animation-delay: 7s;
+    }
+    
+    @keyframes floatOrb {
+        0%, 100% { transform: translate(0, 0) scale(1); }
+        33% { transform: translate(30px, -30px) scale(1.1); }
+        66% { transform: translate(-30px, 30px) scale(0.9); }
+    }
+    
+    /* Grid Pattern */
+    .grid-pattern {
+        background-image: 
+            linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+        background-size: 50px 50px;
+        position: absolute;
+        inset: 0;
+        z-index: 0;
+    }
+    
+    .booking-hero {
+        padding: 3rem 0 2rem;
+        position: relative;
+        z-index: 10;
+    }
+    
+    .booking-hero h1 {
+        font-size: 2.5rem;
+        font-weight: 800;
+        color: white;
+        margin-bottom: 0.5rem;
+        font-family: 'Orbitron', sans-serif;
+    }
+    
+    .booking-hero p {
+        color: #d1d5db;
+        font-size: 1.125rem;
+    }
+    
+    /* Date Selector - Enhanced */
+    .date-selector-wrapper {
+        background: rgba(30, 41, 59, 0.5);
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 1.5rem;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        position: relative;
+        z-index: 10;
+    }
+    
+    .date-selector {
+        display: flex;
+        gap: 1rem;
+        overflow-x: auto;
+        overflow-y: visible;
+        padding: 0.5rem 0.25rem 1rem 0.25rem;
+        margin: 0 -0.25rem;
+        scrollbar-width: thin;
+        scrollbar-color: #667eea transparent;
+    }
+    
+    .date-selector::-webkit-scrollbar {
+        height: 6px;
+    }
+    
+    .date-selector::-webkit-scrollbar-track {
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 3px;
+    }
+    
+    .date-selector::-webkit-scrollbar-thumb {
+        background: #667eea;
+        border-radius: 3px;
+    }
+    
+    .date-card {
+        flex-shrink: 0;
+        min-width: 140px;
+        padding: 1rem 2rem;
+        background: rgba(255, 255, 255, 0.05);
+        border: 2px solid rgba(255, 255, 255, 0.1);
+        border-radius: 1rem;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.3s;
+        text-decoration: none;
+        position: relative;
+        z-index: 1;
+    }
+    
+    .date-card:hover {
+        transform: translateY(-4px) scale(1.02);
+        border-color: #667eea;
+        background: rgba(255, 255, 255, 0.1);
+        z-index: 2;
+    }
+    
+    .date-card.active {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #a855f7 100%);
+        border-color: #818cf8;
+        position: relative;
+    }
+    
+    .date-card.active::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        border-radius: inherit;
+        background: linear-gradient(135deg, rgba(255, 255, 255, 0.2) 0%, transparent 50%);
+        pointer-events: none;
+    }
+    
+    .date-card .date-label {
+        font-size: 1.125rem;
+        font-weight: 700;
+        color: white;
+        margin-bottom: 0.25rem;
+    }
+    
+    .date-card .date-day {
+        font-size: 0.875rem;
+        color: rgba(255, 255, 255, 0.7);
+    }
+    
+    /* Game Cards - Enhanced */
+    .games-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+        gap: 2rem;
+        margin-bottom: 3rem;
+        position: relative;
+        z-index: 10;
+        padding: 0.5rem 0;
+    }
+    
+    .game-card {
+        background: rgba(30, 41, 59, 0.5);
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 1.5rem;
+        overflow: hidden;
+        transition: all 0.3s;
+        position: relative;
+    }
+    
+    .game-card::before {
+        content: '';
+        position: absolute;
+        inset: -2px;
+        border-radius: inherit;
+        padding: 2px;
+        background: linear-gradient(135deg, #667eea, #a855f7);
+        -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+        -webkit-mask-composite: xor;
+        mask-composite: exclude;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+        z-index: -1;
+    }
+    
+    .game-card:hover {
+        transform: translateY(-8px);
+    }
+    
+    .game-card:hover::before {
+        opacity: 0.5;
+    }
+    
+    .game-image {
+        height: 240px;
+        position: relative;
+        overflow: hidden;
+        background: linear-gradient(135deg, #667eea, #764ba2);
+    }
+    
+    .game-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.5s;
+    }
+    
+    .game-card:hover .game-image img {
+        transform: scale(1.15);
+    }
+    
+    .game-badge {
+        position: absolute;
+        top: 1rem;
+        right: 1rem;
+        padding: 0.5rem 1rem;
+        border-radius: 2rem;
+        font-size: 0.75rem;
+        font-weight: 700;
+        backdrop-filter: blur(10px);
+        z-index: 2;
+    }
+    
+    .game-badge.hybrid {
+        background: rgba(16, 185, 129, 0.95);
+        color: white;
+        border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+    
+    .game-badge.private {
+        background: rgba(59, 130, 246, 0.95);
+        color: white;
+        border: 1px solid rgba(59, 130, 246, 0.3);
+    }
+    
+    .game-content {
+        padding: 2rem;
+        position: relative;
+        z-index: 1;
+    }
+    
+    .game-title {
+        font-size: 1.75rem;
+        font-weight: 800;
+        color: white;
+        margin-bottom: 0.75rem;
+        font-family: 'Orbitron', sans-serif;
+    }
+    
+    .game-description {
+        color: #d1d5db;
+        font-size: 0.9375rem;
+        margin-bottom: 1.5rem;
+        line-height: 1.6;
+    }
+    
+    .game-meta {
+        display: flex;
+        gap: 1.5rem;
+        padding: 1rem 0;
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        margin-bottom: 1.5rem;
+    }
+    
+    .meta-item {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.9375rem;
+        font-weight: 600;
+        color: #d1d5db;
+    }
+    
+    .meta-item i {
+        color: #818cf8;
+        font-size: 1.25rem;
+    }
+    
+    /* Availability Badge */
+    .availability-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.75rem 1.25rem;
+        border-radius: 1rem;
+        font-size: 0.875rem;
+        font-weight: 700;
+        margin-bottom: 1.5rem;
+    }
+    
+    .availability-badge.available {
+        background: rgba(16, 185, 129, 0.15);
+        color: #34d399;
+        border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+    
+    .availability-badge.unavailable {
+        background: rgba(239, 68, 68, 0.15);
+        color: #f87171;
+        border: 1px solid rgba(239, 68, 68, 0.3);
+    }
+    
+    /* Action Buttons */
+    .btn-book-now {
+        width: 100%;
+        padding: 1.25rem 2rem;
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        color: white;
+        border: none;
+        border-radius: 0.75rem;
+        font-size: 1.125rem;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.3s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.75rem;
+        text-decoration: none;
+        position: relative;
+        overflow: hidden;
+        z-index: 1;
+    }
+    
+    .btn-book-now::after {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 0;
+        height: 0;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.2);
+        transform: translate(-50%, -50%);
+        transition: width 0.6s, height 0.6s;
+        z-index: -1;
+    }
+    
+    .btn-book-now:hover {
+        transform: translateY(-2px);
+    }
+    
+    .btn-book-now:hover::after {
+        width: 300px;
+        height: 300px;
+    }
+    
+    .btn-book-now:active {
+        transform: translateY(0);
+    }
+    
+    .btn-view-dates {
+        width: 100%;
+        padding: 1rem 2rem;
+        background: rgba(255, 255, 255, 0.1);
+        color: white;
+        border: 2px solid rgba(255, 255, 255, 0.2);
+        border-radius: 0.75rem;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        text-decoration: none;
+        position: relative;
+        z-index: 1;
+    }
+    
+    .btn-view-dates:hover {
+        background: rgba(255, 255, 255, 0.2);
+        border-color: rgba(255, 255, 255, 0.4);
+        transform: translateY(-2px);
+    }
+    
+    .no-slots {
+        text-align: center;
+        padding: 2.5rem 1.5rem;
+        color: #9ca3af;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        min-height: 280px;
+    }
+    
+    .no-slots i {
+        font-size: 3.5rem;
+        margin-bottom: 1rem;
+        opacity: 0.5;
+        color: #6b7280;
+    }
+    
+    .no-slots-title {
+        font-size: 1.125rem;
+        font-weight: 700;
+        color: white;
+        margin-bottom: 0.5rem;
+    }
+    
+    .no-slots-text {
+        font-size: 0.875rem;
+        color: #9ca3af;
+        margin-bottom: 0;
+    }
+    
+    @media (max-width: 768px) {
+        /* Page Layout Mobile */
+        .min-h-screen {
+            padding-top: 1rem !important;
+            padding-bottom: 1rem !important;
+        }
+        
+        .max-w-7xl {
+            padding-left: 1rem !important;
+            padding-right: 1rem !important;
+        }
+        
+        /* Hero Section Mobile */
+        .booking-hero {
+            padding: 2rem 0 1.5rem !important;
+        }
+        
+        .booking-hero h1 {
+            font-size: 1.75rem !important;
+        }
+        
+        .booking-hero p {
+            font-size: 0.9375rem !important;
+        }
+        
+        /* Date Selector Mobile */
+        .date-selector-wrapper {
+            padding: 1.25rem !important;
+            margin-bottom: 1.5rem !important;
+        }
+        
+        .date-selector-wrapper h2 {
+            font-size: 1.25rem !important;
+        }
+        
+        .date-selector-wrapper .w-10 {
+            width: 2.5rem !important;
+            height: 2.5rem !important;
+        }
+        
+        .date-selector-wrapper .text-xl {
+            font-size: 1rem !important;
+        }
+        
+        .date-card {
+            min-width: 100px !important;
+            padding: 0.75rem 1.25rem !important;
+        }
+        
+        .date-card .date-label {
+            font-size: 0.9375rem !important;
+        }
+        
+        .date-card .date-day {
+            font-size: 0.75rem !important;
+        }
+        
+        /* Games Grid Mobile */
+        .games-grid {
+            grid-template-columns: 1fr !important;
+            gap: 1.5rem !important;
+        }
+        
+        /* Game Card Mobile */
+        .game-card {
+            border-radius: 1.25rem !important;
+        }
+        
+        .game-image {
+            height: 200px !important;
+        }
+        
+        .game-content {
+            padding: 1.25rem !important;
+        }
+        
+        .game-title {
+            font-size: 1.5rem !important;
+        }
+        
+        .game-description {
+            font-size: 0.875rem !important;
+            margin-bottom: 1rem !important;
+        }
+        
+        .game-meta {
+            flex-direction: column !important;
+            gap: 0.75rem !important;
+            padding: 0.75rem 0 !important;
+            margin-bottom: 1rem !important;
+        }
+        
+        .meta-item {
+            font-size: 0.875rem !important;
+        }
+        
+        .meta-item i {
+            font-size: 1rem !important;
+        }
+        
+        /* Availability Badge Mobile */
+        .availability-badge {
+            padding: 0.5rem 1rem !important;
+            font-size: 0.75rem !important;
+            margin-bottom: 1rem !important;
+        }
+        
+        /* Buttons Mobile */
+        .btn-book-now {
+            padding: 1rem 1.5rem !important;
+            font-size: 0.9375rem !important;
+        }
+        
+        .btn-view-dates {
+            padding: 0.875rem 1.5rem !important;
+            font-size: 0.875rem !important;
+        }
+        
+        /* No Slots Mobile */
+        .no-slots {
+            padding: 2rem 1rem !important;
+        }
+        
+        .no-slots i {
+            font-size: 3rem !important;
+        }
+        
+        .no-slots-title {
+            font-size: 1.125rem !important;
+        }
+        
+        .no-slots-text {
+            font-size: 0.8125rem !important;
+        }
+        
+        /* Game Badge Mobile */
+        .game-badge {
+            padding: 0.375rem 0.75rem !important;
+            font-size: 0.6875rem !important;
+        }
+        
+        /* Pool Balls Mobile */
+        .game-image .w-16.h-16 {
+            width: 2.5rem !important;
+            height: 2.5rem !important;
+        }
+        
+        .game-image .w-16.h-16 .text-2xl {
+            font-size: 1.25rem !important;
+        }
+        
+        .game-image .gap-4 {
+            gap: 0.5rem !important;
+        }
+        
+        /* Table Tennis Mobile */
+        .game-image .w-20.h-24 {
+            width: 3rem !important;
+            height: 3.5rem !important;
+        }
+        
+        .game-image .w-12.h-12 {
+            width: 2rem !important;
+            height: 2rem !important;
+        }
+        
+        .game-image .gap-8 {
+            gap: 1rem !important;
+        }
+        
+        .game-image .gap-6 {
+            gap: 0.75rem !important;
+        }
+        
+        /* Orbs Mobile */
+        .orb-1, .orb-2 {
+            width: 300px !important;
+            height: 300px !important;
+            filter: blur(60px) !important;
+        }
+
+        /* Slow down animations on mobile */
+        .float-animation {
+            animation: float 8s cubic-bezier(0.4, 0, 0.6, 1) infinite !important;
+        }
+
+        .gradient-orb {
+            animation: floatOrb 40s cubic-bezier(0.4, 0, 0.6, 1) infinite !important;
+        }
+
+        .shimmer-effect {
+            animation: shimmer 4s cubic-bezier(0.4, 0, 0.6, 1) infinite !important;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-5px); }
+        }
+    }
+    
+    /* Extra Small Screens */
+    @media (max-width: 375px) {
+        /* Hero Mobile */
+        .booking-hero h1 {
+            font-size: 1.5rem !important;
+        }
+        
+        .booking-hero p {
+            font-size: 0.875rem !important;
+        }
+        
+        /* Date Selector Extra Small */
+        .date-selector-wrapper {
+            padding: 1rem !important;
+        }
+        
+        .date-card {
+            min-width: 85px !important;
+            padding: 0.625rem 1rem !important;
+        }
+        
+        .date-card .date-label {
+            font-size: 0.875rem !important;
+        }
+        
+        .date-card .date-day {
+            font-size: 0.6875rem !important;
+        }
+        
+        /* Game Card Extra Small */
+        .game-image {
+            height: 180px !important;
+        }
+        
+        .game-content {
+            padding: 1rem !important;
+        }
+        
+        .game-title {
+            font-size: 1.25rem !important;
+        }
+        
+        .game-description {
+            font-size: 0.8125rem !important;
+        }
+        
+        .meta-item {
+            font-size: 0.8125rem !important;
+        }
+        
+        /* Buttons Extra Small */
+        .btn-book-now {
+            padding: 0.875rem 1.25rem !important;
+            font-size: 0.875rem !important;
+        }
+        
+        .btn-view-dates {
+            padding: 0.75rem 1.25rem !important;
+            font-size: 0.8125rem !important;
+        }
+        
+        /* Pool Balls Extra Small */
+        .game-image .w-16.h-16 {
+            width: 2rem !important;
+            height: 2rem !important;
+        }
+        
+        .game-image .w-16.h-16 .text-2xl {
+            font-size: 1rem !important;
+        }
+        
+        /* Table Tennis Extra Small */
+        .game-image .w-20.h-24 {
+            width: 2.5rem !important;
+            height: 3rem !important;
+        }
+        
+        .game-image .w-12.h-12 {
+            width: 1.5rem !important;
+            height: 1.5rem !important;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="min-h-screen py-12 relative" style="background: #111827;">
+    <!-- Animated Background -->
+    <div class="hero-bg">
+        <div class="gradient-orb orb-1"></div>
+        <div class="gradient-orb orb-2"></div>
+        <div class="grid-pattern"></div>
+    </div>
+    
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+        <!-- Header -->
+        <div class="booking-hero animate-fade-in-up">
+            <h1 class="text-4xl sm:text-5xl font-black text-white mb-4" style="font-family: 'Orbitron', sans-serif; line-height: 1.2;">
+                Select Your <span style="background: linear-gradient(135deg, #00f5ff, #b537f2, #ff006e); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">Game</span>
+            </h1>
+            <p class="text-gray-300 text-lg max-w-2xl">Choose from our premium gaming collection and book your preferred time slot</p>
+        </div>
+
+        <!-- Date Selector -->
+        <div class="date-selector-wrapper animate-fade-in-up" style="animation-delay: 0.1s;">
+            <div class="flex items-center gap-3 mb-6">
+                <svg style="stroke: #aaa;" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-calendar-icon lucide-calendar">
+                    <path d="M8 2v4"/><path d="M16 2v4"/><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18"/>
+                </svg>
+                <span class="text-2xl font-black text-white">Select Date</span>
+            </div>
+            <div class="date-selector">
+                {% for date in date_range %}
+                <a href="?date={{ date.isoformat }}" 
+                   class="date-card {% if date == selected_date %}active{% endif %}">
+                    <div class="date-label">
+                        {% if date == today %}Today{% else %}{{ date|date:"M d" }}{% endif %}
+                    </div>
+                    <div class="date-day">{{ date|date:"D" }}</div>
+                </a>
+                {% endfor %}
+            </div>
+        </div>
+
+    <!-- Games Grid -->
+    <div class="games-grid">
+        {% for game_data in games_with_availability %}
+        {% with game=game_data.game %}
+        <div class="game-card animate-fade-in-up" style="animation-delay: 0.{{ forloop.counter }}s; cursor: pointer;" data-game-id="{{ game.id }}" onclick="window.location.href='{% url 'booking:game_detail' game.id %}?date={{ selected_date.isoformat }}'">
+            <!-- Game Image -->
+            <div class="game-image">
+                {% if game.image %}
+                <img src="{{ game.image.url }}" alt="{{ game.name }}" loading="lazy">
+                {% else %}
+                    <!-- Enhanced Placeholder based on game type -->
+                    {% if 'pool' in game.name|lower or '8' in game.name or 'ball' in game.name|lower %}
+                    <div class="w-full h-full bg-gradient-to-br from-emerald-900 via-teal-800 to-cyan-900 flex items-center justify-center relative overflow-hidden">
+                        <!-- Pool table felt texture effect -->
+                        <div class="absolute inset-0 opacity-20" style="background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.3) 2px, rgba(0,0,0,0.3) 4px);"></div>
+                        <!-- Pool balls decoration -->
+                        <div class="relative z-10 flex flex-col items-center">
+                            <div class="flex gap-4 mb-4">
+                                <div class="w-16 h-16 rounded-full bg-white shadow-2xl flex items-center justify-center">
+                                    <span class="text-2xl font-black text-gray-800">8</span>
+                                </div>
+                                <div class="w-16 h-16 rounded-full bg-gradient-to-br from-red-500 to-red-700 shadow-2xl"></div>
+                            </div>
+                            <div class="flex gap-4">
+                                <div class="w-16 h-16 rounded-full bg-gradient-to-br from-yellow-400 to-yellow-600 shadow-2xl"></div>
+                                <div class="w-16 h-16 rounded-full bg-gradient-to-br from-blue-500 to-blue-700 shadow-2xl"></div>
+                            </div>
+                        </div>
+                        <!-- Cue stick decoration -->
+                        <div class="absolute bottom-10 right-10 w-48 h-2 bg-gradient-to-r from-amber-800 to-amber-600 transform rotate-45 opacity-50 rounded-full"></div>
+                    </div>
+                    {% elif 'tennis' in game.name|lower or 'table tennis' in game.name|lower or 'ping' in game.name|lower %}
+                    <div class="w-full h-full bg-gradient-to-br from-blue-900 via-indigo-800 to-purple-900 flex items-center justify-center relative overflow-hidden">
+                        <!-- Table tennis table effect -->
+                        <div class="absolute inset-0 flex items-center justify-center">
+                            <div class="w-4/5 h-3/5 bg-blue-600 opacity-20 rounded-lg border-4 border-white/30"></div>
+                            <div class="absolute w-4/5 h-1 bg-white/40 top-1/2 transform -translate-y-1/2"></div>
+                        </div>
+                        <!-- Ping pong elements -->
+                        <div class="relative z-10 flex flex-col items-center gap-6">
+                            <!-- Paddles -->
+                            <div class="flex gap-8 items-center">
+                                <div class="relative">
+                                    <div class="w-20 h-24 rounded-full bg-gradient-to-br from-red-600 to-red-800 shadow-2xl"></div>
+                                    <div class="w-6 h-16 bg-amber-700 absolute bottom-0 left-1/2 transform -translate-x-1/2 translate-y-12 rounded"></div>
+                                </div>
+                                <div class="w-12 h-12 rounded-full bg-white shadow-2xl animate-pulse"></div>
+                                <div class="relative">
+                                    <div class="w-20 h-24 rounded-full bg-gradient-to-br from-gray-800 to-gray-900 shadow-2xl"></div>
+                                    <div class="w-6 h-16 bg-amber-700 absolute bottom-0 left-1/2 transform -translate-x-1/2 translate-y-12 rounded"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% else %}
+                    <div class="w-full h-full bg-gradient-to-br from-primary-600 via-purple-600 to-secondary-600 flex items-center justify-center relative overflow-hidden">
+                        <div class="absolute inset-0 opacity-10" style="background: radial-gradient(circle at 30% 50%, rgba(255,255,255,0.2) 0%, transparent 50%);"></div>
+                        <div class="relative z-10">
+                            <i class="bi bi-trophy-fill text-white text-8xl opacity-80 drop-shadow-2xl"></i>
+                        </div>
+                    </div>
+                    {% endif %}
+                {% endif %}
+                
+                <!-- Booking Type Badge -->
+                {% if game.booking_type == 'HYBRID' %}
+                <div class="game-badge hybrid">
+                    <i class="bi bi-people-fill"></i> Flexible Booking
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Game Content -->
+            <div class="game-content">
+                <h3 class="game-title">{{ game.name }}</h3>
+                <p class="game-description">{{ game.description|default:"Premium gaming experience with top-tier equipment and comfortable seating"|truncatewords:20 }}</p>
+                
+                <!-- Game Meta -->
+                <div class="game-meta">
+                    <div class="meta-item">
+                        <i class="bi bi-people-fill"></i>
+                        <span>{{ game.capacity }} player{{ game.capacity|pluralize }}</span>
+                    </div>
+                    <div class="meta-item">
+                        <i class="bi bi-clock-fill"></i>
+                        <span>{{ game.slot_duration_minutes }} min</span>
+                    </div>
+                </div>
+
+                <!-- Availability Status & Action Button -->
+                {% if game_data.has_availability %}
+                <div>
+                    <div class="availability-badge available">
+                        <i class="bi bi-check-circle-fill"></i>
+                        <span>Slots Available for {{ selected_date|date:"M d" }}</span>
+                    </div>
+                    
+                    <a href="{% url 'booking:game_detail' game.id %}?date={{ selected_date.isoformat }}" 
+                       class="btn-book-now"
+                       onclick="event.stopPropagation();">
+                        <i class="bi bi-calendar-check"></i>
+                        <span>View Slots & Book Now</span>
+                        <i class="bi bi-arrow-right"></i>
+                    </a>
+                </div>
+                {% else %}
+                <div class="no-slots">
+                    <i class="bi bi-calendar-x" style="display: block;"></i>
+                    <div class="no-slots-title">No Slots Available</div>
+                    <div class="no-slots-text">for {{ selected_date|date:"M d, Y" }}</div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        {% endwith %}
+        {% endfor %}
+    </div>
+
+    {% if not games_with_availability %}
+    <div class="game-card text-center py-16 animate-fade-in-up">
+        <div class="game-content">
+            <i class="bi bi-controller text-gray-500 text-8xl mb-6 float-animation"></i>
+            <h3 class="text-3xl font-black text-white mb-3" style="font-family: 'Orbitron', sans-serif;">No Games Available</h3>
+            <p class="text-gray-400 text-lg mb-6">Please check back later or contact our support team for assistance.</p>
+            <a href="{% url 'contact' %}" class="btn-book-now" style="max-width: 300px; margin: 0 auto;">
+                <i class="bi bi-envelope"></i>
+                <span>Contact Support</span>
+            </a>
+        </div>
+    </div>
+    {% endif %}
+    </div>
+</div>
+
+<!-- Booking Modal will be dynamically created by booking-modal.js -->
+
+<script src="{% static 'js/booking-modal.js' %}"></script>
+<script src="{% static 'js/time-slot-selection.js' %}"></script>
+<script>
+// Set authentication status for the booking modal
+document.body.dataset.authenticated = '{{ request.user.is_authenticated|lower }}';
+document.body.dataset.loginUrl = "{% url 'authentication:customer_login' %}";
+</script>
+
+{% csrf_token %}
+{% endblock %}

@@ -1,0 +1,200 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Create Cafe Owner - TapNex Dashboard{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gaming-primary">
+    <!-- Header -->
+    <div class="bg-gaming-secondary border-b border-gaming-accent">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center py-6">
+                <div>
+                    <h1 class="text-3xl font-bold text-white">Create Cafe Owner Account</h1>
+                    <p class="text-gray-400">Set up a new cafe owner account for the platform</p>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <a href="{% url 'authentication:tapnex_dashboard' %}" class="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition-colors">
+                        Back to Dashboard
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Info Alert -->
+        <div class="bg-blue-900/30 border border-blue-600 px-4 py-3 rounded-lg flex items-start mb-6">
+            <svg class="w-5 h-5 mr-3 mt-0.5 flex-shrink-0 text-blue-400" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
+            </svg>
+            <div>
+                <p class="text-sm text-white font-medium mb-1">Important Information</p>
+                <p class="text-sm text-gray-300">This will create the main cafe owner account for the platform. Only one cafe owner account can exist at a time. The account will have access to the cafe owner dashboard to manage games, view bookings, and access revenue reports.</p>
+            </div>
+        </div>
+
+        <!-- Registration Form -->
+        <div class="bg-gaming-secondary border border-gaming-accent rounded-xl p-6">
+            <h3 class="text-lg font-semibold text-white mb-6">Account Information</h3>
+            
+            <form method="post" class="space-y-6">
+                {% csrf_token %}
+                
+                <!-- Display form errors -->
+                {% if form.errors %}
+                <div class="bg-red-900/30 border border-red-600 px-4 py-3 rounded-lg">
+                    <p class="text-sm text-white font-medium mb-2">Please correct the following errors:</p>
+                    <ul class="list-disc list-inside text-sm text-red-300 space-y-1">
+                        {% for field, errors in form.errors.items %}
+                            {% for error in errors %}
+                                <li>{{ field|capfirst }}: {{ error }}</li>
+                            {% endfor %}
+                        {% endfor %}
+                    </ul>
+                </div>
+                {% endif %}
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- First Name -->
+                    <div>
+                        <label for="{{ form.first_name.id_for_label }}" class="block text-sm font-medium text-gray-300 mb-2">
+                            First Name <span class="text-red-400">*</span>
+                        </label>
+                        {{ form.first_name }}
+                        {% if form.first_name.errors %}
+                            <div class="mt-1 text-sm text-red-400">
+                                {{ form.first_name.errors.0 }}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Last Name -->
+                    <div>
+                        <label for="{{ form.last_name.id_for_label }}" class="block text-sm font-medium text-gray-300 mb-2">
+                            Last Name <span class="text-red-400">*</span>
+                        </label>
+                        {{ form.last_name }}
+                        {% if form.last_name.errors %}
+                            <div class="mt-1 text-sm text-red-400">
+                                {{ form.last_name.errors.0 }}
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Username -->
+                    <div>
+                        <label for="{{ form.username.id_for_label }}" class="block text-sm font-medium text-gray-300 mb-2">
+                            Username <span class="text-red-400">*</span>
+                        </label>
+                        {{ form.username }}
+                        {% if form.username.errors %}
+                            <div class="mt-1 text-sm text-red-400">
+                                {{ form.username.errors.0 }}
+                            </div>
+                        {% endif %}
+                        <p class="mt-1 text-xs text-gray-400">Used for logging in to the cafe owner dashboard</p>
+                    </div>
+
+                    <!-- Email -->
+                    <div>
+                        <label for="{{ form.email.id_for_label }}" class="block text-sm font-medium text-gray-300 mb-2">
+                            Email Address <span class="text-red-400">*</span>
+                        </label>
+                        {{ form.email }}
+                        {% if form.email.errors %}
+                            <div class="mt-1 text-sm text-red-400">
+                                {{ form.email.errors.0 }}
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Cafe Name -->
+                <div>
+                    <label for="{{ form.cafe_name.id_for_label }}" class="block text-sm font-medium text-gray-300 mb-2">
+                        Cafe Name <span class="text-red-400">*</span>
+                    </label>
+                    {{ form.cafe_name }}
+                    {% if form.cafe_name.errors %}
+                        <div class="mt-1 text-sm text-red-400">
+                            {{ form.cafe_name.errors.0 }}
+                        </div>
+                    {% endif %}
+                    <p class="mt-1 text-xs text-gray-400">This will be displayed to customers</p>
+                </div>
+
+                <!-- Phone -->
+                <div>
+                    <label for="{{ form.phone.id_for_label }}" class="block text-sm font-medium text-gray-300 mb-2">
+                        Phone Number <span class="text-red-400">*</span>
+                    </label>
+                    {{ form.phone }}
+                    {% if form.phone.errors %}
+                        <div class="mt-1 text-sm text-red-400">
+                            {{ form.phone.errors.0 }}
+                        </div>
+                    {% endif %}
+                    <p class="mt-1 text-xs text-gray-400">Include country code (e.g., +911234567890)</p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Password -->
+                    <div>
+                        <label for="{{ form.password1.id_for_label }}" class="block text-sm font-medium text-gray-300 mb-2">
+                            Password <span class="text-red-400">*</span>
+                        </label>
+                        {{ form.password1 }}
+                        {% if form.password1.errors %}
+                            <div class="mt-1 text-sm text-red-400">
+                                {{ form.password1.errors.0 }}
+                            </div>
+                        {% endif %}
+                        <p class="mt-1 text-xs text-gray-400">
+                            Must be at least 8 characters with uppercase, lowercase, digit, and special character
+                        </p>
+                    </div>
+
+                    <!-- Confirm Password -->
+                    <div>
+                        <label for="{{ form.password2.id_for_label }}" class="block text-sm font-medium text-gray-300 mb-2">
+                            Confirm Password <span class="text-red-400">*</span>
+                        </label>
+                        {{ form.password2 }}
+                        {% if form.password2.errors %}
+                            <div class="mt-1 text-sm text-red-400">
+                                {{ form.password2.errors.0 }}
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="flex items-center justify-end space-x-4 pt-4 border-t border-gaming-accent">
+                    <a href="{% url 'authentication:tapnex_dashboard' %}" class="px-6 py-2 border border-gray-600 text-gray-300 rounded-lg hover:bg-gray-700 transition-colors">
+                        Cancel
+                    </a>
+                    <button type="submit" class="px-6 py-2 bg-gaming-highlight text-white rounded-lg hover:bg-gaming-highlight/90 transition-colors font-medium">
+                        Create Cafe Owner Account
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Security Notice -->
+        <div class="mt-6 bg-yellow-900/20 border border-yellow-600/50 px-4 py-3 rounded-lg">
+            <div class="flex items-start">
+                <svg class="w-5 h-5 mr-3 mt-0.5 flex-shrink-0 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+                </svg>
+                <div>
+                    <p class="text-sm text-yellow-300 font-medium">Security Notice</p>
+                    <p class="text-sm text-yellow-200 mt-1">Save the login credentials securely. You can reset the password later from the cafe owner management page.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

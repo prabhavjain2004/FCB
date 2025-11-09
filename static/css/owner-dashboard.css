@@ -1,0 +1,152 @@
+/* Owner Dashboard Layout Fixes */
+
+/* Ensure proper layout structure */
+html,
+body {
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden;
+}
+
+/* Sidebar positioning */
+.owner-sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: 300px;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+@media (max-width: 1023px) {
+    .owner-sidebar {
+        width: 280px;
+    }
+}
+
+/* Content area spacing */
+.owner-content {
+    width: 100%;
+    min-height: 100vh;
+}
+
+/* Topbar responsive */
+.owner-topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+/* Stat cards responsive grid */
+.stat-card {
+    min-height: 160px;
+}
+
+@media (max-width: 640px) {
+    .stat-card {
+        min-height: 140px;
+    }
+}
+
+/* Timeline scrollbar */
+.custom-scrollbar::-webkit-scrollbar {
+    width: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 3px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+    background: rgba(102, 126, 234, 0.5);
+    border-radius: 3px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: rgba(102, 126, 234, 0.7);
+}
+
+/* Mobile sidebar improvements */
+@media (max-width: 1023px) {
+    .owner-sidebar {
+        box-shadow: 2px 0 10px rgba(0, 0, 0, 0.3);
+    }
+
+    .owner-content {
+        margin-left: 0 !important;
+    }
+}
+
+/* Desktop layout - No sidebar in current design */
+@media (min-width: 1024px) {
+    .owner-content {
+        margin-left: 0;
+    }
+
+    .owner-topbar {
+        left: 0;
+    }
+}
+
+/* Animations */
+@keyframes fade-in-up {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.animate-fade-in-up {
+    animation: fade-in-up 0.5s ease-out forwards;
+}
+
+@keyframes fade-in-down {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.animate-fade-in-down {
+    animation: fade-in-down 0.5s ease-out forwards;
+}
+
+/* Ensure cards are visible */
+.owner-card,
+.stat-card {
+    position: relative;
+    z-index: 1;
+}
+
+/* Fix truncation issues */
+.truncate {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* Improve mobile touch targets */
+@media (max-width: 768px) {
+    .sidebar-link {
+        padding: 1rem;
+        font-size: 0.9375rem;
+    }
+
+    button {
+        min-height: 44px;
+        min-width: 44px;
+    }
+}

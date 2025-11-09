@@ -1,0 +1,524 @@
+/* Enhanced Time Slot Selection Interface */
+
+/* Calendar Widget */
+.calendar-widget {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20px);
+    border-radius: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.calendar-header {
+    display: flex;
+    align-items: center;
+    justify-content: between;
+    margin-bottom: 1.5rem;
+}
+
+.calendar-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #1f2937;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.calendar-nav {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.calendar-nav-button {
+    width: 40px;
+    height: 40px;
+    border: none;
+    background: rgba(59, 130, 246, 0.1);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    color: #3b82f6;
+}
+
+.calendar-nav-button:hover {
+    background: rgba(59, 130, 246, 0.2);
+    transform: scale(1.1);
+}
+
+.calendar-nav-button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* Calendar Grid */
+.calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 0.5rem;
+}
+
+.calendar-day-header {
+    text-align: center;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #6b7280;
+    padding: 0.5rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.calendar-day {
+    aspect-ratio: 1;
+    border: 2px solid transparent;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-weight: 500;
+    position: relative;
+    background: #f8fafc;
+    color: #374151;
+}
+
+.calendar-day:hover {
+    border-color: #3b82f6;
+    background: #f0f9ff;
+    transform: scale(1.05);
+}
+
+.calendar-day.selected {
+    background: #3b82f6;
+    color: white;
+    border-color: #2563eb;
+    transform: scale(1.05);
+}
+
+.calendar-day.today {
+    background: #fef3c7;
+    color: #92400e;
+    border-color: #f59e0b;
+}
+
+.calendar-day.today.selected {
+    background: #3b82f6;
+    color: white;
+    border-color: #2563eb;
+}
+
+.calendar-day.disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+    background: #f1f5f9;
+    color: #94a3b8;
+}
+
+.calendar-day.disabled:hover {
+    transform: none;
+    border-color: transparent;
+    background: #f1f5f9;
+}
+
+.calendar-day.other-month {
+    opacity: 0.4;
+    color: #9ca3af;
+}
+
+/* Availability Heatmap Indicator */
+.availability-indicator {
+    position: absolute;
+    bottom: 2px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 20px;
+    height: 3px;
+    border-radius: 2px;
+    transition: all 0.3s ease;
+}
+
+.availability-indicator.high {
+    background: #10b981;
+}
+
+.availability-indicator.medium {
+    background: #f59e0b;
+}
+
+.availability-indicator.low {
+    background: #ef4444;
+}
+
+.availability-indicator.none {
+    background: #6b7280;
+    opacity: 0.5;
+}
+
+/* Time Slots Grid */
+.time-slots-container {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20px);
+    border-radius: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    padding: 1.5rem;
+}
+
+.time-slots-header {
+    display: flex;
+    align-items: center;
+    justify-content: between;
+    margin-bottom: 1.5rem;
+}
+
+.time-slots-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #1f2937;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.time-slots-date {
+    font-size: 0.875rem;
+    color: #6b7280;
+    background: #f3f4f6;
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+}
+
+.time-slots-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 1rem;
+}
+
+/* Time Slot Button */
+.time-slot {
+    border: 2px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 1rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    background: white;
+    position: relative;
+    overflow: hidden;
+}
+
+.time-slot::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+    transition: left 0.5s ease;
+}
+
+.time-slot:hover::before {
+    left: 100%;
+}
+
+.time-slot:hover {
+    border-color: #3b82f6;
+    background: #f8faff;
+    transform: translateY(-2px);
+}
+
+.time-slot.selected {
+    border-color: #3b82f6;
+    background: #dbeafe;
+}
+
+.time-slot.unavailable {
+    opacity: 0.5;
+    cursor: not-allowed;
+    background: #f9fafb;
+    border-color: #e5e7eb;
+}
+
+.time-slot.unavailable:hover {
+    transform: none;
+    border-color: #e5e7eb;
+    background: #f9fafb;
+}
+
+.time-slot.unavailable::before {
+    display: none;
+}
+
+/* Time Slot Content */
+.time-slot-time {
+    font-size: 1.125rem;
+    font-weight: 700;
+    color: #1f2937;
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.time-slot-duration {
+    font-size: 0.75rem;
+    color: #6b7280;
+    margin-bottom: 0.75rem;
+}
+
+.time-slot-capacity {
+    display: flex;
+    align-items: center;
+    justify-content: between;
+    margin-bottom: 0.75rem;
+}
+
+.capacity-visualization-mini {
+    display: flex;
+    gap: 2px;
+}
+
+.capacity-dot-mini {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    transition: all 0.3s ease;
+}
+
+.capacity-dot-mini.available {
+    background: #10b981;
+}
+
+.capacity-dot-mini.booked {
+    background: #ef4444;
+}
+
+.capacity-text {
+    font-size: 0.75rem;
+    color: #6b7280;
+    font-weight: 500;
+}
+
+.time-slot-price {
+    display: flex;
+    align-items: center;
+    justify-content: between;
+}
+
+.price-amount {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #3b82f6;
+}
+
+.price-type {
+    font-size: 0.75rem;
+    color: #6b7280;
+}
+
+/* Status Indicators */
+.status-indicator {
+    position: absolute;
+    top: 0.75rem;
+    right: 0.75rem;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    border: 2px solid white;
+}
+
+.status-indicator.available {
+    background: #10b981;
+    animation: pulse-green 2s infinite;
+}
+
+.status-indicator.limited {
+    background: #f59e0b;
+    animation: pulse-yellow 2s infinite;
+}
+
+.status-indicator.full {
+    background: #ef4444;
+}
+
+@keyframes pulse-green {
+    0%, 100% { 
+    }
+    50% { 
+    }
+}
+
+@keyframes pulse-yellow {
+    0%, 100% { 
+    }
+    50% { 
+    }
+}
+
+/* Real-time Update Animation */
+.time-slot.updating {
+    animation: update-flash 0.5s ease-in-out;
+}
+
+@keyframes update-flash {
+    0%, 100% { 
+        background: white;
+    }
+    50% { 
+        background: #f0f9ff;
+        border-color: #3b82f6;
+    }
+}
+
+/* Loading States */
+.time-slots-loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 3rem;
+    color: #6b7280;
+}
+
+.loading-spinner-large {
+    width: 40px;
+    height: 40px;
+    border: 3px solid #e5e7eb;
+    border-top: 3px solid #3b82f6;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-right: 1rem;
+}
+
+/* Empty State */
+.time-slots-empty {
+    text-align: center;
+    padding: 3rem;
+    color: #6b7280;
+}
+
+.empty-icon {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    opacity: 0.5;
+}
+
+/* Legend */
+.availability-legend {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    margin-top: 1rem;
+    padding: 1rem;
+    background: #f8fafc;
+    border-radius: 8px;
+    font-size: 0.875rem;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.legend-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+}
+
+.legend-dot.high {
+    background: #10b981;
+}
+
+.legend-dot.medium {
+    background: #f59e0b;
+}
+
+.legend-dot.low {
+    background: #ef4444;
+}
+
+.legend-dot.none {
+    background: #6b7280;
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+    .calendar-widget,
+    .time-slots-container {
+        padding: 1rem;
+        margin-bottom: 1rem;
+    }
+    
+    .calendar-grid {
+        gap: 0.25rem;
+    }
+    
+    .calendar-day {
+        font-size: 0.875rem;
+    }
+    
+    .availability-indicator {
+        width: 16px;
+        height: 2px;
+    }
+    
+    .time-slots-grid {
+        grid-template-columns: 1fr;
+        gap: 0.75rem;
+    }
+    
+    .time-slot {
+        padding: 0.75rem;
+    }
+    
+    .time-slot-time {
+        font-size: 1rem;
+    }
+    
+    .availability-legend {
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+    
+    .calendar-header,
+    .time-slots-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+}
+
+/* Accessibility */
+@media (prefers-reduced-motion: reduce) {
+    .time-slot,
+    .calendar-day,
+    .calendar-nav-button,
+    .capacity-dot-mini,
+    .status-indicator {
+        transition: none;
+        animation: none;
+    }
+    
+    .time-slot::before {
+        display: none;
+    }
+}
+
+/* High Contrast Mode */
+@media (prefers-contrast: high) {
+    .calendar-day,
+    .time-slot {
+        border-width: 3px;
+    }
+    
+    .availability-indicator,
+    .status-indicator {
+        border-width: 3px;
+    }
+}

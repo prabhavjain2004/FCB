@@ -1,0 +1,3007 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ game.name }} - Game Details{% endblock %}
+
+{% block extra_head %}
+<!-- Force browser to reload JavaScript - no caching -->
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Hero Background with Orbs */
+    .hero-bg {
+        position: absolute;
+        inset: 0;
+        overflow: hidden;
+        z-index: 0;
+        pointer-events: none;
+    }
+    
+    .gradient-orb {
+        position: absolute;
+        border-radius: 50%;
+        filter: blur(100px);
+        opacity: 0.3;
+        animation: floatOrb 20s ease-in-out infinite;
+    }
+    
+    .orb-1 {
+        width: 500px;
+        height: 500px;
+        background: radial-gradient(circle, rgba(102, 126, 234, 0.4) 0%, transparent 70%);
+        top: -150px;
+        right: -150px;
+        animation-delay: 0s;
+    }
+    
+    .orb-2 {
+        width: 400px;
+        height: 400px;
+        background: radial-gradient(circle, rgba(168, 85, 247, 0.3) 0%, transparent 70%);
+        bottom: -100px;
+        left: -100px;
+        animation-delay: 7s;
+    }
+    
+    @keyframes floatOrb {
+        0%, 100% { transform: translate(0, 0) scale(1); }
+        33% { transform: translate(30px, -30px) scale(1.1); }
+        66% { transform: translate(-30px, 30px) scale(0.9); }
+    }
+    
+    /* Grid Pattern */
+    .grid-pattern {
+        background-image: 
+            linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+        background-size: 50px 50px;
+        position: absolute;
+        inset: 0;
+        z-index: 0;
+    }
+    
+    /* Slot Card Styles - Ultra Compact & Clickable */
+    .slot-card {
+        position: relative;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        background: rgba(30, 41, 59, 0.6);
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 0.875rem;
+        padding: 1rem;
+        z-index: 1;
+    }
+    
+    .slot-card-clickable {
+        cursor: pointer;
+    }
+    
+    .slot-card-clickable:hover {
+        transform: translateY(-3px);
+        border-color: rgba(102, 126, 234, 0.5);
+        background: rgba(30, 41, 59, 0.75);
+    }
+    
+    .slot-card-clickable:active {
+        transform: translateY(-1px);
+    }
+    
+    .slot-card-clickable::before {
+        content: '';
+        position: absolute;
+        inset: -1px;
+        border-radius: inherit;
+        padding: 1px;
+        background: linear-gradient(135deg, #667eea, #a855f7);
+        -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+        -webkit-mask-composite: xor;
+        mask-composite: exclude;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+        z-index: -1;
+    }
+    
+    .slot-card-clickable:hover::before {
+        opacity: 0.4;
+    }
+    
+    .slot-card-disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+    
+    .slot-card-disabled:hover {
+        transform: none;
+        border-color: rgba(255, 255, 255, 0.1);
+    }
+    
+    /* Time Filter Buttons - Match Date Tab Style */
+    .time-filter-btn {
+        position: relative;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        background: rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(10px);
+        z-index: 10;
+        cursor: pointer;
+    }
+    
+    .time-filter-btn.active {
+        background: linear-gradient(135deg, #667eea 0%, #a855f7 100%);
+        transform: scale(1.03);
+        color: white;
+    }
+    
+    .time-filter-btn:hover:not(.active) {
+        transform: translateY(-1px);
+        background: rgba(102, 126, 234, 0.1);
+        z-index: 20;
+    }
+    
+    .time-filter-btn i {
+        margin-right: 0.25rem;
+        font-size: 0.75rem;
+    }
+    
+    /* Capacity Dots */
+    .capacity-indicator {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        flex-wrap: wrap;
+    }
+    
+    .capacity-dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        transition: all 0.3s ease;
+    }
+    
+    .capacity-dot.booked {
+        background-color: #ef4444;
+    }
+    
+    .capacity-dot.reserved {
+        background-color: #f59e0b;
+        animation: pulse-reserved 2s ease-in-out infinite;
+    }
+    
+    .capacity-dot.available {
+        background-color: #10b981;
+    }
+    
+    @keyframes pulse-reserved {
+        0%, 100% { opacity: 1; transform: scale(1); }
+        50% { opacity: 0.7; transform: scale(1.1); }
+    }
+    
+    /* Date Tab Styles */
+    .date-tab {
+        position: relative;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        background: rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(10px);
+        z-index: 10;
+    }
+    
+    .date-tab.active {
+        background: linear-gradient(135deg, #667eea 0%, #a855f7 100%);
+        transform: scale(1.03);
+    }
+    
+    .date-tab:hover:not(.active) {
+        transform: translateY(-1px);
+        background: rgba(102, 126, 234, 0.1);
+        z-index: 20;
+    }
+    
+    .scrollbar-hide {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+    }
+    .scrollbar-hide::-webkit-scrollbar {
+        display: none;
+    }
+    
+    /* Loading Animations */
+    .skeleton {
+        animation: skeleton-loading 1s linear infinite alternate;
+        background: linear-gradient(90deg, #2d2d2d 25%, #3d3d3d 50%, #2d2d2d 75%);
+        background-size: 200% 100%;
+    }
+    
+    @keyframes skeleton-loading {
+        0% { background-position: 200% 0; }
+        100% { background-position: -200% 0; }
+    }
+    
+    .fade-in {
+        animation: fadeIn 0.4s ease-out;
+    }
+    
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .loading-spinner {
+        display: inline-block;
+        width: 50px;
+        height: 50px;
+        border: 5px solid rgba(255, 255, 255, 0.1);
+        border-top-color: #667eea;
+        border-radius: 50%;
+        animation: spin 0.8s linear infinite;
+    }
+    
+    @keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+    
+    .loading-overlay {
+        position: relative;
+        min-height: 400px;
+    }
+    
+    .loading-message {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        text-align: center;
+        z-index: 10;
+    }
+    
+    .pulse {
+        animation: pulse 1.5s ease-in-out infinite;
+    }
+    
+    @keyframes pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.5; }
+    }
+    
+    /* Button Styles with Proper Z-Index - Compact */
+    .book-btn {
+        position: relative;
+        z-index: 10;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        background: linear-gradient(135deg, #667eea, #a855f7);
+        border: none;
+        color: white;
+        font-weight: 600;
+        padding: 0.625rem 1rem;
+        border-radius: 0.625rem;
+        cursor: pointer;
+        overflow: hidden;
+        font-size: 0.875rem;
+    }
+    
+    .book-btn::after {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 0;
+        height: 0;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.2);
+        transform: translate(-50%, -50%);
+        transition: width 0.6s, height 0.6s;
+    }
+    
+    .book-btn:hover {
+        transform: translateY(-2px);
+    }
+    
+    .book-btn:hover::after {
+        width: 300px;
+        height: 300px;
+    }
+    
+    .book-btn:active {
+        transform: translateY(0);
+    }
+    
+    .book-btn:disabled,
+    .btn-disabled {
+        background: rgba(107, 114, 128, 0.3) !important;
+        color: rgba(156, 163, 175, 0.8) !important;
+        cursor: not-allowed !important;
+        opacity: 0.6;
+        pointer-events: none;
+    }
+    
+    /* Loading state - preserve gradient */
+    .book-btn.loading {
+        background: linear-gradient(135deg, #667eea, #a855f7) !important;
+        color: white !important;
+        cursor: wait !important;
+        opacity: 0.9 !important;
+        pointer-events: none !important;
+    }
+    
+    .book-btn:disabled:hover,
+    .btn-disabled:hover {
+        transform: none !important;
+    }
+    
+    /* Spot Selector Button Styles */
+    .spot-selector-btn {
+        position: relative;
+        z-index: 10;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        background: rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(10px);
+        border: 2px solid rgba(255, 255, 255, 0.2);
+        border-radius: 12px;
+        padding: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        color: white;
+    }
+    
+    .spot-selector-btn:hover:not(.active) {
+        transform: scale(1.05);
+        border-color: #667eea;
+        background: rgba(102, 126, 234, 0.1);
+    }
+    
+    .spot-selector-btn.active {
+        background: linear-gradient(135deg, #667eea 0%, #a855f7 100%);
+        color: white;
+        border-color: #667eea;
+        transform: scale(1.05);
+    }
+    
+    /* Modal Styles */
+    #unifiedBookingModal,
+    #loginPromptModal {
+        z-index: 9999;
+        animation: modalFadeIn 0.3s ease-out;
+        backdrop-filter: blur(10px);
+        -webkit-overflow-scrolling: touch;
+    }
+    
+    @keyframes modalFadeIn {
+        from {
+            opacity: 0;
+            transform: scale(0.95);
+        }
+        to {
+            opacity: 1;
+            transform: scale(1);
+        }
+    }
+    
+    /* Info Box Hover Effect */
+    .info-box {
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .info-box::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.05), transparent);
+        transition: left 0.5s ease;
+    }
+    
+    .info-box:hover::before {
+        left: 100%;
+    }
+    
+    /* Responsive Adjustments */
+    @media (max-width: 640px) {
+        /* Slot Cards Mobile */
+        .slot-card {
+            padding: 0.75rem !important;
+            border-radius: 0.75rem !important;
+        }
+        
+        .slot-card h3,
+        .slot-card .text-lg {
+            font-size: 0.875rem !important;
+        }
+        
+        .slot-card .text-sm {
+            font-size: 0.75rem !important;
+        }
+        
+        .slot-card .text-xs {
+            font-size: 0.6875rem !important;
+        }
+        
+        /* Book Button Mobile */
+        .book-btn {
+            padding: 0.5rem 0.75rem !important;
+            font-size: 0.75rem !important;
+            border-radius: 0.5rem !important;
+        }
+        
+        .book-btn i {
+            font-size: 0.75rem !important;
+        }
+        
+        /* Capacity Dots Mobile */
+        .capacity-dot {
+            width: 7px !important;
+            height: 7px !important;
+        }
+        
+        .capacity-indicator {
+            gap: 4px !important;
+        }
+        
+        /* Time Filter Buttons */
+        .time-filter-btn {
+            padding: 0.375rem 0.625rem !important;
+            font-size: 0.6875rem !important;
+            min-width: 65px !important;
+        }
+        
+        /* Slot Card Icons */
+        .slot-card i {
+            font-size: 0.875rem !important;
+        }
+        
+        /* Slot Card Badges */
+        .slot-card .rounded-full {
+            padding: 0.25rem 0.5rem !important;
+            font-size: 0.625rem !important;
+        }
+        
+        .time-filter-btn i {
+            margin-right: 0.25rem !important;
+            font-size: 0.625rem !important;
+        }
+        
+        .time-filter-btn .font-bold {
+            font-size: 0.6875rem !important;
+        }
+        
+        /* Time filter container */
+        .mb-6.flex.flex-wrap {
+            gap: 0.5rem !important;
+            margin-bottom: 1rem !important;
+        }
+        
+        /* Modal Mobile Optimization */
+        #unifiedBookingModal > div,
+        #loginPromptModal > div {
+            max-width: 95vw !important;
+            margin: 0.5rem !important;
+            padding: 1.25rem !important;
+            max-height: 95vh;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        /* Modal Header */
+        #unifiedBookingModal h3,
+        #loginPromptModal h3 {
+            font-size: 1.25rem !important;
+            margin-bottom: 0.5rem !important;
+        }
+        
+        #unifiedBookingModal .text-center.mb-6,
+        #loginPromptModal .text-center.mb-6 {
+            margin-bottom: 1rem !important;
+        }
+        
+        #unifiedBookingModal .text-center p,
+        #loginPromptModal .text-center p {
+            font-size: 0.8125rem !important;
+        }
+        
+        /* Modal Icon */
+        #unifiedBookingModal .w-20,
+        #loginPromptModal .w-20 {
+            width: 3.5rem !important;
+            height: 3.5rem !important;
+            margin-bottom: 0.75rem !important;
+        }
+        
+        #unifiedBookingModal .w-20 i,
+        #loginPromptModal .w-20 i {
+            font-size: 1.75rem !important;
+        }
+        
+        /* Full Table Toggle */
+        #fullTableToggle {
+            padding: 0.75rem !important;
+            margin-bottom: 1rem !important;
+        }
+        
+        #fullTableToggle .w-12 {
+            width: 2.25rem !important;
+            height: 2.25rem !important;
+        }
+        
+        #fullTableToggle .text-white {
+            font-size: 0.8125rem !important;
+        }
+        
+        #fullTableToggle .text-xs {
+            font-size: 0.6875rem !important;
+        }
+        
+        #fullTablePrice {
+            font-size: 0.9375rem !important;
+        }
+        
+        #fullTableToggle .flex.items-center.gap-3 {
+            gap: 0.625rem !important;
+        }
+        
+        /* Spot Selection Section */
+        #spotSelectionSection {
+            margin-bottom: 1rem !important;
+        }
+        
+        #spotSelectionSection .text-white.font-semibold {
+            font-size: 0.8125rem !important;
+            margin-bottom: 0.75rem !important;
+        }
+        
+        #spotSelectionSection i {
+            font-size: 0.875rem !important;
+        }
+        
+        /* Spot Selection Grid */
+        #spotSelectionGrid {
+            grid-template-columns: repeat(4, 1fr) !important;
+            gap: 0.5rem !important;
+            margin-bottom: 1rem !important;
+        }
+        
+        .spot-selector-btn {
+            padding: 0.625rem !important;
+            font-size: 0.8125rem !important;
+            border-radius: 0.625rem !important;
+            min-height: 2.5rem !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+        }
+        
+        /* Total Price Display */
+        #totalPriceDisplay {
+            font-size: 1.5rem !important;
+        }
+        
+        #bookingTypeDisplay {
+            font-size: 0.6875rem !important;
+        }
+        
+        .rounded-xl.p-5.mb-6 {
+            padding: 0.875rem !important;
+            margin-bottom: 1rem !important;
+        }
+        
+        .rounded-xl.p-5.mb-6 .flex.justify-between {
+            margin-bottom: 0.375rem !important;
+        }
+        
+        .rounded-xl.p-5.mb-6 .text-gray-200 {
+            font-size: 0.8125rem !important;
+        }
+        
+        /* Action Buttons */
+        #unifiedBookingModal .flex.space-x-3,
+        #loginPromptModal .flex.flex-col {
+            flex-direction: column !important;
+            gap: 0.625rem !important;
+        }
+        
+        #unifiedBookingModal .flex.space-x-3 {
+            margin-top: auto !important;
+        }
+        
+        #unifiedBookingModal button,
+        #loginPromptModal button,
+        #loginPromptModal a {
+            width: 100% !important;
+            padding: 0.75rem 0.875rem !important;
+            font-size: 0.8125rem !important;
+        }
+        
+        /* Login Prompt Modal Specific */
+        #loginPromptModal .p-4.rounded-xl {
+            padding: 0.75rem !important;
+            margin-bottom: 1rem !important;
+        }
+        
+        #loginPromptModal .w-10 {
+            width: 2rem !important;
+            height: 2rem !important;
+        }
+        
+        #loginPromptModal .text-lg {
+            font-size: 0.9375rem !important;
+        }
+        
+        #loginPromptModal .text-xs {
+            font-size: 0.6875rem !important;
+        }
+        
+        #loginPromptModal .space-y-2 {
+            gap: 0.375rem !important;
+        }
+        
+        #loginPromptModal .text-center.pt-2 p {
+            font-size: 0.6875rem !important;
+            padding-top: 0.5rem !important;
+        }
+        
+        /* Smooth scrolling for modal content */
+        #unifiedBookingModal > div::-webkit-scrollbar,
+        #loginPromptModal > div::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        #unifiedBookingModal > div::-webkit-scrollbar-track,
+        #loginPromptModal > div::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 3px;
+        }
+        
+        #unifiedBookingModal > div::-webkit-scrollbar-thumb,
+        #loginPromptModal > div::-webkit-scrollbar-thumb {
+            background: rgba(102, 126, 234, 0.5);
+            border-radius: 3px;
+        }
+        
+        #unifiedBookingModal > div::-webkit-scrollbar-thumb:hover,
+        #loginPromptModal > div::-webkit-scrollbar-thumb:hover {
+            background: rgba(102, 126, 234, 0.7);
+        }
+        
+        /* Current Date Display Card */
+        .mb-6.slot-card {
+            padding: 0.875rem !important;
+            margin-bottom: 1rem !important;
+        }
+        
+        #selectedDateDisplay {
+            font-size: 0.9375rem !important;
+        }
+        
+        #currentTimeDisplay {
+            font-size: 0.75rem !important;
+        }
+        
+        /* Combined Section Mobile */
+        .slot-card.mb-6.p-6 {
+            padding: 1rem !important;
+            margin-bottom: 1.5rem !important;
+        }
+        
+        .slot-card.mb-6.p-6 h2 {
+            font-size: 1.25rem !important;
+        }
+        
+        /* Date Tabs Mobile */
+        .date-tab {
+            min-width: 70px !important;
+            padding: 0.375rem 0.5rem !important;
+            border-radius: 0.5rem !important;
+        }
+        
+        .date-tab .font-bold {
+            font-size: 0.6875rem !important;
+            margin-bottom: 0.125rem !important;
+        }
+        
+        .date-tab .text-xs {
+            font-size: 0.5625rem !important;
+        }
+        
+        /* Date tabs container */
+        .flex.space-x-2.overflow-x-auto {
+            gap: 0.375rem !important;
+            padding-bottom: 0.5rem !important;
+        }
+        
+        .mb-4 {
+            margin-bottom: 0.875rem !important;
+        }
+        
+        /* Time Filter Buttons Mobile */
+        .time-filter-btn {
+            min-width: 65px !important;
+            padding: 0.375rem 0.5rem !important;
+            border-radius: 0.5rem !important;
+        }
+        
+        .time-filter-btn .font-bold {
+            font-size: 0.6875rem !important;
+        }
+        
+        .time-filter-btn i {
+            font-size: 0.6875rem !important;
+        }
+        
+        /* Improve touch targets on mobile */
+        .spot-selector-btn,
+        #fullTableToggle,
+        .time-filter-btn,
+        .date-tab {
+            -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation;
+        }
+        
+        /* Prevent zoom on double tap */
+        button, a {
+            touch-action: manipulation;
+        }
+    }
+    
+    @media (max-width: 768px) {
+        .orb-1, .orb-2 {
+            width: 300px;
+            height: 300px;
+        }
+
+        /* Slow down animations on mobile */
+        .gradient-orb {
+            animation: floatOrb 40s cubic-bezier(0.4, 0, 0.6, 1) infinite !important;
+        }
+
+        .animate-pulse,
+        .pulse-reserved {
+            animation: pulse-reserved 4.5s cubic-bezier(0.4, 0, 0.6, 1) infinite !important;
+        }
+        
+        /* Page Layout Mobile Optimization */
+        .min-h-screen {
+            padding-top: 1rem !important;
+            padding-bottom: 1rem !important;
+        }
+        
+        .max-w-7xl {
+            padding-left: 1rem !important;
+            padding-right: 1rem !important;
+        }
+        
+        /* Back Button Mobile */
+        .mb-6 a {
+            font-size: 0.875rem !important;
+            padding: 0.5rem 0 !important;
+        }
+        
+        .mb-6 a svg {
+            width: 1rem !important;
+            height: 1rem !important;
+            margin-right: 0.375rem !important;
+        }
+        
+        /* Game Header Mobile */
+        .slot-card.mb-10 {
+            margin-bottom: 2rem !important;
+        }
+        
+        .slot-card.mb-10 .grid {
+            grid-template-columns: 1fr !important;
+        }
+        
+        .slot-card.mb-10 .lg\:col-span-2 {
+            height: 250px !important;
+        }
+        
+        .slot-card.mb-10 .lg\:col-span-3 {
+            padding: 1.25rem !important;
+        }
+        
+        .slot-card.mb-10 h1 {
+            font-size: 1.75rem !important;
+            margin-bottom: 0.75rem !important;
+        }
+        
+        .slot-card.mb-10 p {
+            font-size: 0.875rem !important;
+            margin-bottom: 1.5rem !important;
+        }
+        
+        /* Game Details Icons Mobile */
+        .slot-card.mb-10 .bi {
+            font-size: 0.875rem !important;
+        }
+        
+        /* Game Details Grid Mobile */
+        .slot-card.mb-10 .grid.grid-cols-2 {
+            grid-template-columns: repeat(2, 1fr) !important;
+            gap: 0.5rem !important;
+        }
+        
+        .slot-card.mb-10 .grid.grid-cols-2 > div {
+            padding: 0.75rem !important;
+        }
+        
+        .slot-card.mb-10 .grid.grid-cols-2 .text-sm {
+            font-size: 0.75rem !important;
+        }
+        
+        .slot-card.mb-10 .text-2xl {
+            font-size: 1.125rem !important;
+        }
+        
+        /* Pool Balls Decoration Mobile */
+        .slot-card.mb-10 .w-24.h-24 {
+            width: 3.5rem !important;
+            height: 3.5rem !important;
+        }
+        
+        .slot-card.mb-10 .w-24.h-24 .text-4xl {
+            font-size: 1.5rem !important;
+        }
+        
+        .slot-card.mb-10 .flex.gap-6 {
+            gap: 0.75rem !important;
+        }
+        
+        .slot-card.mb-10 .mb-6 {
+            margin-bottom: 0.75rem !important;
+        }
+        
+        /* Cue stick - hide on mobile */
+        .slot-card.mb-10 .absolute.bottom-16 {
+            display: none !important;
+        }
+        
+        /* Booking Type Badge Mobile */
+        .slot-card.mb-10 .absolute.top-4 span {
+            padding: 0.375rem 0.75rem !important;
+            font-size: 0.75rem !important;
+        }
+        
+        /* Section Headers Mobile */
+        h2.text-3xl {
+            font-size: 1.25rem !important;
+        }
+        
+        .flex.items-center.gap-3 i.text-3xl {
+            font-size: 1.25rem !important;
+        }
+        
+        /* Available Slots Section */
+        .flex.items-center.justify-between.mb-6 {
+            margin-bottom: 1rem !important;
+        }
+        
+        #liveIndicator {
+            font-size: 0.625rem !important;
+        }
+        
+        /* Selected Date Display Card */
+        .slot-card.mb-6 {
+            padding: 0.875rem !important;
+            margin-bottom: 1rem !important;
+        }
+        
+        #selectedDateDisplay {
+            font-size: 0.875rem !important;
+        }
+        
+        #currentTimeDisplay {
+            font-size: 0.75rem !important;
+        }
+        
+        .slot-card.mb-6 .px-3 {
+            padding: 0.25rem 0.625rem !important;
+            font-size: 0.625rem !important;
+        }
+        
+        /* Date Selection Section Mobile */
+        .mb-10 {
+            margin-bottom: 1.5rem !important;
+        }
+        
+        .mb-10 .flex.items-center.gap-3 {
+            gap: 0.5rem !important;
+            margin-bottom: 1rem !important;
+        }
+        
+        .mb-10 .bi-calendar-event {
+            font-size: 1.5rem !important;
+        }
+        
+        /* Date Tabs Mobile */
+        .date-tab {
+            min-width: 90px !important;
+            padding: 0.625rem 0.75rem !important;
+        }
+        
+        .date-tab .font-bold {
+            font-size: 0.8125rem !important;
+            margin-bottom: 0.25rem !important;
+        }
+        
+        .date-tab .text-sm {
+            font-size: 0.6875rem !important;
+        }
+        
+        /* Date tabs container */
+        .flex.space-x-4.overflow-x-auto {
+            gap: 0.5rem !important;
+            padding-bottom: 0.75rem !important;
+        }
+        
+        /* Slots Grid Mobile */
+        #slotsContainer > div {
+            grid-template-columns: repeat(2, 1fr) !important;
+            gap: 0.75rem !important;
+        }
+        
+        /* Loading States Mobile */
+        .loading-overlay {
+            min-height: 300px !important;
+        }
+        
+        .loading-spinner {
+            width: 40px !important;
+            height: 40px !important;
+            border-width: 4px !important;
+        }
+        
+        .loading-message p {
+            font-size: 0.875rem !important;
+        }
+        
+        .loading-message p.text-sm {
+            font-size: 0.75rem !important;
+        }
+        
+        /* Skeleton Loader Mobile */
+        .skeleton {
+            height: 100px !important;
+        }
+        
+        /* Empty State Mobile */
+        .text-center.py-12 {
+            padding-top: 2rem !important;
+            padding-bottom: 2rem !important;
+        }
+        
+        .text-center.py-12 i {
+            font-size: 3rem !important;
+        }
+        
+        .text-center.py-12 h3 {
+            font-size: 1.125rem !important;
+        }
+        
+        .text-center.py-12 p {
+            font-size: 0.875rem !important;
+        }
+    }
+    
+    /* Extra small screens optimization */
+    @media (max-width: 375px) {
+        /* Game Header Extra Compact */
+        .slot-card.mb-10 .lg\:col-span-3 {
+            padding: 1rem !important;
+        }
+        
+        .slot-card.mb-10 h1 {
+            font-size: 1.5rem !important;
+        }
+        
+        /* Pool Balls Even Smaller */
+        .slot-card.mb-10 .w-24.h-24 {
+            width: 2.75rem !important;
+            height: 2.75rem !important;
+        }
+        
+        .slot-card.mb-10 .w-24.h-24 .text-4xl {
+            font-size: 1.25rem !important;
+        }
+        
+        .slot-card.mb-10 .flex.gap-6 {
+            gap: 0.5rem !important;
+        }
+        
+        /* Game Details Grid - Keep 2 columns but tighter */
+        .slot-card.mb-10 .grid.grid-cols-2 {
+            gap: 0.375rem !important;
+        }
+        
+        .slot-card.mb-10 .grid.grid-cols-2 > div {
+            padding: 0.625rem !important;
+        }
+        
+        .slot-card.mb-10 .text-2xl {
+            font-size: 1rem !important;
+        }
+        
+        /* Modal Extra Compact */
+        #unifiedBookingModal > div,
+        #loginPromptModal > div {
+            padding: 1rem !important;
+            margin: 0.375rem !important;
+        }
+        
+        #unifiedBookingModal h3,
+        #loginPromptModal h3 {
+            font-size: 1.125rem !important;
+        }
+        
+        #unifiedBookingModal .w-20,
+        #loginPromptModal .w-20 {
+            width: 3rem !important;
+            height: 3rem !important;
+            margin-bottom: 0.5rem !important;
+        }
+        
+        #unifiedBookingModal .w-20 i,
+        #loginPromptModal .w-20 i {
+            font-size: 1.5rem !important;
+        }
+        
+        #fullTableToggle {
+            padding: 0.625rem !important;
+        }
+        
+        #fullTableToggle .w-12 {
+            width: 2rem !important;
+            height: 2rem !important;
+        }
+        
+        #fullTableToggle .text-white {
+            font-size: 0.75rem !important;
+        }
+        
+        #fullTablePrice {
+            font-size: 0.875rem !important;
+        }
+        
+        #spotSelectionGrid {
+            grid-template-columns: repeat(4, 1fr) !important;
+            gap: 0.375rem !important;
+        }
+        
+        .spot-selector-btn {
+            padding: 0.5rem !important;
+            font-size: 0.75rem !important;
+        }
+        
+        #totalPriceDisplay {
+            font-size: 1.375rem !important;
+        }
+        
+        #bookingTypeDisplay {
+            font-size: 0.625rem !important;
+        }
+        
+        #unifiedBookingModal button,
+        #loginPromptModal button,
+        #loginPromptModal a {
+            padding: 0.625rem 0.75rem !important;
+            font-size: 0.75rem !important;
+        }
+        
+        /* Date Tabs Extra Small */
+        .date-tab {
+            min-width: 70px !important;
+            padding: 0.5rem 0.5rem !important;
+        }
+        
+        .date-tab .font-bold {
+            font-size: 0.6875rem !important;
+        }
+        
+        .date-tab .text-xs {
+            font-size: 0.625rem !important;
+        }
+        
+        /* Time Filter Buttons Extra Small */
+        .time-filter-btn {
+            min-width: 60px !important;
+            padding: 0.375rem 0.375rem !important;
+        }
+        
+        .time-filter-btn .font-bold {
+            font-size: 0.625rem !important;
+        }
+        
+        .time-filter-btn i {
+            font-size: 0.5625rem !important;
+        }
+        
+        /* Combined Section Extra Small */
+        .slot-card.mb-6.p-6 {
+            padding: 0.875rem !important;
+        }
+        
+        .slot-card.mb-6.p-6 h2 {
+            font-size: 1.125rem !important;
+        }
+        
+        /* Slot Cards Extra Small */
+        .slot-card {
+            padding: 0.625rem !important;
+        }
+        
+        .slot-card h3,
+        .slot-card .text-lg {
+            font-size: 0.8125rem !important;
+        }
+        
+        .slot-card .text-sm {
+            font-size: 0.6875rem !important;
+        }
+        
+        .slot-card .text-xs {
+            font-size: 0.625rem !important;
+        }
+        
+        /* Book Button Extra Small */
+        .book-btn {
+            padding: 0.375rem 0.625rem !important;
+            font-size: 0.6875rem !important;
+        }
+        
+        /* Capacity Dots Extra Small */
+        .capacity-dot {
+            width: 6px !important;
+            height: 6px !important;
+        }
+        
+        .capacity-indicator {
+            gap: 3px !important;
+        }
+        
+        /* Back Button Extra Small */
+        .mb-6 a {
+            font-size: 0.8125rem !important;
+        }
+        
+        /* Loading States Extra Small */
+        .loading-spinner {
+            width: 35px !important;
+            height: 35px !important;
+        }
+    }
+    
+    @media (min-width: 1536px) {
+        /* 6 columns on very large screens */
+        #slotsContainer > div {
+            grid-template-columns: repeat(6, minmax(0, 1fr));
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="min-h-screen py-8 relative" style="background: #111827;">
+    <!-- Animated Background -->
+    <div class="hero-bg">
+        <div class="gradient-orb orb-1"></div>
+        <div class="gradient-orb orb-2"></div>
+        <div class="grid-pattern"></div>
+    </div>
+    
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10" style="overflow: visible !important;">
+        
+        <!-- Back Button -->
+        <div class="mb-6">
+            <a href="{% url 'home' %}" class="inline-flex items-center text-white hover:text-purple-400 transition-colors font-medium">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                </svg>
+                Back to Home
+            </a>
+        </div>
+
+        <!-- Game Header -->
+        <div class="slot-card mb-10 overflow-hidden" style="padding: 0;">
+            <div class="grid grid-cols-1 lg:grid-cols-5 gap-0">
+                <!-- Game Image -->
+                <div class="lg:col-span-2 h-96 lg:h-auto relative overflow-hidden">
+                    {% if game.image %}
+                    <img src="{{ game.image.url }}" alt="{{ game.name }}" class="w-full h-full object-cover">
+                    {% else %}
+                        <!-- Enhanced Placeholder based on game type -->
+                        {% if 'pool' in game.name|lower or '8' in game.name or 'ball' in game.name|lower %}
+                        <div class="w-full h-full bg-gradient-to-br from-emerald-900 via-teal-800 to-cyan-900 flex items-center justify-center relative overflow-hidden">
+                            <!-- Pool table felt texture effect -->
+                            <div class="absolute inset-0 opacity-20" style="background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.3) 2px, rgba(0,0,0,0.3) 4px);"></div>
+                            <!-- Pool balls decoration -->
+                            <div class="relative z-10 flex flex-col items-center">
+                                <div class="flex gap-6 mb-6">
+                                    <div class="w-24 h-24 rounded-full bg-white shadow-2xl flex items-center justify-center">
+                                        <span class="text-4xl font-black text-gray-800">8</span>
+                                    </div>
+                                    <div class="w-24 h-24 rounded-full bg-gradient-to-br from-red-500 to-red-700 shadow-2xl"></div>
+                                </div>
+                                <div class="flex gap-6">
+                                    <div class="w-24 h-24 rounded-full bg-gradient-to-br from-yellow-400 to-yellow-600 shadow-2xl"></div>
+                                    <div class="w-24 h-24 rounded-full bg-gradient-to-br from-blue-500 to-blue-700 shadow-2xl"></div>
+                                </div>
+                            </div>
+                            <!-- Cue stick decoration -->
+                            <div class="absolute bottom-16 right-16 w-64 h-3 bg-gradient-to-r from-amber-800 to-amber-600 transform rotate-45 opacity-50 rounded-full shadow-xl"></div>
+                        </div>
+                        {% elif 'tennis' in game.name|lower or 'table tennis' in game.name|lower or 'ping' in game.name|lower %}
+                        <div class="w-full h-full bg-gradient-to-br from-blue-900 via-indigo-800 to-purple-900 flex items-center justify-center relative overflow-hidden">
+                            <!-- Table tennis table effect -->
+                            <div class="absolute inset-0 flex items-center justify-center">
+                                <div class="w-4/5 h-3/5 bg-blue-600 opacity-20 rounded-lg border-4 border-white/30"></div>
+                                <div class="absolute w-4/5 h-2 bg-white/40 top-1/2 transform -translate-y-1/2"></div>
+                            </div>
+                            <!-- Ping pong elements -->
+                            <div class="relative z-10 flex flex-col items-center gap-8">
+                                <!-- Paddles -->
+                                <div class="flex gap-12 items-center">
+                                    <div class="relative">
+                                        <div class="w-28 h-32 rounded-full bg-gradient-to-br from-red-600 to-red-800 shadow-2xl"></div>
+                                        <div class="w-8 h-20 bg-amber-700 absolute bottom-0 left-1/2 transform -translate-x-1/2 translate-y-16 rounded shadow-xl"></div>
+                                    </div>
+                                    <div class="w-16 h-16 rounded-full bg-white shadow-2xl animate-pulse"></div>
+                                    <div class="relative">
+                                        <div class="w-28 h-32 rounded-full bg-gradient-to-br from-gray-800 to-gray-900 shadow-2xl"></div>
+                                        <div class="w-8 h-20 bg-amber-700 absolute bottom-0 left-1/2 transform -translate-x-1/2 translate-y-16 rounded shadow-xl"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% else %}
+                        <div class="w-full h-full bg-gradient-to-br from-primary-600 via-purple-600 to-secondary-600 flex items-center justify-center relative overflow-hidden">
+                            <div class="absolute inset-0 opacity-10" style="background: radial-gradient(circle at 30% 50%, rgba(255,255,255,0.2) 0%, transparent 50%);"></div>
+                            <div class="relative z-10">
+                                <i class="bi bi-trophy-fill text-white text-9xl opacity-80 drop-shadow-2xl"></i>
+                            </div>
+                        </div>
+                        {% endif %}
+                    {% endif %}
+                    
+                    <!-- Booking Type Badge -->
+                    <div class="absolute top-4 right-4">
+                        {% if game.booking_type == 'HYBRID' %}
+                        <span class="px-4 py-2 rounded-full text-sm font-bold shadow-lg" style="background: rgba(16, 185, 129, 0.2); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.4); backdrop-filter: blur(10px);">
+                            <i class="bi bi-people-fill"></i> Flexible Booking
+                        </span>
+                        {% else %}
+                        <span class="px-4 py-2 rounded-full text-sm font-bold shadow-lg" style="background: rgba(102, 126, 234, 0.2); color: #818cf8; border: 1px solid rgba(102, 126, 234, 0.4); backdrop-filter: blur(10px);">
+                            <i class="bi bi-lock-fill"></i> Private Only
+                        </span>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Game Info -->
+                <div class="lg:col-span-3 p-8 lg:p-10">
+                    <h1 class="text-5xl font-black text-white mb-4">{{ game.name }}</h1>
+                    <p class="text-gray-300 text-lg mb-8 leading-relaxed">{{ game.description|default:"Professional gaming experience with premium equipment and perfect ambiance." }}</p>
+                    
+                    <!-- Game Details Grid -->
+                    <div class="grid grid-cols-2 gap-4 mb-8">
+                        <div class="bg-white/5 rounded-xl p-5 border border-white/10 hover:bg-white/10 transition-all">
+                            <div class="text-gray-400 text-sm mb-2 flex items-center gap-2">
+                                <i class="bi bi-people-fill text-primary-400"></i>
+                                Capacity
+                            </div>
+                            <div class="text-white text-2xl font-bold">{{ game.capacity }} Player{{ game.capacity|pluralize }}</div>
+                        </div>
+                        
+                        <div class="bg-white/5 rounded-xl p-5 border border-white/10 hover:bg-white/10 transition-all">
+                            <div class="text-gray-400 text-sm mb-2 flex items-center gap-2">
+                                <i class="bi bi-clock-fill text-secondary-400"></i>
+                                Slot Duration
+                            </div>
+                            <div class="text-white text-2xl font-bold">{{ game.slot_duration_minutes }} Minutes</div>
+                        </div>
+                        
+                        <div class="bg-gradient-to-br from-red-500/20 to-pink-500/20 rounded-xl p-5 border border-red-400/30 hover:border-red-400/50 transition-all">
+                            <div class="text-red-200 text-sm mb-2 flex items-center gap-2">
+                                <i class="bi bi-wallet2"></i>
+                                Private Price
+                            </div>
+                            <div class="text-white text-2xl font-bold">₹{{ game.private_price }}</div>
+                        </div>
+                        
+                        {% if game.booking_type == 'HYBRID' %}
+                        <div class="bg-gradient-to-br from-green-500/20 to-emerald-500/20 rounded-xl p-5 border border-green-400/30 hover:border-green-400/50 transition-all">
+                            <div class="text-green-200 text-sm mb-2 flex items-center gap-2">
+                                <i class="bi bi-wallet2"></i>
+                                Shared Price
+                            </div>
+                            <div class="text-white text-2xl font-bold">₹{{ game.shared_price }}</div>
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    {% if not is_authenticated %}
+                    <!-- Login CTA for non-authenticated users -->
+                    <div class="bg-gradient-to-r from-primary-600 to-secondary-600 rounded-xl p-6 text-center">
+                        <p class="text-white font-bold text-lg mb-4">Login to book this game!</p>
+                        <a href="{% url 'authentication:customer_login' %}?next={{ request.path }}" 
+                           class="btn btn-light btn-lg hover-glow">
+                            <i class="bi bi-box-arrow-in-right"></i>
+                            Login Now
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Current Date/Time Display Card -->
+        <div class="mb-6 slot-card">
+            <div class="flex flex-col gap-1 items-center text-center">
+                <span class="text-white font-semibold text-lg" id="selectedDateDisplay">{{ selected_date|date:"l, F d, Y" }}</span>
+                <span class="text-gray-400 text-sm font-mono" id="currentTimeDisplay"></span>
+            </div>
+        </div>
+
+        <!-- Combined Date Selection & Time Slots Section -->
+        <div class="slot-card mb-6 p-6" style="overflow: visible !important; padding-bottom: 2.5rem !important;">
+            <!-- Section Header -->
+            <div class="mb-5">
+                <div class="flex items-center gap-3">
+                    <svg style="stroke: #aaa;" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-calendar-range-icon lucide-calendar-range">
+                        <rect width="18" height="18" x="3" y="4" rx="2"/><path d="M16 2v4"/><path d="M3 10h18"/><path d="M8 2v4"/><path d="M17 14h-6"/><path d="M13 18H7"/><path d="M7 14h.01"/><path d="M17 18h.01"/>
+                    </svg>
+                    <span class="text-2xl font-black text-white leading-none">Select Date & Time</span>
+                </div>
+            </div>
+            
+            <!-- Date Tabs -->
+            <div class="mb-4" style="overflow: visible !important; padding: 0.5rem;">
+                <div class="flex space-x-2 overflow-x-auto pb-2 scrollbar-hide -mx-1 px-1" style="overflow-y: visible !important; margin: -0.5rem; padding: 0.5rem;">
+                    {% for date in date_range %}
+                    <button type="button"
+                            onclick="selectDate('{{ date.isoformat }}')" 
+                            class="date-tab flex-shrink-0 px-4 py-2 rounded-lg text-center min-w-[95px] transition-all duration-300 {% if date == selected_date %}active text-white{% else %}text-gray-300{% endif %} border border-white/10"
+                            data-date="{{ date.isoformat }}">
+                        <div class="font-bold text-sm mb-0.5">
+                            {% if date == today %}Today{% else %}{{ date|date:"M d" }}{% endif %}
+                        </div>
+                        <div class="text-xs opacity-80">{{ date|date:"D" }}</div>
+                    </button>
+                    {% endfor %}
+                </div>
+            </div>
+            
+            <!-- Time Filter Buttons -->
+            <div class="mb-4" style="overflow: visible !important; padding: 0.5rem;">
+                <div class="flex space-x-2 overflow-x-auto pb-2 scrollbar-hide -mx-1 px-1" id="timeFilterContainer" style="overflow-y: visible !important; margin: -0.5rem; padding: 0.5rem;">
+                    <button onclick="filterSlotsByTime('all')" class="time-filter-btn active flex-shrink-0 px-4 py-2 rounded-lg text-center min-w-[75px] transition-all duration-300 border border-white/10" data-filter="all">
+                        <div class="font-bold text-sm flex items-center justify-center gap-1">
+                            <svg style="stroke: #aaa;" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-clock-icon lucide-clock">
+                                <circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/>
+                            </svg>
+                            <span>All</span>
+                        </div>
+                    </button>
+                    <button onclick="filterSlotsByTime('morning')" class="time-filter-btn flex-shrink-0 px-4 py-2 rounded-lg text-center min-w-[75px] transition-all duration-300 text-gray-300 border border-white/10" data-filter="morning">
+                        <div class="font-bold text-sm flex items-center justify-center gap-1">
+                            <svg style="stroke: #aaa;" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-sunrise-icon lucide-sunrise">
+                                <path d="M12 2v8"/><path d="m4.93 10.93 1.41 1.41"/><path d="M2 18h2"/><path d="M20 18h2"/><path d="m19.07 10.93-1.41 1.41"/><path d="M22 22H2"/><path d="m8 6 4-4 4 4"/><path d="M16 18a4 4 0 0 0-8 0"/>
+                            </svg>
+                            <span>Morning</span>
+                        </div>
+                    </button>
+                    <button onclick="filterSlotsByTime('afternoon')" class="time-filter-btn flex-shrink-0 px-4 py-2 rounded-lg text-center min-w-[75px] transition-all duration-300 text-gray-300 border border-white/10" data-filter="afternoon">
+                        <div class="font-bold text-sm flex items-center justify-center gap-1">
+                            <svg style="stroke: #aaa;" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-sun-icon lucide-sun">
+                                <circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/>
+                            </svg>
+                            <span>Afternoon</span>
+                        </div>
+                    </button>
+                    <button onclick="filterSlotsByTime('evening')" class="time-filter-btn flex-shrink-0 px-4 py-2 rounded-lg text-center min-w-[75px] transition-all duration-300 text-gray-300 border border-white/10" data-filter="evening">
+                        <div class="font-bold text-sm flex items-center justify-center gap-1">
+                            <svg style="stroke: #aaa;" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-sunset-icon lucide-sunset">
+                                <path d="M12 10V2"/><path d="m4.93 10.93 1.41 1.41"/><path d="M2 18h2"/><path d="M20 18h2"/><path d="m19.07 10.93-1.41 1.41"/><path d="M22 22H2"/><path d="m16 6-4 4-4-4"/><path d="M16 18a4 4 0 0 0-8 0"/>
+                            </svg>
+                            <span>Evening</span>
+                        </div>
+                    </button>
+                    <button onclick="filterSlotsByTime('night')" class="time-filter-btn flex-shrink-0 px-4 py-2 rounded-lg text-center min-w-[75px] transition-all duration-300 text-gray-300 border border-white/10" data-filter="night">
+                        <div class="font-bold text-sm flex items-center justify-center gap-1">
+                            <svg style="stroke: #aaa;" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-moon-star-icon lucide-moon-star">
+                                <path d="M18 5h4"/><path d="M20 3v4"/><path d="M20.985 12.486a9 9 0 1 1-9.473-9.472c.405-.022.617.46.402.803a6 6 0 0 0 8.268 8.268c.344-.215.825-.004.803.401"/>
+                            </svg>
+                            <span>Night</span>
+                        </div>
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Slots Container - Loaded via AJAX -->
+            <div id="slotsContainer">
+                <!-- Initial Loading State -->
+                <div class="loading-overlay">
+                    <div class="loading-message fade-in">
+                        <div class="loading-spinner mx-auto mb-4"></div>
+                        <p class="text-white text-lg font-medium pulse">Loading available slots...</p>
+                        <p class="text-gray-400 text-sm mt-2">Fetching the latest availability</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<!-- Unified Booking Modal -->
+<div id="unifiedBookingModal" class="fixed inset-0 bg-black bg-opacity-75 hidden items-center justify-center p-4" style="z-index: 9999; overflow-y: auto;" onclick="closeUnifiedModal(event)">
+    <div class="rounded-2xl max-w-md w-full p-8 border border-white/20 relative my-auto" style="background: rgba(30, 41, 59, 0.95); backdrop-filter: blur(20px);" onclick="event.stopPropagation()">
+        <div class="text-center mb-6">
+            <div class="w-20 h-20 mx-auto mb-4 rounded-2xl flex items-center justify-center" style="background: linear-gradient(135deg, #667eea, #a855f7);">
+                <i class="bi bi-controller text-white text-4xl"></i>
+            </div>
+            <h3 class="text-3xl font-black text-white mb-2">Book Your Spot</h3>
+            <p class="text-gray-300 text-sm">Select individual spots or book the full table</p>
+        </div>
+
+        <!-- Full Table Toggle -->
+        <div id="fullTableToggle" class="mb-6 p-4 rounded-xl border-2 cursor-pointer transition-all relative z-10" style="background: rgba(102, 126, 234, 0.1); border-color: rgba(102, 126, 234, 0.3);" onclick="toggleFullTable()">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div class="w-12 h-12 rounded-xl flex items-center justify-center" style="background: rgba(102, 126, 234, 0.2);">
+                        <i class="bi bi-lock-fill text-indigo-300 text-xl"></i>
+                    </div>
+                    <div>
+                        <div class="text-white font-bold">Book Full Table</div>
+                        <div class="text-indigo-200 text-xs">Exclusive access for your group</div>
+                    </div>
+                </div>
+                <div class="flex items-center gap-2">
+                    <span id="fullTablePrice" class="text-indigo-300 font-bold text-lg">₹0</span>
+                    <div id="fullTableCheckbox" class="w-6 h-6 rounded border-2 border-indigo-300 flex items-center justify-center transition-all">
+                        <i class="bi bi-check text-white text-xl hidden"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Individual Spot Selection -->
+        <div id="spotSelectionSection">
+            <div class="text-white font-semibold mb-4 flex items-center gap-2">
+                <i class="bi bi-people-fill text-purple-300 text-lg"></i>
+                <span>Or select individual spots</span>
+            </div>
+            <div id="spotSelectionGrid" class="grid gap-3 mb-6" style="grid-template-columns: repeat(auto-fit, minmax(60px, 1fr)); max-width: 400px;">
+                <!-- Dynamically filled -->
+            </div>
+        </div>
+
+        <!-- Total Price Display -->
+        <div class="rounded-xl p-5 mb-6 border-2 relative overflow-hidden" style="background: linear-gradient(135deg, rgba(102, 126, 234, 0.2), rgba(168, 85, 247, 0.15)); border-color: rgba(102, 126, 234, 0.4);">
+            <div class="flex justify-between items-center mb-2">
+                <span class="text-gray-200 font-medium">Total Amount</span>
+                <span id="totalPriceDisplay" class="text-white text-3xl font-black" style="font-family: 'Orbitron', sans-serif;">₹0</span>
+            </div>
+            <div class="text-xs text-gray-300">
+                <span id="bookingTypeDisplay">Select spots to continue</span>
+            </div>
+        </div>
+
+        <!-- Terms and Conditions Checkbox -->
+        <div class="mb-6">
+            <label class="flex items-start gap-3 cursor-pointer group" for="termsCheckbox">
+                <div class="relative flex-shrink-0 mt-0.5">
+                    <input type="checkbox" id="termsCheckbox" class="hidden" onchange="updateConfirmButtonState()">
+                    <div id="termsCheckboxDisplay" class="w-5 h-5 border-2 border-gray-400 rounded transition-all group-hover:border-indigo-400 flex items-center justify-center">
+                        <i class="bi bi-check text-white text-sm hidden"></i>
+                    </div>
+                </div>
+                <span class="text-gray-300 text-sm leading-relaxed">
+                    I agree to the <a href="/terms" target="_blank" class="text-indigo-400 hover:text-indigo-300 underline" onclick="event.stopPropagation()">Terms and Conditions</a> and <a href="/privacy" target="_blank" class="text-indigo-400 hover:text-indigo-300 underline" onclick="event.stopPropagation()">Privacy Policy</a>
+                </span>
+            </label>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="flex space-x-3">
+            <button onclick="closeUnifiedModal()" 
+                    class="flex-1 px-6 py-3.5 rounded-xl font-semibold transition-all border-2 relative z-10" style="background: rgba(255, 255, 255, 0.05); color: white; border-color: rgba(255, 255, 255, 0.2);"
+                    onmouseover="this.style.background='rgba(255, 255, 255, 0.1)'"
+                    onmouseout="this.style.background='rgba(255, 255, 255, 0.05)'">
+                <i class="bi bi-x-circle mr-1"></i> Cancel
+            </button>
+            <button id="confirmBookingButton" onclick="confirmUnifiedBooking()" 
+                    class="flex-1 px-6 py-3.5 rounded-xl font-bold transition-all relative z-10 book-btn"
+                    disabled>
+                <i class="bi bi-check-circle mr-1"></i> Confirm Booking
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Login Prompt Modal (for non-authenticated users) -->
+<div id="loginPromptModal" class="fixed inset-0 bg-black bg-opacity-75 hidden items-center justify-center p-4" style="z-index: 9999; overflow-y: auto;" onclick="closeLoginPrompt(event)">
+    <div class="rounded-2xl max-w-md w-full p-8 border border-white/20 relative my-auto" style="background: rgba(30, 41, 59, 0.95); backdrop-filter: blur(20px);" onclick="event.stopPropagation()">
+        <div class="text-center mb-6">
+            <div class="w-20 h-20 mx-auto mb-4 rounded-2xl flex items-center justify-center" style="background: linear-gradient(135deg, #667eea, #a855f7);">
+                <i class="bi bi-lock-fill text-white text-4xl"></i>
+            </div>
+            <h3 class="text-3xl font-black text-white mb-2">Login Required</h3>
+            <p class="text-gray-300 text-sm">Please login to book this time slot</p>
+        </div>
+
+        <!-- Slot Details -->
+        <div class="mb-6 p-4 rounded-xl border-2" style="background: rgba(102, 126, 234, 0.1); border-color: rgba(102, 126, 234, 0.3);">
+            <div class="flex items-center gap-3 mb-3">
+                <div class="w-10 h-10 rounded-lg flex items-center justify-center" style="background: linear-gradient(135deg, #667eea, #a855f7);">
+                    <i class="bi bi-clock text-white"></i>
+                </div>
+                <div>
+                    <div class="text-white font-bold text-lg" id="loginPromptTime">--:--</div>
+                    <div class="text-gray-400 text-xs">Selected Time Slot</div>
+                </div>
+            </div>
+            
+            <!-- Pricing Info -->
+            <div id="loginPromptPricing" class="space-y-2 pt-3 border-t border-white/10">
+                <!-- Dynamically filled -->
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="flex flex-col space-y-3">
+            <a href="{% url 'authentication:customer_login' %}?next={{ request.path }}" 
+               class="w-full px-6 py-3.5 rounded-xl font-bold transition-all text-center text-white relative z-10"
+               style="background: linear-gradient(135deg, #667eea, #a855f7);"
+               onmouseover="this.style.transform='translateY(-2px)'"
+               onmouseout="this.style.transform='translateY(0)'">
+                <i class="bi bi-box-arrow-in-right mr-2"></i> Login to Book
+            </a>
+            <button onclick="closeLoginPrompt()" 
+                    class="w-full px-6 py-3.5 rounded-xl font-semibold transition-all border-2 relative z-10" 
+                    style="background: rgba(255, 255, 255, 0.05); color: white; border-color: rgba(255, 255, 255, 0.2);"
+                    onmouseover="this.style.background='rgba(255, 255, 255, 0.1)'"
+                    onmouseout="this.style.background='rgba(255, 255, 255, 0.05)'">
+                <i class="bi bi-x-circle mr-1"></i> Cancel
+            </button>
+            <div class="text-center pt-2">
+                <p class="text-gray-400 text-sm">New user? Login with Google to create an account automatically</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Version: 2.2 - FIXED: Capacity dots now properly show booked/reserved/available states
+// Last updated: 2025-11-06 21:45 UTC
+// CACHE BUSTER: v2.2.001
+// Configuration
+const isAuthenticated = '{{ is_authenticated|yesno:"true,false" }}';
+const gameId = "{{ game.id }}";
+const csrfToken = "{{ csrf_token }}";
+let currentDate = "{{ selected_date.isoformat }}";
+
+// Format date display
+function formatDateDisplay(dateStr) {
+    const date = new Date(dateStr + 'T00:00:00');
+    const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+    return date.toLocaleDateString('en-US', options);
+}
+
+// Check if date is today
+function isToday(dateStr) {
+    const today = new Date();
+    const date = new Date(dateStr + 'T00:00:00');
+    return date.toDateString() === today.toDateString();
+}
+
+// Select date and load slots
+function selectDate(dateStr) {
+    currentDate = dateStr;
+    
+    // Update active state on date buttons with smooth transition
+    document.querySelectorAll('.date-tab').forEach(btn => {
+        if (btn.dataset.date === dateStr) {
+            btn.classList.add('active', 'text-white', 'shadow-2xl');
+            btn.classList.remove('bg-white/5', 'text-gray-300');
+        } else {
+            btn.classList.remove('active', 'text-white', 'shadow-2xl');
+            btn.classList.add('bg-white/5', 'text-gray-300');
+        }
+    });
+    
+    // Update date display
+    const displayText = formatDateDisplay(dateStr);
+    const displayElement = document.getElementById('selectedDateDisplay');
+    if (displayElement) {
+        displayElement.textContent = displayText;
+    }
+    
+    // Scroll slots container into view smoothly
+    document.getElementById('slotsContainer').scrollIntoView({ 
+        behavior: 'smooth', 
+        block: 'nearest' 
+    });
+    
+    // Stop current polling
+    stopPolling();
+    
+    // Load slots for selected date
+    loadSlotsForDate(dateStr);
+    
+    // Restart polling immediately
+    setTimeout(() => {
+        startPolling();
+    }, 500); // Reduced from 1000ms to 500ms
+}
+
+// Load slots via API (OPTIMIZED WITH AJAX)
+function loadSlotsForDate(dateStr) {
+    const container = document.getElementById('slotsContainer');
+    
+    // Show skeleton loader with loading text
+    container.innerHTML = `
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
+            ${Array(8).fill(0).map(() => `
+                <div class="slot-card skeleton" style="height: 120px;">
+                    <div class="h-4 bg-white/10 rounded w-3/4 mb-3"></div>
+                    <div class="h-3 bg-white/10 rounded w-1/2 mb-3"></div>
+                    <div class="h-8 bg-white/10 rounded w-full"></div>
+                </div>
+            `).join('')}
+        </div>
+    `;
+    
+    const startTime = Date.now();
+    
+    // Fetch slots from API
+    fetch(`/api/games/${gameId}/slots/?date=${dateStr}`)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Failed to load slots');
+            }
+            return response.json();
+        })
+        .then(data => {
+            currentSlotsData = data.slots; // Store for comparison
+            renderSlots(data.slots);
+        })
+        .catch(error => {
+            showError('Unable to load slots. Please try again.');
+        });
+}
+
+// Render slots from API data - Simple version (show all at once)
+function renderSlots(slots) {
+    const container = document.getElementById('slotsContainer');
+    
+    if (!slots || slots.length === 0) {
+        container.innerHTML = `
+            <div class="text-center py-20 card fade-in">
+    <div class="mb-6">
+        <svg style="stroke: #aaa;" xmlns="http://www.w3.org/2000/svg" width="80" height="80" viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-calendar-icon lucide-calendar mx-auto text-gray-400">
+            <path d="M8 2v4"/><path d="M16 2v4"/><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18"/>
+        </svg>
+    </div>
+    <p class="text-white text-2xl font-bold mb-3">No slots available for this date</p>
+    <p class="text-gray-400 text-lg">Try selecting a different date or check back later</p>
+</div>
+        `;
+        return;
+    }
+    
+    // Set "All Slots" as default active filter
+    document.querySelectorAll('.time-filter-btn').forEach(btn => {
+        if (btn.dataset.filter === 'all') {
+            btn.classList.add('active');
+        } else {
+            btn.classList.remove('active');
+        }
+    });
+    
+    // Create grid container
+    const gridDiv = document.createElement('div');
+    gridDiv.className = 'grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3';
+    container.innerHTML = '';
+    container.appendChild(gridDiv);
+    
+    // Render all slots at once (no progressive loading)
+    slots.forEach((slot, index) => {
+        const slotCard = createSlotCard(slot);
+        gridDiv.appendChild(slotCard);
+        
+        // Stagger animation slightly for visual effect
+        setTimeout(() => {
+            slotCard.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+            slotCard.style.opacity = '1';
+            slotCard.style.transform = 'translateY(0)';
+        }, index * 15); // Very fast stagger
+    });
+}
+
+// Create a slot card element
+function createSlotCard(slot) {
+    const availability = slot.availability;
+    const bookingOptions = slot.booking_options;
+    const timeCategory = getTimeCategory(slot.time_display);
+    
+    // Extract pricing info
+    let sharedPrice = 0;
+    let privatePrice = 0;
+    let canBookPrivate = false;
+    let canBookShared = false;
+    let maxSpotsPerBooking = availability.total_capacity || 4;
+    
+    bookingOptions.forEach(option => {
+        if (option.type === 'PRIVATE') {
+            privatePrice = option.price;
+            canBookPrivate = option.available;
+        } else if (option.type === 'SHARED') {
+            sharedPrice = option.price_per_spot || option.price || 0;
+            maxSpotsPerBooking = option.max_spots_per_booking || availability.total_capacity || 4;
+            canBookShared = option.available;
+        }
+    });
+    
+    const trulyAvailable = availability.truly_available_spots !== undefined ? availability.truly_available_spots : availability.available_spots;
+    const totalCapacity = availability.total_capacity;
+    const reservedSpots = availability.reserved_spots || 0;
+    const isAvailable = trulyAvailable > 0;
+    
+    // Create slot card element
+    const slotCard = document.createElement('div');
+    slotCard.className = `slot-card ${isAvailable ? 'slot-card-clickable' : 'slot-card-disabled'}`;
+    slotCard.setAttribute('data-time-category', timeCategory);
+    slotCard.style.opacity = '0';
+    slotCard.style.transform = 'translateY(20px)';
+    
+    if (isAvailable) {
+        slotCard.onclick = () => {
+            if (isAuthenticated === 'true') {
+                showUnifiedBookingModal(slot.id, trulyAvailable, sharedPrice, privatePrice, totalCapacity, Math.min(trulyAvailable, maxSpotsPerBooking), canBookPrivate, canBookShared);
+            } else {
+                showLoginPrompt(slot.time_display, sharedPrice, privatePrice, canBookPrivate, canBookShared);
+            }
+        };
+        slotCard.setAttribute('role', 'button');
+        slotCard.setAttribute('tabindex', '0');
+    }
+    
+    slotCard.innerHTML = `
+        <!-- Time with Icon -->
+        <div class="flex items-center gap-2 mb-3">
+            {% comment %} <svg style="stroke: #aaa;" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-clock-icon lucide-clock">
+                <circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/>
+            </svg> {% endcomment %}
+            <span class="text-white font-bold text-base">
+                ${slot.time_display}
+            </span>
+        </div>
+        
+        <!-- Capacity Dots -->
+        <div class="flex items-center justify-between">
+            <div class="capacity-indicator">
+                ${renderCapacityDots(availability)}
+            </div>
+            <span class="text-xs text-gray-400 font-medium">
+                ${trulyAvailable}/${totalCapacity}
+            </span>
+        </div>
+
+        <!-- Status Indicator (only for unavailable) -->
+        ${!isAvailable ? `
+            <div class="mt-3 pt-3 border-t border-white/10 text-center">
+                <span class="text-xs text-gray-500 font-medium">
+                    <i class="bi bi-x-circle mr-1"></i> ${reservedSpots > 0 ? 'Reserved' : 'Fully Booked'}
+                </span>
+            </div>
+        ` : ''}
+    `;
+    
+    return slotCard;
+}
+
+// Render capacity indicator dots with real-time updates (booked, reserved, available)
+function renderCapacityDots(availability) {
+    let html = '';
+    const bookedSpots = availability.booked_spots || 0;
+    const reservedSpots = availability.reserved_spots || 0;
+    const totalCapacity = availability.total_capacity || 0;
+    
+    for (let i = 0; i < totalCapacity; i++) {
+        let dotClass = 'available';
+        
+        if (i < bookedSpots) {
+            dotClass = 'booked'; // Red - confirmed bookings
+        } else if (i < bookedSpots + reservedSpots) {
+            dotClass = 'reserved'; // Yellow/Orange - pending payment
+        }
+        
+        html += `<div class="capacity-dot ${dotClass}" data-spot-index="${i}" title="${dotClass}"></div>`;
+    }
+    return html;
+}
+
+// Update capacity dots with animation when availability changes
+function updateCapacityDotsWithAnimation(slotElement, newAvailability) {
+    const dots = slotElement.querySelectorAll('.capacity-dot');
+    const bookedSpots = newAvailability.booked_spots || 0;
+    const reservedSpots = newAvailability.reserved_spots || 0;
+    
+    dots.forEach((dot, index) => {
+        // Determine what state this dot should be in
+        let targetClass = 'available';
+        if (index < bookedSpots) {
+            targetClass = 'booked'; // Red - confirmed bookings
+        } else if (index < bookedSpots + reservedSpots) {
+            targetClass = 'reserved'; // Yellow/Orange - pending payment
+        }
+        
+        // Get current state
+        const currentClass = dot.classList.contains('booked') ? 'booked' : 
+                           dot.classList.contains('reserved') ? 'reserved' : 'available';
+        
+        // Only update if state changed
+        if (currentClass !== targetClass) {
+            // Remove all state classes
+            dot.classList.remove('booked', 'reserved', 'available');
+            // Add new state class
+            dot.classList.add(targetClass);
+            // Update title attribute
+            dot.setAttribute('title', targetClass);
+            // Animate the change
+            dot.style.transform = 'scale(1.3)';
+            setTimeout(() => {
+                dot.style.transform = 'scale(1)';
+            }, 300);
+        }
+    });
+    
+    // Update availability text
+    const availabilityText = slotElement.querySelector('.capacity-indicator span');
+    if (availabilityText) {
+        const oldText = availabilityText.textContent;
+        const trulyAvailable = newAvailability.truly_available_spots !== undefined ? newAvailability.truly_available_spots : newAvailability.available_spots;
+        const newText = `${trulyAvailable}/${newAvailability.total_capacity}`;
+        if (oldText !== newText) {
+            availabilityText.textContent = newText;
+            availabilityText.style.color = '#10b981';
+            setTimeout(() => {
+                availabilityText.style.color = '';
+            }, 1000);
+        }
+    }
+}
+
+// These functions are no longer needed as we render directly in renderSlots
+// Keeping them as stubs in case they're referenced elsewhere
+
+// Show error message
+function showError(message) {
+    const container = document.getElementById('slotsContainer');
+    container.innerHTML = `
+        <div class="text-center py-16 bg-red-500/10 rounded-2xl border border-red-500/30 fade-in">
+            <div class="text-red-400 text-6xl mb-4">⚠️</div>
+            <p class="text-red-300 text-lg mb-2">${message}</p>
+            <button onclick="loadSlotsForDate(currentDate)" 
+                    class="mt-4 bg-red-500 hover:bg-red-600 text-white px-6 py-2 rounded-lg transition-colors">
+                Try Again
+            </button>
+        </div>
+    `;
+}
+
+{% if is_authenticated %}
+// Unified booking modal variables
+let selectedSlotId = null;
+let selectedSpots = 0;
+let pricePerSpot = 0;
+let privatePrice = 0;
+let maxSpots = 0;
+let totalCapacity = 0;
+let isFullTable = false;
+let canBookPrivate = true;
+let canBookShared = true;
+
+// Show unified booking modal
+function showUnifiedBookingModal(slotId, availableSpots, spotPrice, fullTablePrice, capacity, maxSpotsPerBooking, allowPrivate, allowShared) {
+    selectedSlotId = slotId;
+    pricePerSpot = spotPrice;
+    privatePrice = fullTablePrice;
+    maxSpots = Math.min(availableSpots, maxSpotsPerBooking);
+    totalCapacity = capacity;
+    selectedSpots = 0;
+    isFullTable = false;
+    canBookPrivate = allowPrivate;
+    canBookShared = allowShared;
+    
+    // Track modal state for real-time updates
+    isModalOpen = true;
+    currentModalSlotId = slotId;
+    
+    // Update full table price display
+    document.getElementById('fullTablePrice').textContent = `₹${fullTablePrice}`;
+    
+    // Show/hide full table option based on availability
+    const fullTableToggle = document.getElementById('fullTableToggle');
+    if (canBookPrivate) {
+        fullTableToggle.style.display = 'block';
+        fullTableToggle.style.opacity = '1';
+    } else {
+        fullTableToggle.style.display = 'none';
+    }
+    
+    // Show/hide spot selection based on availability
+    const spotSelectionSection = document.getElementById('spotSelectionSection');
+    const spotSelectionLabel = spotSelectionSection.querySelector('span');
+    if (canBookShared) {
+        spotSelectionSection.style.display = 'block';
+        // Update label text based on whether full table option is available
+        if (canBookPrivate) {
+            spotSelectionLabel.textContent = 'Or select individual spots';
+        } else {
+            spotSelectionLabel.textContent = 'Select individual spots';
+        }
+    } else {
+        spotSelectionSection.style.display = 'none';
+    }
+    
+    // Build spot selection grid
+    const grid = document.getElementById('spotSelectionGrid');
+    grid.innerHTML = '';
+    
+    for (let i = 1; i <= maxSpots; i++) {
+        const button = document.createElement('button');
+        button.className = 'spot-selector-btn bg-white/10 hover:bg-white/20 text-white rounded-lg py-4 font-bold text-lg transition-all border-2 border-white/20 hover:border-gaming-highlight';
+        button.textContent = i;
+        button.onclick = () => selectNumberOfSpots(i);
+        grid.appendChild(button);
+    }
+    
+    // Reset full table checkbox
+    resetFullTableCheckbox();
+    
+    // Reset terms and conditions checkbox
+    const termsCheckbox = document.getElementById('termsCheckbox');
+    if (termsCheckbox) {
+        termsCheckbox.checked = false;
+    }
+    
+    // Update displays
+    updateUnifiedPriceDisplay();
+    
+    // Show modal
+    document.getElementById('unifiedBookingModal').classList.remove('hidden');
+    document.getElementById('unifiedBookingModal').classList.add('flex');
+}
+
+// Toggle full table booking
+function toggleFullTable() {
+    if (!canBookPrivate) {
+        alert('Full table booking is not available for this slot');
+        return;
+    }
+    
+    isFullTable = !isFullTable;
+    
+    const checkbox = document.getElementById('fullTableCheckbox');
+    const checkIcon = checkbox.querySelector('i');
+    const spotButtons = document.querySelectorAll('.spot-selector-btn');
+    
+    if (isFullTable) {
+        // Enable full table mode
+        checkbox.classList.add('bg-blue-500', 'border-blue-500');
+        checkIcon.classList.remove('hidden');
+        
+        // Disable individual spot selection
+        spotButtons.forEach(btn => {
+            btn.disabled = true;
+            btn.classList.add('opacity-50', 'cursor-not-allowed');
+            btn.classList.remove('bg-gaming-highlight', 'border-gaming-highlight', 'scale-110', 'shadow-lg');
+        });
+        
+        selectedSpots = totalCapacity;
+    } else {
+        // Disable full table mode
+        checkbox.classList.remove('bg-blue-500', 'border-blue-500');
+        checkIcon.classList.add('hidden');
+        
+        // Enable individual spot selection
+        spotButtons.forEach(btn => {
+            btn.disabled = false;
+            btn.classList.remove('opacity-50', 'cursor-not-allowed');
+        });
+        
+        selectedSpots = 0;
+    }
+    
+    updateUnifiedPriceDisplay();
+}
+
+// Reset full table checkbox
+function resetFullTableCheckbox() {
+    isFullTable = false;
+    const checkbox = document.getElementById('fullTableCheckbox');
+    const checkIcon = checkbox.querySelector('i');
+    checkbox.classList.remove('bg-blue-500', 'border-blue-500');
+    checkIcon.classList.add('hidden');
+}
+
+// Select number of spots
+function selectNumberOfSpots(spots) {
+    if (isFullTable) {
+        // Disable full table mode when selecting individual spots
+        isFullTable = false;
+        resetFullTableCheckbox();
+    }
+    
+    selectedSpots = spots;
+    
+    // AUTO-DETECT FULL TABLE: If user selects all available spots, treat as full table
+    if (spots === totalCapacity && canBookPrivate) {
+        isFullTable = true;
+        const checkbox = document.getElementById('fullTableCheckbox');
+        const checkIcon = checkbox.querySelector('i');
+        checkbox.classList.add('bg-blue-500', 'border-blue-500');
+        checkIcon.classList.remove('hidden');
+    }
+    
+    // Update button states
+    const buttons = document.querySelectorAll('.spot-selector-btn');
+    buttons.forEach((btn, index) => {
+        if (index + 1 === spots) {
+            btn.classList.add('bg-gaming-highlight', 'border-gaming-highlight', 'scale-110', 'shadow-lg');
+            btn.classList.remove('bg-white/10', 'border-white/20');
+        } else {
+            btn.classList.remove('bg-gaming-highlight', 'border-gaming-highlight', 'scale-110', 'shadow-lg');
+            btn.classList.add('bg-white/10', 'border-white/20');
+        }
+    });
+    
+    // Update price display
+    updateUnifiedPriceDisplay();
+}
+
+// Update price display for unified modal
+function updateUnifiedPriceDisplay() {
+    updateConfirmButtonState();
+    
+    const bookingTypeDisplay = document.getElementById('bookingTypeDisplay');
+    
+    if (isFullTable) {
+        // Full table booking - use private price
+        document.getElementById('totalPriceDisplay').textContent = `₹${privatePrice}`;
+        
+        // Check if auto-converted (selected all spots individually)
+        if (selectedSpots === totalCapacity) {
+            bookingTypeDisplay.innerHTML = `Full table (${totalCapacity} spots)`;
+        } else {
+            bookingTypeDisplay.textContent = `Full table (${totalCapacity} spots) • Private booking price`;
+        }
+    } else if (selectedSpots > 0) {
+        // Individual spots booking - use shared price
+        const totalPrice = selectedSpots * pricePerSpot;
+        document.getElementById('totalPriceDisplay').textContent = `₹${totalPrice}`;
+        bookingTypeDisplay.textContent = `${selectedSpots} spot${selectedSpots !== 1 ? 's' : ''} × ₹${pricePerSpot} per spot`;
+    } else {
+        // No selection
+        document.getElementById('totalPriceDisplay').textContent = `₹0`;
+        bookingTypeDisplay.textContent = 'Select spots to continue';
+    }
+}
+
+// Update confirm button state based on selection and terms acceptance
+function updateConfirmButtonState() {
+    const confirmButton = document.getElementById('confirmBookingButton');
+    const termsCheckbox = document.getElementById('termsCheckbox');
+    const termsCheckboxDisplay = document.getElementById('termsCheckboxDisplay');
+    const checkIcon = termsCheckboxDisplay ? termsCheckboxDisplay.querySelector('i') : null;
+    
+    // Update visual state of checkbox
+    if (termsCheckbox && termsCheckbox.checked) {
+        if (termsCheckboxDisplay) {
+            termsCheckboxDisplay.classList.add('bg-gradient-to-br', 'from-indigo-500', 'to-purple-500', 'border-indigo-400');
+            termsCheckboxDisplay.classList.remove('border-gray-400');
+        }
+        if (checkIcon) {
+            checkIcon.classList.remove('hidden');
+        }
+    } else {
+        if (termsCheckboxDisplay) {
+            termsCheckboxDisplay.classList.remove('bg-gradient-to-br', 'from-indigo-500', 'to-purple-500', 'border-indigo-400');
+            termsCheckboxDisplay.classList.add('border-gray-400');
+        }
+        if (checkIcon) {
+            checkIcon.classList.add('hidden');
+        }
+    }
+    
+    // Enable button only if spots are selected AND terms are accepted
+    const hasSelection = isFullTable || selectedSpots > 0;
+    const termsAccepted = termsCheckbox && termsCheckbox.checked;
+    
+    confirmButton.disabled = !(hasSelection && termsAccepted);
+}
+
+// Close unified booking modal
+function closeUnifiedModal(event) {
+    if (event && event.target !== event.currentTarget) return;
+    
+    const modal = document.getElementById('unifiedBookingModal');
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
+    
+    // Reset modal tracking
+    isModalOpen = false;
+    currentModalSlotId = null;
+    
+    // Reset all variables
+    selectedSlotId = null;
+    selectedSpots = 0;
+    pricePerSpot = 0;
+    privatePrice = 0;
+    maxSpots = 0;
+    totalCapacity = 0;
+    isFullTable = false;
+}
+
+// Confirm unified booking
+function confirmUnifiedBooking() {
+    // Comprehensive validation
+    if (!selectedSlotId) {
+        alert('Slot information missing. Please close and try again.');
+        return;
+    }
+    
+    if (selectedSpots === 0 || selectedSpots < 1) {
+        alert('Please select at least 1 spot or enable full table booking');
+        return;
+    }
+    
+    // Check if terms and conditions are accepted
+    const termsCheckbox = document.getElementById('termsCheckbox');
+    if (!termsCheckbox || !termsCheckbox.checked) {
+        alert('Please accept the Terms and Conditions to continue');
+        return;
+    }
+    
+    // Determine booking type
+    const bookingType = isFullTable ? 'PRIVATE' : 'SHARED';
+    
+    // Store values before closing modal (to prevent reset)
+    const slotIdToBook = selectedSlotId;
+    const spotsToBook = selectedSpots;
+    
+    // Show loading state on confirm button BEFORE closing modal
+    const confirmButton = document.getElementById('confirmBookingButton');
+    if (confirmButton) {
+        // Preserve button dimensions
+        const width = confirmButton.offsetWidth;
+        const height = confirmButton.offsetHeight;
+        
+        // Add loading class to preserve gradient
+        confirmButton.classList.add('loading');
+        confirmButton.disabled = true;
+        confirmButton.style.width = width + 'px';
+        confirmButton.style.height = height + 'px';
+        confirmButton.style.minWidth = width + 'px';
+        confirmButton.style.minHeight = height + 'px';
+        confirmButton.style.display = 'flex';
+        confirmButton.style.alignItems = 'center';
+        confirmButton.style.justifyContent = 'center';
+        confirmButton.style.gap = '0.5rem';
+        confirmButton.innerHTML = '<i class="bi bi-arrow-repeat animate-spin"></i> <span>Processing...</span>';
+    }
+    
+    // Proceed with booking (don't close modal yet - let bookSlot handle it on success)
+    bookSlotFromModal(slotIdToBook, bookingType, spotsToBook);
+}
+
+// Book a slot from modal (no event parameter needed)
+function bookSlotFromModal(slotId, bookingType, spotsRequested) {
+    // Comprehensive validation before making request
+    if (!slotId) {
+        showBookingError('Slot information missing. Please try again.');
+        return;
+    }
+    
+    if (!bookingType || !['PRIVATE', 'SHARED'].includes(bookingType)) {
+        showBookingError('Invalid booking type. Please try again.');
+        return;
+    }
+    
+    if (!spotsRequested || spotsRequested < 1) {
+        showBookingError('Invalid number of spots. Please try again.');
+        return;
+    }
+    
+    const bookingData = {
+        game_slot_id: slotId,
+        booking_type: bookingType,
+        spots_requested: spotsRequested
+    };
+    
+    // Create booking using AJAX
+    fetch('/booking/games/book/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': csrfToken
+        },
+        body: JSON.stringify(bookingData)
+    })
+    .then(response => {
+        if (!response.ok) {
+            return response.json().then(err => {
+                throw err;
+            });
+        }
+        return response.json();
+    })
+    .then(data => {
+        if (data.success) {
+            // Redirect to confirmation page
+            window.location.href = data.redirect_url;
+        } else {
+            // Restore button state
+            const confirmButton = document.getElementById('confirmBookingButton');
+            if (confirmButton) {
+                confirmButton.classList.remove('loading');
+                confirmButton.disabled = false;
+                confirmButton.innerHTML = '<i class="bi bi-check-circle mr-1"></i> Confirm Booking';
+            }
+            
+            // Handle specific error types
+            handleBookingError(data);
+        }
+    })
+    .catch(error => {
+        // Restore button state
+        const confirmButton = document.getElementById('confirmBookingButton');
+        if (confirmButton) {
+            confirmButton.classList.remove('loading');
+            confirmButton.disabled = false;
+            confirmButton.innerHTML = '<i class="bi bi-check-circle mr-1"></i> Confirm Booking';
+        }
+        
+        // Handle error
+        handleBookingError(error);
+    });
+}
+
+// Book a slot (legacy function for direct slot card clicks)
+function bookSlot(slotId, bookingType, spotsRequested, event) {
+    // Comprehensive validation before making request
+    if (!slotId) {
+        showBookingError('Slot information missing. Please try again.');
+        return;
+    }
+    
+    if (!bookingType || !['PRIVATE', 'SHARED'].includes(bookingType)) {
+        showBookingError('Invalid booking type. Please try again.');
+        return;
+    }
+    
+    if (!spotsRequested || spotsRequested < 1) {
+        showBookingError('Invalid number of spots. Please try again.');
+        return;
+    }
+    
+    const bookingData = {
+        game_slot_id: slotId,
+        booking_type: bookingType,
+        spots_requested: spotsRequested
+    };
+    
+    // Show loading state on button if event is provided
+    let clickedButton = null;
+    if (event && event.target) {
+        clickedButton = event.target;
+        
+        // Remove animation classes FIRST to prevent interference
+        clickedButton.classList.remove('hover-glow', 'btn-ripple', 'group');
+        clickedButton.style.overflow = 'visible';
+        
+        // Set flex properties FIRST to prevent layout shift
+        clickedButton.style.display = 'flex';
+        clickedButton.style.alignItems = 'center';
+        clickedButton.style.justifyContent = 'center';
+        clickedButton.style.gap = '0.5rem';
+        
+        // Then preserve button dimensions
+        const width = clickedButton.offsetWidth;
+        const height = clickedButton.offsetHeight;
+        clickedButton.style.width = width + 'px';
+        clickedButton.style.height = height + 'px';
+        clickedButton.style.minWidth = width + 'px';
+        clickedButton.style.minHeight = height + 'px';
+        
+        clickedButton.disabled = true;
+        const originalText = clickedButton.innerHTML;
+        clickedButton.innerHTML = '<i class="bi bi-arrow-repeat animate-spin"></i> <span>Processing...</span>';
+        clickedButton.dataset.originalText = originalText;
+    }
+    
+    // Create booking using AJAX
+    fetch('/booking/games/book/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': csrfToken
+        },
+        body: JSON.stringify(bookingData)
+    })
+    .then(response => {
+        if (!response.ok) {
+            return response.json().then(err => {
+                throw err;
+            });
+        }
+        return response.json();
+    })
+    .then(data => {
+        if (data.success) {
+            // Redirect to confirmation page
+            window.location.href = data.redirect_url;
+        } else {
+            // Restore button states
+            if (clickedButton && clickedButton.dataset.originalText) {
+                clickedButton.disabled = false;
+                clickedButton.innerHTML = clickedButton.dataset.originalText;
+            }
+            
+            // Handle specific error types
+            handleBookingError(data);
+        }
+    })
+    .catch(error => {
+        // Restore button states
+        if (clickedButton && clickedButton.dataset.originalText) {
+            clickedButton.disabled = false;
+            clickedButton.innerHTML = clickedButton.dataset.originalText;
+        }
+        
+        // Handle error
+        handleBookingError(error);
+    });
+}
+
+// Handle booking errors with better UX
+function handleBookingError(error) {
+    const errorType = error.error_type || 'unknown';
+    const errorMessage = error.error || error.message || 'Booking failed';
+    const errorDetails = error.details || '';
+    
+    // Check if it's an availability error (race condition)
+    if (errorMessage.includes('not available') || 
+        errorMessage.includes('no longer available') || 
+        errorMessage.includes('Only') || 
+        errorMessage.includes('spots available')) {
+        
+        // Close modal
+        closeUnifiedModal();
+        
+        // Show availability error with refresh option
+        showAvailabilityError(errorMessage, errorDetails);
+        
+        // Force refresh slots immediately
+        loadSlotsForDate(currentDate);
+        
+    } else if (error.redirect_url && errorMessage === 'Authentication required') {
+        // Redirect to login
+        window.location.href = error.redirect_url;
+    } else {
+        // Generic error
+        showBookingError(errorMessage + (errorDetails ? '\n\n' + errorDetails : ''));
+    }
+}
+
+// Show availability error with refresh option
+function showAvailabilityError(message, details) {
+    const notification = document.createElement('div');
+    notification.className = 'fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-[60] max-w-md w-full mx-4';
+    notification.innerHTML = `
+        <div class="bg-gradient-to-br from-red-900/95 to-red-800/95 backdrop-blur-xl rounded-2xl p-6 border-2 border-red-500/50 shadow-2xl animate-shake">
+            <div class="flex items-start gap-4">
+                <div class="flex-shrink-0">
+                    <div class="w-12 h-12 bg-red-500/20 rounded-full flex items-center justify-center">
+                        <i class="bi bi-exclamation-triangle-fill text-red-300 text-2xl"></i>
+                    </div>
+                </div>
+                <div class="flex-1">
+                    <h3 class="text-white font-bold text-lg mb-2">Availability Changed</h3>
+                    <p class="text-red-100 text-sm mb-1">${message}</p>
+                    ${details ? `<p class="text-red-200 text-xs mt-2">${details}</p>` : ''}
+                    <p class="text-red-200 text-xs mt-3 italic">The page has been refreshed with current availability.</p>
+                </div>
+            </div>
+            <div class="mt-4 flex gap-3">
+                <button onclick="this.closest('.fixed').remove()" 
+                        class="flex-1 bg-white/10 hover:bg-white/20 text-white px-4 py-2 rounded-lg font-medium transition-colors border border-white/20">
+                    Close
+                </button>
+                <button onclick="this.closest('.fixed').remove(); loadSlotsForDate(currentDate);" 
+                        class="flex-1 bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg font-semibold transition-colors shadow-lg">
+                    <i class="bi bi-arrow-clockwise"></i> Refresh Again
+                </button>
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(notification);
+    
+    // Auto-remove after 8 seconds
+    setTimeout(() => {
+        if (notification.parentElement) {
+            notification.style.opacity = '0';
+            notification.style.transform = 'translate(-50%, -50%) scale(0.95)';
+            setTimeout(() => notification.remove(), 300);
+        }
+    }, 8000);
+}
+
+// Show generic booking error
+function showBookingError(message) {
+    alert(message);
+}
+
+// Add animations for notifications
+const style = document.createElement('style');
+style.textContent = `
+    @keyframes shake {
+        0%, 100% { transform: translate(-50%, -50%) translateX(0); }
+        10%, 30%, 50%, 70%, 90% { transform: translate(-50%, -50%) translateX(-10px); }
+        20%, 40%, 60%, 80% { transform: translate(-50%, -50%) translateX(10px); }
+    }
+    .animate-shake {
+        animation: shake 0.5s ease-in-out;
+    }
+    @keyframes slideIn {
+        from {
+            opacity: 0;
+            transform: translateX(100%);
+        }
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+    .animate-slide-in {
+        animation: slideIn 0.3s ease-out;
+    }
+`;
+document.head.appendChild(style);
+{% endif %}
+
+// Login Prompt Modal Functions (for non-authenticated users)
+function showLoginPrompt(timeDisplay, sharedPrice, privatePrice, canBookPrivate, canBookShared) {
+    // Set time display
+    document.getElementById('loginPromptTime').textContent = timeDisplay;
+    
+    // Build pricing info
+    const pricingDiv = document.getElementById('loginPromptPricing');
+    let pricingHTML = '';
+    
+    if (canBookShared && sharedPrice) {
+        pricingHTML += `
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                    <i class="bi bi-person text-green-400"></i>
+                    <span class="text-gray-300 text-sm">Shared (per person)</span>
+                </div>
+                <span class="text-white font-bold">₹${sharedPrice}</span>
+            </div>
+        `;
+    }
+    
+    if (canBookPrivate && privatePrice) {
+        pricingHTML += `
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                    <i class="bi bi-lock text-blue-400"></i>
+                    <span class="text-gray-300 text-sm">Private (full table)</span>
+                </div>
+                <span class="text-white font-bold">₹${privatePrice}</span>
+            </div>
+        `;
+    }
+    
+    if (!pricingHTML) {
+        pricingHTML = '<div class="text-gray-400 text-sm text-center">Pricing information available after login</div>';
+    }
+    
+    pricingDiv.innerHTML = pricingHTML;
+    
+    // Show modal
+    document.getElementById('loginPromptModal').classList.remove('hidden');
+    document.getElementById('loginPromptModal').classList.add('flex');
+}
+
+function closeLoginPrompt(event) {
+    // Close if clicking on backdrop or called directly
+    if (!event || event.target.id === 'loginPromptModal') {
+        document.getElementById('loginPromptModal').classList.add('hidden');
+        document.getElementById('loginPromptModal').classList.remove('flex');
+    }
+}
+
+// Smart polling system - adapts based on activity
+let pollingInterval = null;
+let currentPollingInterval = 5000; // Start with 5 seconds
+const MIN_POLLING_INTERVAL = 2000; // Minimum 2 seconds when active
+const MAX_POLLING_INTERVAL = 10000; // Maximum 10 seconds when idle
+const ACTIVE_POLLING_INTERVAL = 2000; // Fast polling when changes detected
+let consecutiveNoChanges = 0;
+let isModalOpen = false;
+let currentModalSlotId = null;
+let lastFetchTime = 0;
+let isFetching = false;
+
+function startPolling() {
+    // Clear any existing interval
+    if (pollingInterval) {
+        clearInterval(pollingInterval);
+    }
+    
+    // Show live indicator
+    const liveIndicator = document.getElementById('liveIndicator');
+    if (liveIndicator) {
+        liveIndicator.style.opacity = '1';
+    }
+    
+    // Reset to active polling
+    currentPollingInterval = ACTIVE_POLLING_INTERVAL;
+    consecutiveNoChanges = 0;
+    
+    // Start smart polling
+    pollSlots();
+    pollingInterval = setInterval(pollSlots, currentPollingInterval);
+}
+
+function pollSlots() {
+    // Prevent overlapping requests
+    if (isFetching) {
+        return;
+    }
+    
+    // Don't poll if page is hidden
+    if (document.hidden) {
+        return;
+    }
+    
+    isFetching = true;
+    lastFetchTime = Date.now();
+    
+    fetch(`/api/games/${gameId}/slots/?date=${currentDate}`)
+        .then(response => {
+            if (response.ok) {
+                return response.json();
+            }
+            throw new Error('API request failed');
+        })
+        .then(data => {
+            if (data && data.slots) {
+                // Check if modal is open and availability changed for that slot
+                if (isModalOpen && currentModalSlotId) {
+                    checkModalSlotAvailability(data.slots);
+                }
+                
+                // Update slots display if data has changed
+                const hasChanges = updateSlotsIfChanged(data.slots);
+                
+                // Adjust polling interval based on activity
+                adjustPollingInterval(hasChanges);
+            }
+        })
+        .catch(error => {
+            // Silently handle polling error
+        })
+        .finally(() => {
+            isFetching = false;
+        });
+}
+
+function adjustPollingInterval(hasChanges) {
+    if (hasChanges) {
+        // Changes detected - use fast polling
+        consecutiveNoChanges = 0;
+        if (currentPollingInterval !== ACTIVE_POLLING_INTERVAL) {
+            currentPollingInterval = ACTIVE_POLLING_INTERVAL;
+            restartPollingWithNewInterval();
+        }
+    } else {
+        // No changes - gradually slow down polling
+        consecutiveNoChanges++;
+        
+        if (consecutiveNoChanges >= 3) {
+            // After 3 polls with no changes, slow down
+            const newInterval = Math.min(currentPollingInterval * 1.5, MAX_POLLING_INTERVAL);
+            if (newInterval !== currentPollingInterval) {
+                currentPollingInterval = newInterval;
+                restartPollingWithNewInterval();
+            }
+        }
+    }
+}
+
+function restartPollingWithNewInterval() {
+    if (pollingInterval) {
+        clearInterval(pollingInterval);
+    }
+    pollingInterval = setInterval(pollSlots, currentPollingInterval);
+}
+
+// Check if the slot in the open modal has changed availability
+function checkModalSlotAvailability(slots) {
+    // CRITICAL: Only check if modal is actually open
+    if (!isModalOpen || !currentModalSlotId) {
+        return;
+    }
+    
+    const currentSlot = slots.find(slot => slot.id === currentModalSlotId);
+    
+    if (!currentSlot) {
+        // Slot might be filtered out (past slot) or truly unavailable
+        // Silently return - this is normal when slots become past slots
+        return;
+    }
+    
+    // Check if availability has changed significantly
+    const availability = currentSlot.availability;
+    const bookingOptions = currentSlot.booking_options;
+    
+    if (!availability || !bookingOptions) {
+        // Missing data, silently return
+        return;
+    }
+    
+    // Store previous state to detect actual changes
+    if (!window.previousModalAvailability) {
+        const sharedOpt = bookingOptions.find(opt => opt.type === 'SHARED');
+        const privateOpt = bookingOptions.find(opt => opt.type === 'PRIVATE');
+        
+        window.previousModalAvailability = {
+            available_spots: availability.available_spots || 0,
+            canBookShared: sharedOpt ? sharedOpt.available : false,
+            canBookPrivate: privateOpt ? privateOpt.available : false
+        };
+        return; // First check, just store state
+    }
+    
+    const prev = window.previousModalAvailability;
+    
+    // Find shared option
+    const sharedOption = bookingOptions.find(opt => opt.type === 'SHARED');
+    const privateOption = bookingOptions.find(opt => opt.type === 'PRIVATE');
+    
+    // If the slot became fully booked (and wasn't before)
+    if (availability.available_spots === 0 && prev.available_spots > 0) {
+        closeUnifiedModal();
+        showAvailabilityError('This time slot just became fully booked.', 'Please select a different time slot.');
+        window.previousModalAvailability = null;
+        return;
+    }
+    
+    // If shared booking is no longer available but was before
+    if (sharedOption && !sharedOption.available && prev.canBookShared) {
+        closeUnifiedModal();
+        showAvailabilityError('Shared booking is no longer available for this slot.', 'Someone just booked it privately.');
+        window.previousModalAvailability = null;
+        return;
+    }
+    
+    // If private booking is no longer available but was before
+    if (privateOption && !privateOption.available && prev.canBookPrivate) {
+        closeUnifiedModal();
+        showAvailabilityError('Private booking is no longer available for this slot.', 'Someone just made a shared booking.');
+        window.previousModalAvailability = null;
+        return;
+    }
+    
+    // If available spots decreased below selected spots
+    if (selectedSpots > 0 && !isFullTable && availability.available_spots < selectedSpots && availability.available_spots < prev.available_spots) {
+        // Update the modal with new availability
+        const newMaxSpots = Math.min(availability.available_spots, availability.total_capacity || 4);
+        maxSpots = newMaxSpots;
+        
+        // Reset selection
+        selectedSpots = 0;
+        isFullTable = false;
+        
+        // Rebuild spot grid
+        const grid = document.getElementById('spotSelectionGrid');
+        if (grid) {
+            grid.innerHTML = '';
+            for (let i = 1; i <= newMaxSpots; i++) {
+                const button = document.createElement('button');
+                button.className = 'spot-selector-btn bg-white/10 hover:bg-white/20 text-white rounded-lg py-4 font-bold text-lg transition-all border-2 border-white/20 hover:border-gaming-highlight';
+                button.textContent = i;
+                button.onclick = () => selectNumberOfSpots(i);
+                grid.appendChild(button);
+            }
+        }
+        
+        // Show warning notification
+        showAvailabilityWarning(`Only ${availability.available_spots} spot${availability.available_spots !== 1 ? 's' : ''} remaining!`);
+        
+        // Update price display
+        updateUnifiedPriceDisplay();
+    }
+    
+    // Update previous state
+    window.previousModalAvailability = {
+        available_spots: availability.available_spots,
+        canBookShared: sharedOption ? sharedOption.available : false,
+        canBookPrivate: privateOption ? privateOption.available : false
+    };
+}
+
+// Show availability warning (less severe than error)
+function showAvailabilityWarning(message) {
+    const notification = document.createElement('div');
+    notification.className = 'fixed top-4 right-4 z-[70] max-w-sm animate-slide-in';
+    notification.innerHTML = `
+        <div class="bg-gradient-to-br from-yellow-900/95 to-orange-800/95 backdrop-blur-xl rounded-xl p-4 border-2 border-yellow-500/50 shadow-xl">
+            <div class="flex items-center gap-3">
+                <div class="flex-shrink-0">
+                    <i class="bi bi-exclamation-circle-fill text-yellow-300 text-xl"></i>
+                </div>
+                <div class="flex-1">
+                    <p class="text-yellow-100 text-sm font-medium">${message}</p>
+                </div>
+                <button onclick="this.closest('.fixed').remove()" class="text-yellow-300 hover:text-white transition-colors">
+                    <i class="bi bi-x-lg"></i>
+                </button>
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(notification);
+    
+    // Auto-remove after 5 seconds
+    setTimeout(() => {
+        if (notification.parentElement) {
+            notification.style.opacity = '0';
+            setTimeout(() => notification.remove(), 300);
+        }
+    }, 5000);
+}
+
+function stopPolling() {
+    if (pollingInterval) {
+        clearInterval(pollingInterval);
+        pollingInterval = null;
+    }
+    
+    // Hide live indicator
+    const liveIndicator = document.getElementById('liveIndicator');
+    if (liveIndicator) {
+        liveIndicator.style.opacity = '0';
+    }
+}
+
+// Store current slots data for comparison
+let currentSlotsData = null;
+
+function updateSlotsIfChanged(newSlots) {
+    // Convert to JSON string for simple comparison
+    const newSlotsStr = JSON.stringify(newSlots);
+    const currentSlotsStr = JSON.stringify(currentSlotsData);
+    
+    if (newSlotsStr !== currentSlotsStr) {
+        currentSlotsData = newSlots;
+        renderSlots(newSlots);
+        
+        // Show subtle notification
+        showUpdateNotification();
+        
+        return true; // Changes detected
+    }
+    
+    return false; // No changes
+}
+
+function showUpdateNotification() {
+    const notification = document.createElement('div');
+    notification.className = 'fixed top-4 right-4 z-50 glass rounded-xl px-4 py-3 max-w-sm transform translate-x-full transition-transform duration-300 border-success/30 text-success';
+    notification.innerHTML = `
+        <div class="flex items-center gap-3">
+            <svg class="w-5 h-5 flex-shrink-0 animate-pulse" fill="currentColor" viewBox="0 0 16 16">
+                <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2z"/>
+            </svg>
+            <span class="text-sm font-medium">Availability updated</span>
+        </div>
+    `;
+    
+    document.body.appendChild(notification);
+    
+    // Animate in
+    setTimeout(() => {
+        notification.style.transform = 'translateX(0)';
+    }, 100);
+    
+    // Auto remove after 3 seconds
+    setTimeout(() => {
+        notification.style.transform = 'translateX(full)';
+        setTimeout(() => {
+            notification.remove();
+        }, 300);
+    }, 3000);
+}
+
+// Pause polling when page is not visible
+document.addEventListener('visibilitychange', function() {
+    if (document.hidden) {
+        stopPolling();
+    } else {
+        // Immediately refresh when page becomes visible
+        loadSlotsForDate(currentDate);
+        startPolling();
+    }
+});
+
+// Load initial slots on page load
+document.addEventListener('DOMContentLoaded', function() {
+    loadSlotsForDate(currentDate);
+    
+    // Start real-time polling after initial load completes
+    setTimeout(() => {
+        startPolling();
+    }, 1000); // Wait 1 second before starting polling to let initial load complete
+});
+
+// Clean up on page unload
+window.addEventListener('beforeunload', function() {
+    stopPolling();
+});
+
+// Time filtering functions
+function getTimeCategory(timeDisplay) {
+    // Extract hour from time display (e.g., "11:46 AM" -> 11)
+    const match = timeDisplay.match(/(\d+):(\d+)\s*(AM|PM)/i);
+    if (!match) return 'all';
+    
+    let hour = parseInt(match[1]);
+    const period = match[3].toUpperCase();
+    
+    // Convert to 24-hour format
+    if (period === 'PM' && hour !== 12) {
+        hour += 12;
+    } else if (period === 'AM' && hour === 12) {
+        hour = 0;
+    }
+    
+    // Categorize by time
+    if (hour >= 6 && hour < 12) return 'morning';
+    if (hour >= 12 && hour < 17) return 'afternoon';
+    if (hour >= 17 && hour < 21) return 'evening';
+    return 'night';
+}
+
+function filterSlotsByTime(category) {
+    // Update active button
+    document.querySelectorAll('.time-filter-btn').forEach(btn => {
+        if (btn.dataset.filter === category) {
+            btn.classList.add('active');
+            btn.classList.remove('text-gray-300');
+            btn.classList.add('text-white');
+        } else {
+            btn.classList.remove('active');
+            btn.classList.add('text-gray-300');
+            btn.classList.remove('text-white');
+        }
+    });
+    
+    // Filter slots
+    const slots = document.querySelectorAll('.slot-card[data-time-category]');
+    let visibleCount = 0;
+    
+    slots.forEach(slot => {
+        const slotCategory = slot.dataset.timeCategory;
+        if (category === 'all' || slotCategory === category) {
+            slot.style.display = '';
+            slot.classList.add('fade-in');
+            visibleCount++;
+        } else {
+            slot.style.display = 'none';
+        }
+    });
+    
+    // Show message if no slots in category
+    const container = document.getElementById('slotsContainer');
+    const existingMessage = container.querySelector('.no-slots-message');
+    if (existingMessage) {
+        existingMessage.remove();
+    }
+    
+    // Only show filter-specific message if:
+    // 1. No visible slots for this filter
+    // 2. Filter is not 'all'
+    // 3. There ARE slots for the day (total slots > 0)
+    const totalSlots = slots.length;
+    
+    if (visibleCount === 0 && category !== 'all' && totalSlots > 0) {
+        const categoryNames = {
+            'morning': 'Morning (6 AM - 12 PM)',
+            'afternoon': 'Afternoon (12 PM - 5 PM)',
+            'evening': 'Evening (5 PM - 9 PM)',
+            'night': 'Night (9 PM onwards)'
+        };
+        
+        const message = document.createElement('div');
+        message.className = 'no-slots-message text-center py-12 fade-in';
+        message.innerHTML = `
+<div class="mb-4">
+    <svg style="stroke: #aaa;" xmlns="http://www.w3.org/2000/svg" width="56" height="56" viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-clock-icon lucide-clock mx-auto text-gray-400">
+        <circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/>
+    </svg>
+</div>
+            <p class="text-white text-xl font-bold mb-2">No ${categoryNames[category]} slots available</p>
+            <p class="text-gray-400">Try selecting a different time period</p>
+        `;
+        container.appendChild(message);
+    }
+    
+    // Scroll to top of slots
+    if (category !== 'all') {
+        container.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+}
+
+// Add keyboard support for clickable slot cards
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter' && e.target.classList.contains('slot-card-clickable')) {
+        e.target.click();
+    }
+});
+
+// Update current time display in IST
+function updateCurrentTime() {
+    const timeDisplay = document.getElementById('currentTimeDisplay');
+    const dateDisplay = document.getElementById('selectedDateDisplay');
+    
+    if (timeDisplay || dateDisplay) {
+        // Get current time in IST (Asia/Kolkata timezone)
+        const now = new Date();
+        const istTime = new Date(now.toLocaleString('en-US', { timeZone: 'Asia/Kolkata' }));
+        
+        // Update time display
+        if (timeDisplay) {
+            let hours = istTime.getHours();
+            const minutes = istTime.getMinutes();
+            const seconds = istTime.getSeconds();
+            const ampm = hours >= 12 ? 'PM' : 'AM';
+            
+            // Convert to 12-hour format
+            hours = hours % 12;
+            hours = hours ? hours : 12; // 0 should be 12
+            
+            // Pad with zeros
+            const minutesStr = minutes.toString().padStart(2, '0');
+            const secondsStr = seconds.toString().padStart(2, '0');
+            
+            timeDisplay.textContent = `${hours}:${minutesStr}:${secondsStr} ${ampm} IST`;
+        }
+        
+        // Update date display
+        if (dateDisplay) {
+            const options = { 
+                weekday: 'long', 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric',
+                timeZone: 'Asia/Kolkata'
+            };
+            const dateStr = istTime.toLocaleDateString('en-US', options);
+            dateDisplay.textContent = dateStr;
+        }
+    }
+}
+
+// Update time immediately and then every second
+updateCurrentTime();
+setInterval(updateCurrentTime, 1000);
+
+</script>
+{% endblock %}

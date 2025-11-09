@@ -1,0 +1,249 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Commission Settings - TapNex Dashboard{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50">
+    <!-- Header -->
+    <div class="bg-white shadow-sm border-b">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center py-6">
+                <div>
+                    <h1 class="text-3xl font-bold text-gray-900">Commission Settings</h1>
+                    <p class="text-gray-600">Manage commission rates and platform fees</p>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <a href="{% url 'authentication:tapnex_dashboard' %}" class="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition-colors">
+                        Back to Dashboard
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Current Settings Overview -->
+        <div class="bg-white rounded-lg shadow p-6 mb-8">
+            <h3 class="text-lg font-semibold text-gray-900 mb-4">Current Commission Structure</h3>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="text-center">
+                    <p class="text-3xl font-bold text-blue-600">{{ tapnex_user.commission_rate }}%</p>
+                    <p class="text-sm text-gray-600">Commission Rate</p>
+                </div>
+                <div class="text-center">
+                    <p class="text-3xl font-bold text-green-600">₹{{ tapnex_user.platform_fee }}</p>
+                    <p class="text-sm text-gray-600">Platform Fee</p>
+                </div>
+                <div class="text-center">
+                    <p class="text-3xl font-bold text-purple-600">₹{{ current_commission.total_commission }}</p>
+                    <p class="text-sm text-gray-600">Total Commission (Last 7 Days)</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Impact Analysis -->
+        <div class="bg-white rounded-lg shadow p-6 mb-8">
+            <h3 class="text-lg font-semibold text-gray-900 mb-4">Impact Analysis (Last 7 Days)</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <h4 class="font-medium text-gray-900 mb-3">Revenue Breakdown</h4>
+                    <div class="space-y-2">
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Gross Revenue</span>
+                            <span class="font-semibold">₹{{ recent_revenue }}</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Commission ({{ tapnex_user.commission_rate }}%)</span>
+                            <span class="font-semibold text-blue-600">₹{{ current_commission.commission_amount }}</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Platform Fees</span>
+                            <span class="font-semibold text-blue-600">₹{{ current_commission.platform_fee }}</span>
+                        </div>
+                        <hr class="border-gray-200">
+                        <div class="flex justify-between">
+                            <span class="font-semibold text-gray-900">Total TapNex Revenue</span>
+                            <span class="font-bold text-green-600">₹{{ current_commission.total_commission }}</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Net Payout to Cafe</span>
+                            <span class="font-semibold text-gray-900">₹{{ current_commission.net_payout }}</span>
+                        </div>
+                    </div>
+                </div>
+                <div>
+                    <h4 class="font-medium text-gray-900 mb-3">Booking Statistics</h4>
+                    <div class="space-y-2">
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Total Bookings</span>
+                            <span class="font-semibold">{{ recent_bookings_count }}</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Average Booking Value</span>
+                            <span class="font-semibold">₹{{ recent_revenue|floatformat:2 }}</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Commission per Booking</span>
+                            <span class="font-semibold text-blue-600">
+                                {% if recent_bookings_count > 0 %}
+                                    ₹{% widthratio current_commission.total_commission 1 recent_bookings_count %}
+                                {% else %}
+                                    ₹0.00
+                                {% endif %}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Commission Settings Form -->
+        <div class="bg-white rounded-lg shadow p-6">
+            <h3 class="text-lg font-semibold text-gray-900 mb-6">Update Commission Settings</h3>
+            
+            <form method="post" class="space-y-6">
+                {% csrf_token %}
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Commission Rate -->
+                    <div>
+                        <label for="{{ form.commission_rate.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                            {{ form.commission_rate.label }}
+                        </label>
+                        {{ form.commission_rate }}
+                        {% if form.commission_rate.help_text %}
+                            <p class="mt-1 text-sm text-gray-500">{{ form.commission_rate.help_text }}</p>
+                        {% endif %}
+                        {% if form.commission_rate.errors %}
+                            <div class="mt-1 text-sm text-red-600">
+                                {{ form.commission_rate.errors.0 }}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Platform Fee Type -->
+                    <div>
+                        <label for="{{ form.platform_fee_type.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                            {{ form.platform_fee_type.label }}
+                        </label>
+                        {{ form.platform_fee_type }}
+                        {% if form.platform_fee_type.help_text %}
+                            <p class="mt-1 text-sm text-gray-500">{{ form.platform_fee_type.help_text }}</p>
+                        {% endif %}
+                        {% if form.platform_fee_type.errors %}
+                            <div class="mt-1 text-sm text-red-600">
+                                {{ form.platform_fee_type.errors.0 }}
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Platform Fee -->
+                    <div>
+                        <label for="{{ form.platform_fee.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                            {{ form.platform_fee.label }}
+                        </label>
+                        {{ form.platform_fee }}
+                        {% if form.platform_fee.help_text %}
+                            <p class="mt-1 text-sm text-gray-500">{{ form.platform_fee.help_text }}</p>
+                        {% endif %}
+                        {% if form.platform_fee.errors %}
+                            <div class="mt-1 text-sm text-red-600">
+                                {{ form.platform_fee.errors.0 }}
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Contact Email -->
+                    <div>
+                        <label for="{{ form.contact_email.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                            {{ form.contact_email.label }}
+                        </label>
+                        {{ form.contact_email }}
+                        {% if form.contact_email.help_text %}
+                            <p class="mt-1 text-sm text-gray-500">{{ form.contact_email.help_text }}</p>
+                        {% endif %}
+                        {% if form.contact_email.errors %}
+                            <div class="mt-1 text-sm text-red-600">
+                                {{ form.contact_email.errors.0 }}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Phone -->
+                    <div>
+                        <label for="{{ form.phone.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                            {{ form.phone.label }}
+                        </label>
+                        {{ form.phone }}
+                        {% if form.phone.help_text %}
+                            <p class="mt-1 text-sm text-gray-500">{{ form.phone.help_text }}</p>
+                        {% endif %}
+                        {% if form.phone.errors %}
+                            <div class="mt-1 text-sm text-red-600">
+                                {{ form.phone.errors.0 }}
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Form Actions -->
+                <div class="flex justify-end space-x-4 pt-6 border-t border-gray-200">
+                    <a href="{% url 'authentication:tapnex_dashboard' %}" class="px-6 py-3 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors">
+                        Cancel
+                    </a>
+                    <button type="submit" class="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+                        Update Settings
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Warning Notice -->
+        <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mt-6">
+            <div class="flex">
+                <div class="flex-shrink-0">
+                    <svg class="h-5 w-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
+                    </svg>
+                </div>
+                <div class="ml-3">
+                    <h3 class="text-sm font-medium text-yellow-800">Important Notice</h3>
+                    <div class="mt-2 text-sm text-yellow-700">
+                        <p>Changes to commission settings will apply to all future bookings. Existing bookings will maintain their original commission structure. Please review the impact analysis before making changes.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Real-time commission calculator
+document.addEventListener('DOMContentLoaded', function() {
+    const commissionRateInput = document.getElementById('{{ form.commission_rate.id_for_label }}');
+    const platformFeeInput = document.getElementById('{{ form.platform_fee.id_for_label }}');
+    
+    function calculateImpact() {
+        const rate = parseFloat(commissionRateInput.value) || 0;
+        const fee = parseFloat(platformFeeInput.value) || 0;
+        const grossRevenue = {{ recent_revenue }};
+        const bookingCount = {{ recent_bookings_count }};
+        
+        const commission = (grossRevenue * rate) / 100;
+        const totalFees = fee * bookingCount;
+        const totalCommission = commission + totalFees;
+        const netPayout = grossRevenue - totalCommission;
+        
+        // Update preview (you can add preview elements if needed)
+    }
+    
+    commissionRateInput.addEventListener('input', calculateImpact);
+    platformFeeInput.addEventListener('input', calculateImpact);
+});
+</script>
+{% endblock %}

@@ -1,0 +1,918 @@
+{% load static %}
+
+<!-- Gaming Stations Grid Component -->
+<div class="gaming-stations-container">
+    <!-- Enhanced Header Section -->
+    <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between mb-8 space-y-6 lg:space-y-0">
+        <div class="space-y-2">
+            <h2 class="text-3xl md:text-4xl font-bold text-white">Game Tables</h2>
+            <p class="text-neutral-300 text-lg">Choose your perfect table</p>
+        </div>
+        
+        <!-- Desktop Filter Controls -->
+        <div class="hidden lg:flex items-center space-x-4">
+            <!-- Station Type Filter -->
+            <div class="relative">
+                <select id="station-type-filter" 
+                        class="glass rounded-xl px-4 py-3 pr-10 text-sm font-medium text-white min-w-[160px] border border-glass-border focus:border-accent-cyan focus:outline-none transition-all duration-300"
+                        onchange="filterStations()">
+                    <option value="">All Types</option>
+                    <option value="POOL">Pool Tables</option>
+                    <option value="TABLE_TENNIS">Table Tennis</option>
+                </select>
+                <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                    <svg class="w-4 h-4 text-neutral-400" fill="currentColor" viewBox="0 0 16 16">
+                        <path fill-rule="evenodd" d="M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z"/>
+                    </svg>
+                </div>
+            </div>
+            
+            <!-- Availability Filter -->
+            <div class="relative">
+                <select id="availability-filter" 
+                        class="glass rounded-xl px-4 py-3 pr-10 text-sm font-medium text-white min-w-[160px] border border-glass-border focus:border-accent-cyan focus:outline-none transition-all duration-300"
+                        onchange="filterStations()">
+                    <option value="">All Stations</option>
+                    <option value="available">Available Only</option>
+                    <option value="occupied">Occupied</option>
+                    <option value="maintenance">Maintenance</option>
+                </select>
+                <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                    <svg class="w-4 h-4 text-neutral-400" fill="currentColor" viewBox="0 0 16 16">
+                        <path fill-rule="evenodd" d="M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z"/>
+                    </svg>
+                </div>
+            </div>
+            
+            <!-- Price Range Filter -->
+            <div class="relative">
+                <select id="price-filter" 
+                        class="glass rounded-xl px-4 py-3 pr-10 text-sm font-medium text-white min-w-[160px] border border-glass-border focus:border-accent-cyan focus:outline-none transition-all duration-300"
+                        onchange="filterStations()">
+                    <option value="">All Prices</option>
+                    <option value="0-50">₹0 - ₹50</option>
+                    <option value="51-100">₹51 - ₹100</option>
+                    <option value="101-200">₹101 - ₹200</option>
+                    <option value="201+">₹201+</option>
+                </select>
+                <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                    <svg class="w-4 h-4 text-neutral-400" fill="currentColor" viewBox="0 0 16 16">
+                        <path fill-rule="evenodd" d="M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z"/>
+                    </svg>
+                </div>
+            </div>
+            
+            <!-- Sort Options -->
+            <div class="relative">
+                <select id="sort-options" 
+                        class="glass rounded-xl px-4 py-3 pr-10 text-sm font-medium text-white min-w-[160px] border border-glass-border focus:border-accent-cyan focus:outline-none transition-all duration-300"
+                        onchange="sortStations()">
+                    <option value="name">Sort by Name</option>
+                    <option value="type">Sort by Type</option>
+                    <option value="price-low">Price: Low to High</option>
+                    <option value="price-high">Price: High to Low</option>
+                    <option value="availability">Availability</option>
+                </select>
+                <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                    <svg class="w-4 h-4 text-neutral-400" fill="currentColor" viewBox="0 0 16 16">
+                        <path fill-rule="evenodd" d="M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z"/>
+                    </svg>
+                </div>
+            </div>
+            
+            <!-- Clear Filters Button -->
+            <button id="clear-filters-btn" 
+                    onclick="clearFilters()" 
+                    class="glass rounded-xl px-4 py-3 text-sm font-medium text-neutral-300 border border-glass-border hover:border-accent-orange hover:text-accent-orange transition-all duration-300 opacity-0 pointer-events-none">
+                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 16 16">
+                    <path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8 2.146 2.854Z"/>
+                </svg>
+            </button>
+        </div>
+        
+        <!-- Mobile Filter Button -->
+        <div class="lg:hidden">
+            <button id="mobile-filter-btn" 
+                    onclick="toggleMobileFilters()" 
+                    class="w-full glass rounded-xl px-6 py-4 text-white font-medium border border-glass-border hover:border-accent-cyan transition-all duration-300 flex items-center justify-center gap-3">
+                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 16 16">
+                    <path d="M6 10.5a.5.5 0 0 1 .5-.5h3a.5.5 0 0 1 0 1h-3a.5.5 0 0 1-.5-.5zm-2-3a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 0 1h-7a.5.5 0 0 1-.5-.5zm-2-3a.5.5 0 0 1 .5-.5h11a.5.5 0 0 1 0 1h-11a.5.5 0 0 1-.5-.5z"/>
+                </svg>
+                Filters & Sort
+                <span id="active-filters-count" class="hidden bg-accent-orange text-white text-xs font-bold px-2 py-1 rounded-full">0</span>
+            </button>
+        </div>
+    </div>
+    
+    <!-- Mobile Filter Bottom Sheet -->
+    <div id="mobile-filter-sheet" class="fixed inset-0 z-50 lg:hidden transform translate-y-full transition-transform duration-500 ease-out">
+        <!-- Backdrop -->
+        <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" onclick="toggleMobileFilters()"></div>
+        
+        <!-- Sheet Content -->
+        <div class="absolute bottom-0 left-0 right-0 bg-primary-900 rounded-t-3xl border-t border-glass-border max-h-[80vh] overflow-y-auto">
+            <!-- Handle -->
+            <div class="flex justify-center pt-4 pb-2">
+                <div class="w-12 h-1 bg-neutral-600 rounded-full"></div>
+            </div>
+            
+            <!-- Header -->
+            <div class="flex items-center justify-between px-6 py-4 border-b border-glass-border">
+                <h3 class="text-xl font-bold text-white">Filters & Sort</h3>
+                <button onclick="toggleMobileFilters()" class="text-neutral-400 hover:text-white transition-colors">
+                    <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 16 16">
+                        <path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8 2.146 2.854Z"/>
+                    </svg>
+                </button>
+            </div>
+            
+            <!-- Filter Content -->
+            <div class="p-6 space-y-6">
+                <!-- Station Type -->
+                <div class="space-y-3">
+                    <label class="text-sm font-semibold text-white">Station Type</label>
+                    <select id="mobile-station-type-filter" 
+                            class="w-full glass rounded-xl px-4 py-3 text-white border border-glass-border focus:border-accent-cyan focus:outline-none transition-all duration-300"
+                            onchange="syncMobileFilters()">
+                        <option value="">All Types</option>
+                        <option value="POOL">Pool Tables</option>
+                        <option value="TABLE_TENNIS">Table Tennis</option>
+                    </select>
+                </div>
+                
+                <!-- Availability -->
+                <div class="space-y-3">
+                    <label class="text-sm font-semibold text-white">Availability</label>
+                    <select id="mobile-availability-filter" 
+                            class="w-full glass rounded-xl px-4 py-3 text-white border border-glass-border focus:border-accent-cyan focus:outline-none transition-all duration-300"
+                            onchange="syncMobileFilters()">
+                        <option value="">All Stations</option>
+                        <option value="available">Available Only</option>
+                        <option value="occupied">Occupied</option>
+                        <option value="maintenance">Maintenance</option>
+                    </select>
+                </div>
+                
+                <!-- Price Range -->
+                <div class="space-y-3">
+                    <label class="text-sm font-semibold text-white">Price Range</label>
+                    <select id="mobile-price-filter" 
+                            class="w-full glass rounded-xl px-4 py-3 text-white border border-glass-border focus:border-accent-cyan focus:outline-none transition-all duration-300"
+                            onchange="syncMobileFilters()">
+                        <option value="">All Prices</option>
+                        <option value="0-50">₹0 - ₹50</option>
+                        <option value="51-100">₹51 - ₹100</option>
+                        <option value="101-200">₹101 - ₹200</option>
+                        <option value="201+">₹201+</option>
+                    </select>
+                </div>
+                
+                <!-- Sort Options -->
+                <div class="space-y-3">
+                    <label class="text-sm font-semibold text-white">Sort By</label>
+                    <select id="mobile-sort-options" 
+                            class="w-full glass rounded-xl px-4 py-3 text-white border border-glass-border focus:border-accent-cyan focus:outline-none transition-all duration-300"
+                            onchange="syncMobileFilters()">
+                        <option value="name">Sort by Name</option>
+                        <option value="type">Sort by Type</option>
+                        <option value="price-low">Price: Low to High</option>
+                        <option value="price-high">Price: High to Low</option>
+                        <option value="availability">Availability</option>
+                    </select>
+                </div>
+                
+                <!-- Action Buttons -->
+                <div class="flex gap-3 pt-4">
+                    <button onclick="clearFilters()" 
+                            class="flex-1 glass rounded-xl px-6 py-3 text-neutral-300 font-medium border border-glass-border hover:border-accent-orange hover:text-accent-orange transition-all duration-300">
+                        Clear All
+                    </button>
+                    <button onclick="applyMobileFilters()" 
+                            class="flex-1 btn-primary rounded-xl px-6 py-3 font-bold">
+                        Apply Filters
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Quick Stats -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+        <div class="bg-gaming-secondary/50 backdrop-blur-sm rounded-lg p-4 border border-gaming-accent">
+            <div class="flex items-center">
+                <div class="w-8 h-8 bg-green-500/20 rounded-lg flex items-center justify-center mr-3">
+                    <div class="w-3 h-3 bg-green-400 rounded-full"></div>
+                </div>
+                <div>
+                    <p class="text-2xl font-bold text-white" id="available-count">{{ available_count|default:0 }}</p>
+                    <p class="text-xs text-gray-400">Available</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="bg-gaming-secondary/50 backdrop-blur-sm rounded-lg p-4 border border-gaming-accent">
+            <div class="flex items-center">
+                <div class="w-8 h-8 bg-red-500/20 rounded-lg flex items-center justify-center mr-3">
+                    <div class="w-3 h-3 bg-red-400 rounded-full"></div>
+                </div>
+                <div>
+                    <p class="text-2xl font-bold text-white" id="occupied-count">{{ occupied_count|default:0 }}</p>
+                    <p class="text-xs text-gray-400">Occupied</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="bg-gaming-secondary/50 backdrop-blur-sm rounded-lg p-4 border border-gaming-accent">
+            <div class="flex items-center">
+                <div class="w-8 h-8 bg-gaming-highlight/20 rounded-lg flex items-center justify-center mr-3">
+                    <svg class="w-4 h-4 text-gaming-highlight" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                </div>
+                <div>
+                    <p class="text-2xl font-bold text-white">{{ total_stations|default:0 }}</p>
+                    <p class="text-xs text-gray-400">Total Stations</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="bg-gaming-secondary/50 backdrop-blur-sm rounded-lg p-4 border border-gaming-accent">
+            <div class="flex items-center">
+                <div class="w-8 h-8 bg-blue-500/20 rounded-lg flex items-center justify-center mr-3">
+                    <svg class="w-4 h-4 text-blue-400" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M8.433 7.418c.155-.103.346-.196.567-.267v1.698a2.305 2.305 0 01-.567-.267C8.07 8.34 8 8.114 8 8c0-.114.07-.34.433-.582zM11 12.849v-1.698c.22.071.412.164.567.267.364.243.433.468.433.582 0 .114-.07.34-.433.582a2.305 2.305 0 01-.567.267z"/>
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-13a1 1 0 10-2 0v.092a4.535 4.535 0 00-1.676.662C6.602 6.234 6 7.009 6 8c0 .99.602 1.765 1.324 2.246.48.32 1.054.545 1.676.662v1.941c-.391-.127-.68-.317-.843-.504a1 1 0 10-1.51 1.31c.562.649 1.413 1.076 2.353 1.253V15a1 1 0 102 0v-.092a4.535 4.535 0 001.676-.662C13.398 13.766 14 12.991 14 12c0-.99-.602-1.765-1.324-2.246A4.535 4.535 0 0011 9.092V7.151c.391.127.68.317.843.504a1 1 0 101.511-1.31c-.563-.649-1.413-1.076-2.354-1.253V5z" clip-rule="evenodd"/>
+                    </svg>
+                </div>
+                <div>
+                    <p class="text-2xl font-bold text-white">₹{{ avg_price|default:"0"|floatformat:0 }}</p>
+                    <p class="text-xs text-gray-400">Avg. Price/hr</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Loading State -->
+    <div id="loading-stations" class="hidden">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {% for i in "123456" %}
+                <div class="animate-pulse">
+                    <div class="bg-gaming-secondary rounded-xl overflow-hidden">
+                        <div class="h-48 bg-gaming-accent"></div>
+                        <div class="p-6">
+                            <div class="h-4 bg-gaming-accent rounded mb-2"></div>
+                            <div class="h-3 bg-gaming-accent rounded w-3/4 mb-4"></div>
+                            <div class="space-y-2 mb-4">
+                                <div class="h-2 bg-gaming-accent rounded"></div>
+                                <div class="h-2 bg-gaming-accent rounded w-5/6"></div>
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <div class="h-6 bg-gaming-accent rounded w-16"></div>
+                                <div class="h-8 bg-gaming-accent rounded w-20"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+    
+    <!-- Stations Grid -->
+    <div id="stations-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        {% for station in stations %}
+            <div class="station-card" 
+                 data-type="{{ station.station_type }}" 
+                 data-availability="{% if station.is_available %}available{% elif station.is_maintenance %}maintenance{% else %}occupied{% endif %}"
+                 data-price="{{ station.hourly_rate }}"
+                 data-name="{{ station.name }}">
+                {% include 'components/gaming_station_card.html' with station=station %}
+            </div>
+        {% empty %}
+            <!-- Empty State -->
+            <div class="col-span-full">
+                <div class="text-center py-12">
+                    <div class="w-24 h-24 bg-gaming-accent/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <svg class="w-12 h-12 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zm0 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V8zm0 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1v-2z" clip-rule="evenodd"></path>
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-semibold text-gray-300 mb-2">No Gaming Stations Found</h3>
+                    <p class="text-gray-400 mb-6">There are currently no gaming stations available.</p>
+                    {% if user.is_staff %}
+                        <a href="#" class="btn-primary">Add Gaming Station</a>
+                    {% endif %}
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+    
+    <!-- No Results State (Hidden by default) -->
+    <div id="no-results" class="hidden col-span-full">
+        <div class="text-center py-12">
+            <div class="w-24 h-24 bg-gaming-accent/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg class="w-12 h-12 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd"></path>
+                </svg>
+            </div>
+            <h3 class="text-xl font-semibold text-gray-300 mb-2">No Stations Match Your Filters</h3>
+            <p class="text-gray-400 mb-6">Try adjusting your filters to see more results.</p>
+            <button onclick="clearFilters()" class="btn-secondary">Clear Filters</button>
+        </div>
+    </div>
+</div>
+
+<script>
+// Enhanced station filtering and sorting functionality with smooth transitions
+function filterStations() {
+    const typeFilter = document.getElementById('station-type-filter').value;
+    const availabilityFilter = document.getElementById('availability-filter').value;
+    const priceFilter = document.getElementById('price-filter').value;
+    const stationCards = document.querySelectorAll('.station-card');
+    const noResults = document.getElementById('no-results');
+    const stationsGrid = document.getElementById('stations-grid');
+    let visibleCount = 0;
+    
+    // Add loading state
+    stationsGrid.style.opacity = '0.7';
+    stationsGrid.style.pointerEvents = 'none';
+    
+    // Apply filters with animation delay
+    setTimeout(() => {
+        stationCards.forEach((card, index) => {
+            const cardType = card.dataset.type;
+            const cardAvailability = card.dataset.availability;
+            const cardPrice = parseFloat(card.dataset.price);
+            
+            let showCard = true;
+            
+            // Apply type filter
+            if (typeFilter && cardType !== typeFilter) {
+                showCard = false;
+            }
+            
+            // Apply availability filter
+            if (availabilityFilter && cardAvailability !== availabilityFilter) {
+                showCard = false;
+            }
+            
+            // Apply price filter
+            if (priceFilter && !isPriceInRange(cardPrice, priceFilter)) {
+                showCard = false;
+            }
+            
+            // Animate card visibility
+            if (showCard) {
+                card.style.display = 'block';
+                card.style.opacity = '0';
+                card.style.transform = 'translateY(20px) scale(0.95)';
+                
+                setTimeout(() => {
+                    card.style.transition = 'all 0.5s ease-out';
+                    card.style.opacity = '1';
+                    card.style.transform = 'translateY(0) scale(1)';
+                }, index * 50); // Stagger animation
+                
+                visibleCount++;
+            } else {
+                card.style.transition = 'all 0.3s ease-out';
+                card.style.opacity = '0';
+                card.style.transform = 'translateY(-20px) scale(0.95)';
+                
+                setTimeout(() => {
+                    card.style.display = 'none';
+                }, 300);
+            }
+        });
+        
+        // Show/hide no results message with animation
+        setTimeout(() => {
+            if (visibleCount === 0) {
+                noResults.classList.remove('hidden');
+                noResults.classList.add('col-span-full');
+                noResults.style.opacity = '0';
+                noResults.style.transform = 'translateY(20px)';
+                
+                setTimeout(() => {
+                    noResults.style.transition = 'all 0.5s ease-out';
+                    noResults.style.opacity = '1';
+                    noResults.style.transform = 'translateY(0)';
+                }, 100);
+            } else {
+                noResults.style.transition = 'all 0.3s ease-out';
+                noResults.style.opacity = '0';
+                noResults.style.transform = 'translateY(-20px)';
+                
+                setTimeout(() => {
+                    noResults.classList.add('hidden');
+                    noResults.classList.remove('col-span-full');
+                }, 300);
+            }
+            
+            // Remove loading state
+            stationsGrid.style.opacity = '1';
+            stationsGrid.style.pointerEvents = 'auto';
+            
+            updateStats();
+            updateClearFiltersButton();
+        }, 200);
+    }, 100);
+}
+
+// Helper function to check if price is in range
+function isPriceInRange(price, range) {
+    switch (range) {
+        case '0-50':
+            return price >= 0 && price <= 50;
+        case '51-100':
+            return price >= 51 && price <= 100;
+        case '101-200':
+            return price >= 101 && price <= 200;
+        case '201+':
+            return price >= 201;
+        default:
+            return true;
+    }
+}
+
+function sortStations() {
+    const sortBy = document.getElementById('sort-options').value;
+    const stationsGrid = document.getElementById('stations-grid');
+    const stationCards = Array.from(document.querySelectorAll('.station-card'));
+    
+    // Add loading state
+    stationsGrid.style.opacity = '0.7';
+    stationsGrid.style.pointerEvents = 'none';
+    
+    // Animate cards out
+    stationCards.forEach((card, index) => {
+        card.style.transition = 'all 0.3s ease-out';
+        card.style.transform = 'translateY(-10px) scale(0.98)';
+        card.style.opacity = '0.5';
+    });
+    
+    setTimeout(() => {
+        // Sort cards
+        stationCards.sort((a, b) => {
+            switch (sortBy) {
+                case 'name':
+                    return a.dataset.name.localeCompare(b.dataset.name);
+                case 'type':
+                    return a.dataset.type.localeCompare(b.dataset.type);
+                case 'price-low':
+                    return parseFloat(a.dataset.price) - parseFloat(b.dataset.price);
+                case 'price-high':
+                    return parseFloat(b.dataset.price) - parseFloat(a.dataset.price);
+                case 'availability':
+                    const availabilityOrder = { 'available': 0, 'occupied': 1, 'maintenance': 2 };
+                    return availabilityOrder[a.dataset.availability] - availabilityOrder[b.dataset.availability];
+                default:
+                    return 0;
+            }
+        });
+        
+        // Re-append sorted cards
+        stationCards.forEach(card => {
+            stationsGrid.appendChild(card);
+        });
+        
+        // Animate cards back in with stagger
+        stationCards.forEach((card, index) => {
+            setTimeout(() => {
+                card.style.transition = 'all 0.5s ease-out';
+                card.style.transform = 'translateY(0) scale(1)';
+                card.style.opacity = '1';
+            }, index * 50);
+        });
+        
+        // Remove loading state
+        setTimeout(() => {
+            stationsGrid.style.opacity = '1';
+            stationsGrid.style.pointerEvents = 'auto';
+        }, stationCards.length * 50 + 200);
+        
+    }, 300);
+}
+
+function clearFilters() {
+    // Clear desktop filters
+    document.getElementById('station-type-filter').value = '';
+    document.getElementById('availability-filter').value = '';
+    document.getElementById('price-filter').value = '';
+    document.getElementById('sort-options').value = 'name';
+    
+    // Clear mobile filters
+    document.getElementById('mobile-station-type-filter').value = '';
+    document.getElementById('mobile-availability-filter').value = '';
+    document.getElementById('mobile-price-filter').value = '';
+    document.getElementById('mobile-sort-options').value = 'name';
+    
+    // Apply filters with animation
+    filterStations();
+    updateClearFiltersButton();
+    updateActiveFiltersCount();
+}
+
+// Mobile filter functions
+function toggleMobileFilters() {
+    const sheet = document.getElementById('mobile-filter-sheet');
+    const isOpen = !sheet.classList.contains('translate-y-full');
+    
+    if (isOpen) {
+        sheet.classList.add('translate-y-full');
+        document.body.style.overflow = 'auto';
+    } else {
+        sheet.classList.remove('translate-y-full');
+        document.body.style.overflow = 'hidden';
+        syncDesktopToMobile();
+    }
+}
+
+function syncMobileFilters() {
+    // Sync mobile values to desktop
+    document.getElementById('station-type-filter').value = document.getElementById('mobile-station-type-filter').value;
+    document.getElementById('availability-filter').value = document.getElementById('mobile-availability-filter').value;
+    document.getElementById('price-filter').value = document.getElementById('mobile-price-filter').value;
+    document.getElementById('sort-options').value = document.getElementById('mobile-sort-options').value;
+    
+    updateActiveFiltersCount();
+}
+
+function syncDesktopToMobile() {
+    // Sync desktop values to mobile
+    document.getElementById('mobile-station-type-filter').value = document.getElementById('station-type-filter').value;
+    document.getElementById('mobile-availability-filter').value = document.getElementById('availability-filter').value;
+    document.getElementById('mobile-price-filter').value = document.getElementById('price-filter').value;
+    document.getElementById('mobile-sort-options').value = document.getElementById('sort-options').value;
+}
+
+function applyMobileFilters() {
+    syncMobileFilters();
+    filterStations();
+    sortStations();
+    toggleMobileFilters();
+}
+
+function updateClearFiltersButton() {
+    const clearBtn = document.getElementById('clear-filters-btn');
+    const hasFilters = document.getElementById('station-type-filter').value ||
+                      document.getElementById('availability-filter').value ||
+                      document.getElementById('price-filter').value ||
+                      document.getElementById('sort-options').value !== 'name';
+    
+    if (hasFilters) {
+        clearBtn.style.opacity = '1';
+        clearBtn.style.pointerEvents = 'auto';
+        clearBtn.classList.add('animate-pulse');
+    } else {
+        clearBtn.style.opacity = '0';
+        clearBtn.style.pointerEvents = 'none';
+        clearBtn.classList.remove('animate-pulse');
+    }
+}
+
+function updateActiveFiltersCount() {
+    const countElement = document.getElementById('active-filters-count');
+    let count = 0;
+    
+    if (document.getElementById('station-type-filter').value) count++;
+    if (document.getElementById('availability-filter').value) count++;
+    if (document.getElementById('price-filter').value) count++;
+    if (document.getElementById('sort-options').value !== 'name') count++;
+    
+    if (count > 0) {
+        countElement.textContent = count;
+        countElement.classList.remove('hidden');
+    } else {
+        countElement.classList.add('hidden');
+    }
+}
+
+function updateStats() {
+    const stationCards = document.querySelectorAll('.station-card:not([style*="display: none"])');
+    let availableCount = 0;
+    let occupiedCount = 0;
+    
+    stationCards.forEach(card => {
+        const availability = card.dataset.availability;
+        if (availability === 'available') {
+            availableCount++;
+        } else if (availability === 'occupied') {
+            occupiedCount++;
+        }
+    });
+    
+    document.getElementById('available-count').textContent = availableCount;
+    document.getElementById('occupied-count').textContent = occupiedCount;
+}
+
+function bookStation(stationId) {
+    // Show loading state
+    const button = event.target;
+    const originalText = button.textContent;
+    button.disabled = true;
+    button.innerHTML = `
+        <svg class="animate-spin h-4 w-4 text-white inline mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+        </svg>
+        Booking...
+    `;
+    
+    // Simulate booking process (replace with actual booking logic)
+    setTimeout(() => {
+        // Redirect to booking page or show booking modal
+        window.location.href = `/booking/station/${stationId}/`;
+    }, 1000);
+}
+
+// Real-time updates (if using WebSocket or polling)
+function updateStationAvailability() {
+    // This would be connected to your real-time system
+    // For now, we'll just refresh the page periodically
+    // In a real implementation, you'd use WebSocket or Server-Sent Events
+}
+
+// Initialize on page load
+document.addEventListener('DOMContentLoaded', function() {
+    // Set up periodic updates (every 60 seconds - optimized)
+    setInterval(updateStationAvailability, 60000);
+    
+    // Initialize stats
+    updateStats();
+    updateClearFiltersButton();
+    updateActiveFiltersCount();
+    
+    // Add event listeners for filter changes
+    document.getElementById('station-type-filter').addEventListener('change', () => {
+        filterStations();
+        updateClearFiltersButton();
+        updateActiveFiltersCount();
+    });
+    
+    document.getElementById('availability-filter').addEventListener('change', () => {
+        filterStations();
+        updateClearFiltersButton();
+        updateActiveFiltersCount();
+    });
+    
+    document.getElementById('price-filter').addEventListener('change', () => {
+        filterStations();
+        updateClearFiltersButton();
+        updateActiveFiltersCount();
+    });
+    
+    document.getElementById('sort-options').addEventListener('change', () => {
+        sortStations();
+        updateClearFiltersButton();
+        updateActiveFiltersCount();
+    });
+    
+    // Close mobile filter sheet when clicking outside
+    document.addEventListener('click', function(event) {
+        const sheet = document.getElementById('mobile-filter-sheet');
+        const filterBtn = document.getElementById('mobile-filter-btn');
+        
+        if (!sheet.contains(event.target) && !filterBtn.contains(event.target) && 
+            !sheet.classList.contains('translate-y-full')) {
+            toggleMobileFilters();
+        }
+    });
+    
+    // Handle escape key for mobile filters
+    document.addEventListener('keydown', function(event) {
+        if (event.key === 'Escape') {
+            const sheet = document.getElementById('mobile-filter-sheet');
+            if (!sheet.classList.contains('translate-y-full')) {
+                toggleMobileFilters();
+            }
+        }
+    });
+    
+    // Add smooth scroll behavior for better UX
+    document.documentElement.style.scrollBehavior = 'smooth';
+});
+</script>
+
+<style>
+.gaming-stations-container {
+    animation: fadeIn 0.6s ease-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.station-card {
+    transition: all 0.5s ease-out;
+}
+
+.station-card:hover {
+    transform: translateY(-4px) scale(1.02);
+}
+
+/* Enhanced filter animations */
+@keyframes filterSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes filterSlideOut {
+    from {
+        opacity: 1;
+        transform: translateY(0);
+    }
+    to {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+}
+
+/* Mobile filter sheet animations */
+#mobile-filter-sheet {
+    transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+#mobile-filter-sheet .absolute.bottom-0 {
+    transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Enhanced glassmorphism for filters */
+.glass {
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.glass:hover {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(0, 212, 255, 0.3);
+}
+
+.glass:focus-within {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(0, 212, 255, 0.5);
+}
+
+/* Button enhancements */
+.btn-primary {
+    background: linear-gradient(135deg, #FF6B35, #00D4FF);
+    border: none;
+    color: white;
+    font-weight: 700;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-primary::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.5s ease;
+}
+
+.btn-primary:hover::before {
+    left: 100%;
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px) scale(1.05);
+}
+
+/* Loading states */
+.loading-overlay {
+    position: relative;
+}
+
+.loading-overlay::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(2px);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+}
+
+.loading-overlay.loading::after {
+    opacity: 1;
+}
+
+/* Pulse animation for active filters */
+@keyframes pulse {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.7;
+    }
+}
+
+.animate-pulse {
+    animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* Custom scrollbar for better aesthetics */
+.gaming-stations-container::-webkit-scrollbar {
+    width: 8px;
+}
+
+.gaming-stations-container::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 4px;
+}
+
+.gaming-stations-container::-webkit-scrollbar-thumb {
+    background: rgba(0, 212, 255, 0.3);
+    border-radius: 4px;
+    transition: background 0.3s ease;
+}
+
+.gaming-stations-container::-webkit-scrollbar-thumb:hover {
+    background: rgba(0, 212, 255, 0.5);
+}
+
+/* Mobile-specific enhancements */
+@media (max-width: 1024px) {
+    .station-card {
+        margin-bottom: 1rem;
+    }
+    
+    /* Touch-friendly interactions */
+    .glass {
+        min-height: 48px;
+    }
+    
+    button {
+        min-height: 48px;
+    }
+    
+    select {
+        min-height: 48px;
+    }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+    .gaming-stations-container,
+    .station-card,
+    .glass,
+    .btn-primary,
+    #mobile-filter-sheet,
+    * {
+        animation: none !important;
+        transition: none !important;
+    }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+    .glass {
+        background: rgba(255, 255, 255, 0.15);
+        border: 2px solid rgba(255, 255, 255, 0.3);
+    }
+    
+    .btn-primary {
+        border: 2px solid white;
+    }
+}
+
+/* Focus indicators for accessibility */
+select:focus,
+button:focus {
+    outline: 2px solid #00D4FF;
+    outline-offset: 2px;
+}
+
+/* Color utilities */
+.text-accent-cyan { color: #00D4FF; }
+.text-accent-orange { color: #FF6B35; }
+.text-neutral-300 { color: #CBD5E1; }
+.text-neutral-400 { color: #94A3B8; }
+.border-accent-cyan { border-color: #00D4FF; }
+.border-accent-orange { border-color: #FF6B35; }
+.border-glass-border { border-color: rgba(255, 255, 255, 0.1); }
+.bg-primary-900 { background-color: #001A33; }
+</style>

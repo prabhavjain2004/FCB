@@ -1,0 +1,172 @@
+{% extends "base.html" %}
+
+{% block title %}Login Cancelled - TapNex{% endblock %}
+
+{% block content %}
+<style>
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    @keyframes scaleIn {
+        from {
+            transform: scale(0);
+        }
+        to {
+            transform: scale(1);
+        }
+    }
+    
+    .animate-fade-in {
+        animation: fadeIn 0.5s ease-out;
+    }
+    
+    .animate-scale-in {
+        animation: scaleIn 0.5s ease-out 0.2s both;
+    }
+    
+    /* Mobile optimizations */
+    @media (max-width: 640px) {
+        .cancel-container {
+            padding: 1rem;
+            padding-top: 5rem !important;
+        }
+        
+        .cancel-card {
+            padding: 1.5rem;
+        }
+        
+        .cancel-icon {
+            width: 4rem;
+            height: 4rem;
+        }
+        
+        .cancel-title {
+            font-size: 1.5rem;
+            line-height: 2rem;
+        }
+        
+        .cancel-text {
+            font-size: 0.875rem;
+        }
+        
+        .cancel-btn {
+            padding: 0.875rem 1rem;
+            font-size: 0.9375rem;
+            touch-action: manipulation;
+            -webkit-tap-highlight-color: transparent;
+        }
+    }
+    
+    /* Enhanced button hover effects */
+    .cancel-btn {
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .cancel-btn::before {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 0;
+        height: 0;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.1);
+        transform: translate(-50%, -50%);
+        transition: width 0.6s, height 0.6s;
+    }
+    
+    .cancel-btn:active::before {
+        width: 300px;
+        height: 300px;
+    }
+    
+    /* Gradient background */
+    .cancel-bg {
+        background: linear-gradient(135deg, #1a1f2e 0%, #0f1419 100%);
+    }
+</style>
+
+<div class="cancel-bg min-h-screen flex items-center justify-center cancel-container py-12 pt-24">
+    <div class="max-w-md w-full animate-fade-in">
+        <div class="card text-center cancel-card">
+            <!-- Info Icon -->
+            <div class="w-20 h-20 cancel-icon bg-gradient-to-br from-blue-500/30 to-blue-600/20 rounded-full flex items-center justify-center mx-auto mb-6 animate-scale-in">
+                <svg class="w-10 h-10 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+            </div>
+
+            <h1 class="text-3xl cancel-title font-gaming font-bold text-white mb-4">
+                Login Cancelled
+            </h1>
+            
+            <p class="text-gray-400 cancel-text mb-8 leading-relaxed">
+                You decided to cancel the login process. No worries, you can try again anytime!
+            </p>
+
+            <!-- Info Message -->
+            <div class="bg-blue-500/10 rounded-lg p-4 mb-6 border border-blue-500/20">
+                <p class="text-sm text-blue-300">
+                    <i class="bi bi-info-circle mr-2"></i>
+                    No account was created or modified
+                </p>
+            </div>
+
+            <div class="space-y-3">
+                <a href="{% url 'authentication:customer_login' %}" class="btn-primary w-full flex items-center justify-center text-center cancel-btn">
+                    <i class="bi bi-box-arrow-in-right mr-2"></i>
+                    Try Logging In Again
+                </a>
+                
+                <a href="{% url 'home' %}" class="btn-secondary w-full flex items-center justify-center text-center cancel-btn">
+                    <i class="bi bi-house-door mr-2"></i>
+                    Return to Home
+                </a>
+            </div>
+
+            <!-- Additional Quick Links -->
+            <div class="mt-6 pt-6 border-t border-gaming-accent">
+                <div class="grid grid-cols-2 gap-3 mb-4">
+                    <a href="{% url 'booking:game_selection' %}" class="text-sm text-gray-400 hover:text-gaming-highlight transition-colors py-2">
+                        <i class="bi bi-controller block text-lg mb-1"></i>
+                        Browse Games
+                    </a>
+                    <a href="{% url 'contact' %}" class="text-sm text-gray-400 hover:text-gaming-highlight transition-colors py-2">
+                        <i class="bi bi-envelope block text-lg mb-1"></i>
+                        Contact Us
+                    </a>
+                </div>
+                
+                <p class="text-gray-500 text-xs">
+                    Need help? Our support team is here for you 24/7
+                </p>
+            </div>
+        </div>
+        
+        <!-- Footer branding -->
+        <div class="text-center mt-6">
+            <p class="text-gray-600 text-sm">
+                Powered by <span class="text-gaming-highlight font-semibold">TapNex</span>
+            </p>
+        </div>
+    </div>
+</div>
+
+<!-- Auto-redirect after 5 seconds -->
+<script>
+    // Optional: Auto-redirect to login page after 5 seconds
+    setTimeout(function() {
+        window.location.href = "{% url 'authentication:customer_login' %}";
+    }, 5000);
+</script>
+{% endblock %}

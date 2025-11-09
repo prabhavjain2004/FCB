@@ -1,0 +1,248 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}TapNex Superuser Dashboard{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gaming-primary">
+    <!-- Header -->
+    <div class="bg-gaming-secondary border-b border-gaming-accent">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h1 class="text-3xl font-gaming font-bold text-white">TapNex Administration</h1>
+                    <p class="text-gray-400 mt-1">Welcome back, {{ user.get_full_name|default:user.username }}</p>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <span class="text-sm text-gray-400">Last login: {{ user.last_login|date:"M d, Y H:i" }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Navigation Tabs -->
+    <div class="bg-gaming-secondary border-b border-gaming-accent">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <nav class="flex space-x-8 overflow-x-auto">
+                <a href="{% url 'authentication:tapnex_dashboard' %}" class="border-b-2 border-gaming-highlight text-gaming-highlight px-1 py-4 text-sm font-medium whitespace-nowrap">
+                    Dashboard
+                </a>
+                <a href="{% url 'authentication:manage_users' %}" class="border-b-2 border-transparent text-gray-400 hover:text-white hover:border-gray-300 px-1 py-4 text-sm font-medium whitespace-nowrap">
+                    Users
+                </a>
+                <a href="{% url 'authentication:manage_bookings' %}" class="border-b-2 border-transparent text-gray-400 hover:text-white hover:border-gray-300 px-1 py-4 text-sm font-medium whitespace-nowrap">
+                    Bookings
+                </a>
+                <a href="{% url 'authentication:manage_games' %}" class="border-b-2 border-transparent text-gray-400 hover:text-white hover:border-gray-300 px-1 py-4 text-sm font-medium whitespace-nowrap">
+                    Games
+                </a>
+                <a href="{% url 'authentication:revenue_reports' %}" class="border-b-2 border-transparent text-gray-400 hover:text-white hover:border-gray-300 px-1 py-4 text-sm font-medium whitespace-nowrap">
+                    Revenue
+                </a>
+                <a href="{% url 'authentication:system_analytics' %}" class="border-b-2 border-transparent text-gray-400 hover:text-white hover:border-gray-300 px-1 py-4 text-sm font-medium whitespace-nowrap">
+                    Analytics
+                </a>
+                <a href="{% url 'authentication:system_settings' %}" class="border-b-2 border-transparent text-gray-400 hover:text-white hover:border-gray-300 px-1 py-4 text-sm font-medium whitespace-nowrap">
+                    Settings
+                </a>
+            </nav>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Alerts -->
+        {% if alerts %}
+        <div class="mb-6 space-y-3">
+            {% for alert in alerts %}
+            <div class="{% if alert.type == 'warning' %}bg-yellow-900/30 border-yellow-600{% elif alert.type == 'error' %}bg-red-900/30 border-red-600{% else %}bg-blue-900/30 border-blue-600{% endif %} border px-4 py-3 rounded-lg flex items-center">
+                <svg class="w-5 h-5 mr-3" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
+                </svg>
+                <span class="text-sm text-white">{{ alert.message }}</span>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <!-- Quick Stats Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <!-- Total Users -->
+            <div class="bg-gaming-secondary border border-gaming-accent rounded-xl p-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-gray-400 text-sm">Total Users</p>
+                        <p class="text-3xl font-bold text-white mt-2">{{ stats.total_users }}</p>
+                    </div>
+                    <div class="w-12 h-12 bg-blue-500/20 rounded-lg flex items-center justify-center">
+                        <svg class="w-6 h-6 text-blue-400" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z"/>
+                        </svg>
+                    </div>
+                </div>
+                <p class="text-xs text-gray-500 mt-3">{{ stats.total_customers }} customers, {{ stats.total_cafe_owners }} cafe owners</p>
+            </div>
+
+            <!-- Total Bookings -->
+            <div class="bg-gaming-secondary border border-gaming-accent rounded-xl p-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-gray-400 text-sm">Total Bookings</p>
+                        <p class="text-3xl font-bold text-white mt-2">{{ stats.total_bookings }}</p>
+                    </div>
+                    <div class="w-12 h-12 bg-green-500/20 rounded-lg flex items-center justify-center">
+                        <svg class="w-6 h-6 text-green-400" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd"/>
+                        </svg>
+                    </div>
+                </div>
+                <p class="text-xs text-gray-500 mt-3">{{ stats.today_bookings }} today, {{ stats.pending_bookings }} pending</p>
+            </div>
+
+            <!-- Active Games -->
+            <div class="bg-gaming-secondary border border-gaming-accent rounded-xl p-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-gray-400 text-sm">Active Games</p>
+                        <p class="text-3xl font-bold text-white mt-2">{{ stats.active_games }}</p>
+                    </div>
+                    <div class="w-12 h-12 bg-purple-500/20 rounded-lg flex items-center justify-center">
+                        <svg class="w-6 h-6 text-purple-400" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M11 17a1 1 0 001.447.894l4-2A1 1 0 0017 15V9.236a1 1 0 00-1.447-.894l-4 2a1 1 0 00-.553.894V17zM15.211 6.276a1 1 0 000-1.788l-4.764-2.382a1 1 0 00-.894 0L4.789 4.488a1 1 0 000 1.788l4.764 2.382a1 1 0 00.894 0l4.764-2.382zM4.447 8.342A1 1 0 003 9.236V15a1 1 0 00.553.894l4 2A1 1 0 009 17v-5.764a1 1 0 00-.553-.894l-4-2z"/>
+                        </svg>
+                    </div>
+                </div>
+                <p class="text-xs text-gray-500 mt-3">{{ stats.total_games }} total games</p>
+            </div>
+
+            <!-- Today's Revenue -->
+            <div class="bg-gaming-secondary border border-gaming-accent rounded-xl p-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-gray-400 text-sm">Today's Revenue</p>
+                        <p class="text-3xl font-bold text-gaming-highlight mt-2">₹{{ real_time_metrics.today.revenue|floatformat:0 }}</p>
+                    </div>
+                    <div class="w-12 h-12 bg-gaming-highlight/20 rounded-lg flex items-center justify-center">
+                        <svg class="w-6 h-6 text-gaming-highlight" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M8.433 7.418c.155-.103.346-.196.567-.267v1.698a2.305 2.305 0 01-.567-.267C8.07 8.34 8 8.114 8 8c0-.114.07-.34.433-.582zM11 12.849v-1.698c.22.071.412.164.567.267.364.243.433.468.433.582 0 .114-.07.34-.433.582a2.305 2.305 0 01-.567.267z"/>
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-13a1 1 0 10-2 0v.092a4.535 4.535 0 00-1.676.662C6.602 6.234 6 7.009 6 8c0 .99.602 1.765 1.324 2.246.48.32 1.054.545 1.676.662v1.941c-.391-.127-.68-.317-.843-.504a1 1 0 10-1.51 1.31c.562.649 1.413 1.076 2.353 1.253V15a1 1 0 102 0v-.092a4.535 4.535 0 001.676-.662C13.398 13.766 14 12.991 14 12c0-.99-.602-1.765-1.324-2.246A4.535 4.535 0 0011 9.092V7.151c.391.127.68.317.843.504a1 1 0 101.511-1.31c-.563-.649-1.413-1.076-2.354-1.253V5z" clip-rule="evenodd"/>
+                        </svg>
+                    </div>
+                </div>
+                <p class="text-xs text-gray-500 mt-3">₹{{ real_time_metrics.month.revenue|floatformat:0 }} this month</p>
+            </div>
+        </div>
+
+        <!-- Two Column Layout -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+            <!-- Recent Bookings -->
+            <div class="bg-gaming-secondary border border-gaming-accent rounded-xl overflow-hidden">
+                <div class="px-6 py-4 border-b border-gaming-accent flex justify-between items-center">
+                    <h3 class="text-lg font-semibold text-white">Recent Bookings</h3>
+                    <a href="{% url 'authentication:manage_bookings' %}" class="text-sm text-gaming-highlight hover:underline">View All</a>
+                </div>
+                <div class="p-6">
+                    {% if recent_bookings %}
+                    <div class="space-y-4">
+                        {% for booking in recent_bookings %}
+                        <div class="flex items-center justify-between py-3 border-b border-gaming-accent/30 last:border-0">
+                            <div class="flex-1">
+                                <p class="text-white font-medium">{{ booking.customer.user.get_full_name|default:booking.customer.user.username }}</p>
+                                <p class="text-sm text-gray-400">{{ booking.game.name }} - {{ booking.booking_type }}</p>
+                            </div>
+                            <div class="text-right">
+                                <p class="text-gaming-highlight font-semibold">₹{{ booking.total_amount|floatformat:0 }}</p>
+                                <span class="text-xs px-2 py-1 rounded {% if booking.status == 'CONFIRMED' %}bg-green-900/30 text-green-400{% elif booking.status == 'PENDING' %}bg-yellow-900/30 text-yellow-400{% elif booking.status == 'COMPLETED' %}bg-blue-900/30 text-blue-400{% else %}bg-gray-900/30 text-gray-400{% endif %}">
+                                    {{ booking.status }}
+                                </span>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <p class="text-gray-400 text-center py-8">No recent bookings</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Recent Users -->
+            <div class="bg-gaming-secondary border border-gaming-accent rounded-xl overflow-hidden">
+                <div class="px-6 py-4 border-b border-gaming-accent flex justify-between items-center">
+                    <h3 class="text-lg font-semibold text-white">Recent Users</h3>
+                    <a href="{% url 'authentication:manage_users' %}" class="text-sm text-gaming-highlight hover:underline">View All</a>
+                </div>
+                <div class="p-6">
+                    {% if recent_users %}
+                    <div class="space-y-4">
+                        {% for user_obj in recent_users %}
+                        <div class="flex items-center justify-between py-3 border-b border-gaming-accent/30 last:border-0">
+                            <div class="flex items-center space-x-3">
+                                <div class="w-10 h-10 bg-gaming-highlight/20 rounded-full flex items-center justify-center">
+                                    <span class="text-gaming-highlight font-semibold">{{ user_obj.username|slice:":1"|upper }}</span>
+                                </div>
+                                <div>
+                                    <p class="text-white font-medium">{{ user_obj.get_full_name|default:user_obj.username }}</p>
+                                    <p class="text-sm text-gray-400">{{ user_obj.email }}</p>
+                                </div>
+                            </div>
+                            <div class="text-right">
+                                <p class="text-xs text-gray-400">{{ user_obj.date_joined|date:"M d, Y" }}</p>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <p class="text-gray-400 text-center py-8">No recent users</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="bg-gaming-secondary border border-gaming-accent rounded-xl p-6">
+            <h3 class="text-lg font-semibold text-white mb-4">Quick Actions</h3>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                {% if not cafe_owner %}
+                <a href="{% url 'authentication:create_cafe_owner' %}" class="bg-green-600 hover:bg-green-700 border border-green-500 rounded-lg p-4 text-center transition-all duration-200">
+                    <svg class="w-8 h-8 text-white mx-auto mb-2" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M8 9a3 3 0 100-6 3 3 0 000 6zM8 11a6 6 0 016 6H2a6 6 0 016-6zM16 7a1 1 0 10-2 0v1h-1a1 1 0 100 2h1v1a1 1 0 102 0v-1h1a1 1 0 100-2h-1V7z"/>
+                    </svg>
+                    <p class="text-white text-sm font-medium">Create Owner</p>
+                </a>
+                {% else %}
+                <a href="{% url 'authentication:cafe_owner_management' %}" class="bg-gaming-primary hover:bg-gaming-accent/30 border border-gaming-accent rounded-lg p-4 text-center transition-all duration-200">
+                    <svg class="w-8 h-8 text-gaming-highlight mx-auto mb-2" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z"/>
+                    </svg>
+                    <p class="text-white text-sm font-medium">Manage Owner</p>
+                </a>
+                {% endif %}
+                <a href="{% url 'authentication:manage_users' %}" class="bg-gaming-primary hover:bg-gaming-accent/30 border border-gaming-accent rounded-lg p-4 text-center transition-all duration-200">
+                    <svg class="w-8 h-8 text-gaming-highlight mx-auto mb-2" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M8 9a3 3 0 100-6 3 3 0 000 6zM8 11a6 6 0 016 6H2a6 6 0 016-6zM16 7a1 1 0 10-2 0v1h-1a1 1 0 100 2h1v1a1 1 0 102 0v-1h1a1 1 0 100-2h-1V7z"/>
+                    </svg>
+                    <p class="text-white text-sm font-medium">Manage Users</p>
+                </a>
+                <a href="{% url 'authentication:manage_bookings' %}" class="bg-gaming-primary hover:bg-gaming-accent/30 border border-gaming-accent rounded-lg p-4 text-center transition-all duration-200">
+                    <svg class="w-8 h-8 text-gaming-highlight mx-auto mb-2" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd"/>
+                    </svg>
+                    <p class="text-white text-sm font-medium">View Bookings</p>
+                </a>
+                <a href="{% url 'authentication:manage_games' %}" class="bg-gaming-primary hover:bg-gaming-accent/30 border border-gaming-accent rounded-lg p-4 text-center transition-all duration-200">
+                    <svg class="w-8 h-8 text-gaming-highlight mx-auto mb-2" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M11 17a1 1 0 001.447.894l4-2A1 1 0 0017 15V9.236a1 1 0 00-1.447-.894l-4 2a1 1 0 00-.553.894V17zM15.211 6.276a1 1 0 000-1.788l-4.764-2.382a1 1 0 00-.894 0L4.789 4.488a1 1 0 000 1.788l4.764 2.382a1 1 0 00.894 0l4.764-2.382zM4.447 8.342A1 1 0 003 9.236V15a1 1 0 00.553.894l4 2A1 1 0 009 17v-5.764a1 1 0 00-.553-.894l-4-2z"/>
+                    </svg>
+                    <p class="text-white text-sm font-medium">Manage Games</p>
+                </a>
+                <a href="{% url 'authentication:system_settings' %}" class="bg-gaming-primary hover:bg-gaming-accent/30 border border-gaming-accent rounded-lg p-4 text-center transition-all duration-200">
+                    <svg class="w-8 h-8 text-gaming-highlight mx-auto mb-2" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.836 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.533 1.533 0 012.287-.947c1.372.836 2.942-.734 2.106-2.106a1.533 1.533 0 01.947-2.287c1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.836-1.372-.734-2.942-2.106-2.106a1.532 1.532 0 01-2.287-.947zM10 13a3 3 0 100-6 3 3 0 000 6z" clip-rule="evenodd"/>
+                    </svg>
+                    <p class="text-white text-sm font-medium">Settings</p>
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+
+{% block title %}Database Browser - TapNex Superuser{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gaming-primary py-8">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <h1 class="text-3xl font-gaming font-bold text-white mb-8">Database Browser</h1>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {% for model in models_list %}
+            <div class="bg-gaming-secondary border border-gaming-accent rounded-xl p-6 hover:bg-gaming-accent/10 transition-all duration-200">
+                <h3 class="text-xl font-semibold text-white mb-2">{{ model.name }}</h3>
+                <p class="text-3xl font-bold text-gaming-highlight mb-4">{{ model.count }}</p>
+                <p class="text-sm text-gray-400">{{ model.count }} record{{ model.count|pluralize }}</p>
+            </div>
+            {% endfor %}
+        </div>
+
+        <div class="mt-8 bg-gaming-secondary border border-gaming-accent rounded-xl p-6">
+            <p class="text-gray-400">Select a model above to view and manage records. Full CRUD operations available for all models.</p>
+        </div>
+    </div>
+</div>
+{% endblock %}

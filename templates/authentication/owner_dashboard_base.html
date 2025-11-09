@@ -1,0 +1,250 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>
+      {% block title %}
+        Owner Dashboard
+      {% endblock %}- {{ cafe_owner.cafe_name }}
+    </title>
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="{% static 'images/tapnex_logo.png' %}" />
+    <link rel="apple-touch-icon" href="{% static 'images/tapnex_logo.png' %}" />
+
+    <!-- Tailwind CSS CDN (primary) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Chart.js for analytics -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+
+    <style>
+      .sidebar-collapsed {
+        width: 4rem;
+      }
+      .sidebar-expanded {
+        width: 16rem;
+      }
+      @media (max-width: 768px) {
+        .sidebar-mobile-hidden {
+          transform: translateX(-100%);
+        }
+        .sidebar-mobile-visible {
+          transform: translateX(0);
+        }
+      }
+    </style>
+  </head>
+  <body style="background-color: #111827;">
+    <div class="flex h-screen overflow-hidden">
+      <!-- Sidebar -->
+      <aside id="sidebar" class="sidebar-expanded text-white transition-all duration-300 ease-in-out flex-shrink-0 sidebar-mobile-hidden md:sidebar-mobile-visible overflow-y-auto" style="background: linear-gradient(to bottom, #1e3a8a, #1e40af, #1e3a8a);">
+        <!-- Logo & Cafe Name -->
+        <div class="p-4 border-b border-white/20">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+              <div class="w-10 h-10 flex items-center justify-center">
+                <img src="{% static 'images/tapnex_logo.png' %}" alt="TapNex Logo" class="w-full h-full object-contain" />
+              </div>
+              <div class="sidebar-text">
+                <h2 class="font-bold text-sm">{{ cafe_owner.cafe_name }}</h2>
+                <p class="text-xs text-gray-300">Owner Portal</p>
+              </div>
+            </div>
+            <button id="sidebarToggle" class="hidden md:block text-white hover:text-gray-300"><i class="fas fa-bars"></i></button>
+          </div>
+        </div>
+
+        <!-- Navigation Menu -->
+        <nav class="mt-6 px-3">
+          <a href="{% url 'authentication:owner_overview' %}"
+            class="flex items-center space-x-3 px-4 py-3 rounded-lg mb-2 transition-colors duration-200 {% if request.resolver_match.url_name == 'owner_overview' %}
+              bg-white/20
+            {% else %}
+              hover:bg-white/10
+            {% endif %}">
+            <i class="fas fa-home w-5"></i>
+            <span class="sidebar-text">Overview</span>
+          </a>
+
+          <a href="{% url 'authentication:owner_bookings' %}"
+            class="flex items-center space-x-3 px-4 py-3 rounded-lg mb-2 transition-colors duration-200 {% if request.resolver_match.url_name == 'owner_bookings' %}
+              bg-white/20
+            {% else %}
+              hover:bg-white/10
+            {% endif %}">
+            <i class="fas fa-calendar-check w-5"></i>
+            <span class="sidebar-text">Bookings</span>
+          </a>
+
+          <a href="{% url 'authentication:owner_games' %}"
+            class="flex items-center space-x-3 px-4 py-3 rounded-lg mb-2 transition-colors duration-200 {% if request.resolver_match.url_name == 'owner_games' %}
+              bg-white/20
+            {% else %}
+              hover:bg-white/10
+            {% endif %}">
+            <i class="fas fa-gamepad w-5"></i>
+            <span class="sidebar-text">Games & Stations</span>
+          </a>
+
+          <a href="{% url 'booking:game_management:custom_slot_create' %}" class="flex items-center space-x-3 px-4 py-3 rounded-lg mb-2 transition-colors duration-200 bg-gradient-to-r from-green-500/20 to-emerald-500/20 border border-green-400/30 hover:from-green-500/30 hover:to-emerald-500/30">
+            <i class="fas fa-calendar-plus w-5 text-green-300"></i>
+            <span class="sidebar-text text-green-200">Add Custom Slots</span>
+          </a>
+
+          <a href="{% url 'authentication:owner_customers' %}"
+            class="flex items-center space-x-3 px-4 py-3 rounded-lg mb-2 transition-colors duration-200 {% if request.resolver_match.url_name == 'owner_customers' %}
+              bg-white/20
+            {% else %}
+              hover:bg-white/10
+            {% endif %}">
+            <i class="fas fa-users w-5"></i>
+            <span class="sidebar-text">Customers</span>
+          </a>
+
+          <a href="{% url 'authentication:owner_revenue' %}"
+            class="flex items-center space-x-3 px-4 py-3 rounded-lg mb-2 transition-colors duration-200 {% if request.resolver_match.url_name == 'owner_revenue' %}
+              bg-white/20
+            {% else %}
+              hover:bg-white/10
+            {% endif %}">
+            <i class="fas fa-dollar-sign w-5"></i>
+            <span class="sidebar-text">Revenue & Finance</span>
+          </a>
+
+          <a href="{% url 'authentication:owner_reports' %}"
+            class="flex items-center space-x-3 px-4 py-3 rounded-lg mb-2 transition-colors duration-200 {% if request.resolver_match.url_name == 'owner_reports' %}
+              bg-white/20
+            {% else %}
+              hover:bg-white/10
+            {% endif %}">
+            <i class="fas fa-chart-line w-5"></i>
+            <span class="sidebar-text">Reports & Analytics</span>
+          </a>
+        </nav>
+
+        <!-- Bottom Section -->
+        <div class="absolute bottom-0 left-0 right-0 p-4 border-t border-white/20">
+          <a href="{% url 'authentication:logout' %}" class="flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-red-500/20 transition-colors duration-200 text-red-300">
+            <i class="fas fa-sign-out-alt w-5"></i>
+            <span class="sidebar-text">Logout</span>
+          </a>
+        </div>
+      </aside>
+
+      <!-- Main Content Area -->
+      <div class="flex-1 flex flex-col overflow-hidden">
+        <!-- Top Bar -->
+        <header class="bg-white shadow-md z-10">
+          <div class="flex items-center justify-between px-6 py-4">
+            <div class="flex items-center space-x-4">
+              <!-- Mobile Menu Toggle -->
+              <button id="mobileSidebarToggle" class="md:hidden text-gray-600 hover:text-gray-900"><i class="fas fa-bars text-xl"></i></button>
+
+              <div>
+                <h1 class="text-2xl font-bold text-gray-800">
+                  {% block page_title %}
+                    Dashboard
+                  {% endblock %}
+                </h1>
+                <p class="text-sm text-gray-600">
+                  {% block page_subtitle %}
+                    Welcome back!
+                  {% endblock %}
+                </p>
+              </div>
+            </div>
+
+            <div class="flex items-center space-x-4">
+              <!-- Search Bar -->
+              <div class="hidden lg:block relative">
+                <input type="text" placeholder="Search..." class="w-64 px-4 py-2 pl-10 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+                <i class="fas fa-search absolute left-3 top-3 text-gray-400"></i>
+              </div>
+
+              <!-- User Profile -->
+              <div class="relative group">
+                <button class="flex items-center space-x-3 px-3 py-2 rounded-lg hover:bg-gray-100 transition-colors duration-200">
+                  <div class="w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-full flex items-center justify-center text-white font-semibold">{{ user.first_name|first|default:user.username|first }}</div>
+                  <div class="hidden md:block text-left">
+                    <p class="text-sm font-semibold text-gray-800">{{ user.get_full_name|default:user.username }}</p>
+                    <p class="text-xs text-gray-600">Cafe Owner</p>
+                  </div>
+                  <i class="fas fa-chevron-down text-gray-600 text-xs"></i>
+                </button>
+
+                <!-- Dropdown Menu -->
+                <div class="hidden group-hover:block absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg py-2 border border-gray-200">
+                  <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"><i class="fas fa-user mr-2"></i> Profile</a>
+                  <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"><i class="fas fa-cog mr-2"></i> Settings</a>
+                  <hr class="my-2" />
+                  <a href="{% url 'authentication:logout' %}" class="block px-4 py-2 text-sm text-red-600 hover:bg-red-50"><i class="fas fa-sign-out-alt mr-2"></i> Logout</a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </header>
+
+        <!-- Page Content -->
+        <main class="flex-1 overflow-x-hidden overflow-y-auto bg-gray-100">
+          <div class="container mx-auto px-6 py-8">
+            {% block content %}
+
+            {% endblock %}
+          </div>
+        </main>
+      </div>
+    </div>
+
+    <!-- Mobile Sidebar Overlay -->
+    <div id="sidebarOverlay" class="hidden md:hidden fixed inset-0 bg-black bg-opacity-50 z-40"></div>
+
+    <script>
+      // Sidebar Toggle (Desktop)
+      const sidebar = document.getElementById('sidebar')
+      const sidebarToggle = document.getElementById('sidebarToggle')
+      const sidebarTexts = document.querySelectorAll('.sidebar-text')
+      
+      sidebarToggle?.addEventListener('click', () => {
+        sidebar.classList.toggle('sidebar-collapsed')
+        sidebar.classList.toggle('sidebar-expanded')
+      
+        sidebarTexts.forEach((text) => {
+          text.classList.toggle('hidden')
+        })
+      })
+      
+      // Mobile Sidebar Toggle
+      const mobileSidebarToggle = document.getElementById('mobileSidebarToggle')
+      const sidebarOverlay = document.getElementById('sidebarOverlay')
+      
+      mobileSidebarToggle?.addEventListener('click', () => {
+        sidebar.classList.toggle('sidebar-mobile-hidden')
+        sidebar.classList.toggle('sidebar-mobile-visible')
+        sidebarOverlay.classList.toggle('hidden')
+      })
+      
+      sidebarOverlay?.addEventListener('click', () => {
+        sidebar.classList.add('sidebar-mobile-hidden')
+        sidebar.classList.remove('sidebar-mobile-visible')
+        sidebarOverlay.classList.add('hidden')
+      })
+      
+      // Auto-refresh data every 60 seconds for real-time updates (optimized from 30s)
+      setInterval(() => {
+        if (typeof refreshDashboardData === 'function') {
+          refreshDashboardData()
+        }
+      }, 60000)
+    </script>
+
+    {% block extra_js %}
+
+    {% endblock %}
+  </body>
+</html>

@@ -1,0 +1,600 @@
+{% extends 'authentication/owner_base.html' %}
+{% load static %}
+
+{% block title %}{{ title }}{% endblock %}
+{% block page_title %}{{ title }}{% endblock %}
+{% block page_subtitle %}Configure schedule settings with real-time preview{% endblock %}
+
+{% block extra_css %}
+  <style>
+    .hero-bg {
+        position: absolute;
+        inset: 0;
+        overflow: hidden;
+        z-index: 0;
+        pointer-events: none;
+    }
+    
+    .gradient-orb {
+        position: absolute;
+        border-radius: 50%;
+        filter: blur(100px);
+        opacity: 0.2;
+        animation: floatOrb 20s ease-in-out infinite;
+    }
+    
+    .orb-1 {
+        width: 400px;
+        height: 400px;
+        background: radial-gradient(circle, rgba(102, 126, 234, 0.4) 0%, transparent 70%);
+        top: -100px;
+        right: -100px;
+    }
+    
+    .orb-2 {
+        width: 350px;
+        height: 350px;
+        background: radial-gradient(circle, rgba(168, 85, 247, 0.3) 0%, transparent 70%);
+        bottom: -80px;
+        left: -80px;
+        animation-delay: 7s;
+    }
+    
+    @keyframes floatOrb {
+        0%, 100% { transform: translate(0, 0) scale(1); }
+        33% { transform: translate(20px, -20px) scale(1.05); }
+        66% { transform: translate(-20px, 20px) scale(0.95); }
+    }
+    
+    .grid-pattern {
+        background-image: 
+            linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+        background-size: 50px 50px;
+        position: absolute;
+        inset: 0;
+        z-index: 0;
+    }
+    
+    .form-section {
+      background: rgba(30, 41, 59, 0.5);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 1.5rem;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+    
+    .game-info-card {
+      background: linear-gradient(to right, rgba(59, 130, 246, 0.1), rgba(99, 102, 241, 0.1));
+      border-radius: 1rem;
+      padding: 1.5rem;
+      border: 1px solid rgba(59, 130, 246, 0.2);
+    }
+    
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+    }
+    
+    .stat-card {
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 0.75rem;
+      padding: 1rem;
+      text-align: center;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    .stat-value {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: #60a5fa;
+    }
+    
+    .stat-label {
+      font-size: 0.875rem;
+      color: #9ca3af;
+      margin-top: 0.25rem;
+    }
+    
+    .preview-section {
+      background: linear-gradient(to right, rgba(16, 185, 129, 0.1), rgba(5, 150, 105, 0.1));
+      border-radius: 1rem;
+      padding: 1.5rem;
+      border: 1px solid rgba(16, 185, 129, 0.2);
+      margin-top: 1.5rem;
+    }
+    
+    .preview-loading {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem 0;
+    }
+    
+    .slot-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1rem;
+    }
+    
+    .day-card {
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 0.75rem;
+      padding: 1rem;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    .slot-item {
+      background: rgba(255, 255, 255, 0.03);
+      border-radius: 0.5rem;
+      padding: 0.5rem 0.75rem;
+      font-size: 0.875rem;
+      margin-bottom: 0.25rem;
+      color: #d1d5db;
+    }
+    
+    .revenue-analysis {
+      background: rgba(16, 185, 129, 0.1);
+      border-radius: 0.75rem;
+      padding: 1rem;
+      border: 1px solid rgba(16, 185, 129, 0.2);
+      margin-top: 1rem;
+    }
+    
+    .booking-impact {
+      background: rgba(245, 158, 11, 0.1);
+      border-radius: 0.75rem;
+      padding: 1rem;
+      border: 1px solid rgba(245, 158, 11, 0.2);
+      margin-top: 1rem;
+    }
+    
+    .error-message {
+      background: rgba(239, 68, 68, 0.1);
+      border-radius: 0.75rem;
+      padding: 1rem;
+      border: 1px solid rgba(239, 68, 68, 0.2);
+      color: #fca5a5;
+    }
+    
+    .field-group {
+      margin-bottom: 1.5rem;
+    }
+    
+    .form-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1.5rem;
+    }
+    
+    .checkbox-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 0.75rem;
+    }
+    
+    .checkbox-item {
+      display: flex;
+      align-items: center;
+    }
+  </style>
+{% endblock %}
+
+{% block content %}
+<div class="relative">
+    <!-- Background Elements -->
+    <div class="hero-bg">
+        <div class="gradient-orb orb-1"></div>
+        <div class="gradient-orb orb-2"></div>
+        <div class="grid-pattern"></div>
+    </div>
+    
+    <div class="relative z-10">
+      <!-- Header Actions -->
+      <div class="mb-6">
+        <div class="flex flex-wrap gap-3">
+          <div class="flex space-x-4">
+            <a href="{% url 'booking:game_management:advanced_schedule_management' game_id=game.id %}" class="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-medium flex items-center">
+              <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+              </svg>Advanced Analytics
+            </a>
+            <a href="{% url 'booking:game_management:game_detail' game_id=game.id %}" class="text-gray-600 hover:text-gray-800 flex items-center">
+              <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+              </svg>Back to Game Details
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Game Info Card -->
+      <div class="game-info-card mb-6">
+        <div class="flex items-start justify-between">
+          <div>
+            <h2 class="text-xl font-semibold text-gray-900">{{ game.name }}</h2>
+            <p class="text-gray-600 mt-1">{{ game.description }}</p>
+            <div class="mt-4 grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+              <div>
+                <span class="font-medium">Capacity:</span> {{ game.capacity }} players
+              </div>
+              <div>
+                <span class="font-medium">Type:</span> {{ game.get_booking_type_display }}
+              </div>
+              <div>
+                <span class="font-medium">Private Price:</span> ₹{{ game.private_price }}
+              </div>
+              {% if game.shared_price %}
+                <div>
+                  <span class="font-medium">Shared Price:</span> ₹{{ game.shared_price }}/person
+                </div>
+              {% endif %}
+            </div>
+          </div>
+          {% if game.image %}
+            <img src="{{ game.image.url }}" alt="{{ game.name }}" class="w-24 h-24 rounded-lg object-cover" />
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- Current Statistics -->
+      <div class="stats-grid mb-6">
+        <div class="stat-card">
+          <div class="stat-value">{{ total_slots }}</div>
+          <div class="stat-label">Total Active Slots</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value">{{ upcoming_bookings }}</div>
+          <div class="stat-label">Upcoming Bookings</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value">{{ game.slot_duration_minutes }}min</div>
+          <div class="stat-label">Current Slot Duration</div>
+        </div>
+      </div>
+
+      <form method="post" id="scheduleForm" class="space-y-6">
+        {% csrf_token %}
+
+        <!-- Schedule Configuration -->
+        <div class="form-section">
+          <h2 class="text-xl font-semibold text-gray-900 mb-6">Schedule Configuration</h2>
+
+          <!-- Operating Hours -->
+          <div class="form-row">
+            <div class="field-group">
+              <label for="{{ form.opening_time.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">{{ form.opening_time.label }}</label>
+              {{ form.opening_time }}
+              {% if form.opening_time.help_text %}
+                <p class="mt-1 text-sm text-gray-500">{{ form.opening_time.help_text }}</p>
+              {% endif %}
+              {% if form.opening_time.errors %}
+                <div class="mt-1 text-sm text-red-600">
+                  {% for error in form.opening_time.errors %}
+                    {{ error }}
+                  {% endfor %}
+                </div>
+              {% endif %}
+            </div>
+
+            <div class="field-group">
+              <label for="{{ form.closing_time.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">{{ form.closing_time.label }}</label>
+              {{ form.closing_time }}
+              {% if form.closing_time.help_text %}
+                <p class="mt-1 text-sm text-gray-500">{{ form.closing_time.help_text }}</p>
+              {% endif %}
+              {% if form.closing_time.errors %}
+                <div class="mt-1 text-sm text-red-600">
+                  {% for error in form.closing_time.errors %}
+                    {{ error }}
+                  {% endfor %}
+                </div>
+              {% endif %}
+            </div>
+          </div>
+
+          <!-- Slot Duration -->
+          <div class="field-group">
+            <label for="{{ form.slot_duration_minutes.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">{{ form.slot_duration_minutes.label }}</label>
+            {{ form.slot_duration_minutes }}
+            {% if form.slot_duration_minutes.help_text %}
+              <p class="mt-1 text-sm text-gray-500">{{ form.slot_duration_minutes.help_text }}</p>
+            {% endif %}
+            {% if form.slot_duration_minutes.errors %}
+              <div class="mt-1 text-sm text-red-600">
+                {% for error in form.slot_duration_minutes.errors %}
+                  {{ error }}
+                {% endfor %}
+              </div>
+            {% endif %}
+          </div>
+
+          <!-- Available Days -->
+          <div class="field-group">
+            <label class="block text-sm font-medium text-gray-700 mb-2">{{ form.available_days.label }}</label>
+            <div class="checkbox-grid">
+              {% for choice in form.available_days %}
+                <div class="checkbox-item">
+                  {{ choice.tag }}
+                  <label for="{{ choice.id_for_label }}" class="ml-2 text-sm text-gray-700">{{ choice.choice_label }}</label>
+                </div>
+              {% endfor %}
+            </div>
+            {% if form.available_days.help_text %}
+              <p class="mt-2 text-sm text-gray-500">{{ form.available_days.help_text }}</p>
+            {% endif %}
+            {% if form.available_days.errors %}
+              <div class="mt-2 text-sm text-red-600">
+                {% for error in form.available_days.errors %}
+                  {{ error }}
+                {% endfor %}
+              </div>
+            {% endif %}
+          </div>
+
+          <!-- Regenerate Slots Option -->
+          <div class="mt-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
+            <div class="flex items-center">
+              {{ form.regenerate_slots }}
+              <label for="{{ form.regenerate_slots.id_for_label }}" class="ml-3 text-sm font-medium text-gray-700">{{ form.regenerate_slots.label }}</label>
+            </div>
+            {% if form.regenerate_slots.help_text %}
+              <p class="mt-2 text-sm text-gray-600">{{ form.regenerate_slots.help_text }}</p>
+            {% endif %}
+          </div>
+        </div>
+
+        <!-- Real-time Preview Section -->
+        <div class="preview-section" id="previewSection" style="display: none;">
+          <h2 class="text-xl font-semibold text-gray-900 mb-4">Schedule Preview</h2>
+
+          <div id="previewContent">
+            <div class="preview-loading">
+              <svg class="animate-spin h-8 w-8 text-green-600" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+              <span class="ml-2 text-gray-600">Generating preview...</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Form Actions -->
+        <div class="flex justify-end space-x-4">
+          <a href="{% url 'booking:game_management:game_detail' game_id=game.id %}" class="px-6 py-3 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 font-medium">Cancel</a>
+          <button type="submit" id="submitBtn" class="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium">{{ submit_text }}</button>
+        </div>
+      </form>
+    </div>
+</div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      const form = document.getElementById('scheduleForm')
+      const scheduleInputs = document.querySelectorAll('#scheduleForm input[type="time"], #scheduleForm input[type="number"], #scheduleForm input[type="checkbox"][name="available_days"]')
+      const submitBtn = document.getElementById('submitBtn')
+      const previewSection = document.getElementById('previewSection')
+      const previewContent = document.getElementById('previewContent')
+    
+      let previewTimeout
+    
+      // Handle input changes for real-time preview
+      scheduleInputs.forEach((input) => {
+        input.addEventListener('change', updatePreview)
+        if (input.type === 'time' || input.type === 'number') {
+          input.addEventListener('input', function () {
+            clearTimeout(previewTimeout)
+            previewTimeout = setTimeout(updatePreview, 500)
+          })
+        }
+      })
+    
+      // Initial preview on page load
+      updatePreview()
+    
+      function updatePreview() {
+        const openingTime = document.getElementById('{{ form.opening_time.id_for_label }}').value
+        const closingTime = document.getElementById('{{ form.closing_time.id_for_label }}').value
+        const slotDuration = document.getElementById('{{ form.slot_duration_minutes.id_for_label }}').value
+        const selectedDays = Array.from(document.querySelectorAll('input[name="available_days"]:checked')).map((cb) => cb.value)
+    
+        if (!openingTime || !closingTime || !slotDuration || selectedDays.length === 0) {
+          previewSection.style.display = 'none'
+          return
+        }
+    
+        // Show preview section
+        previewSection.style.display = 'block'
+    
+        // Show loading state
+        previewContent.innerHTML = `
+                <div class="preview-loading">
+                    <svg class="animate-spin h-8 w-8 text-green-600" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    <span class="ml-2 text-gray-600">Generating preview...</span>
+                </div>
+            `
+    
+        // Prepare form data
+        const formData = new URLSearchParams()
+        formData.append('opening_time', openingTime)
+        formData.append('closing_time', closingTime)
+        formData.append('slot_duration_minutes', slotDuration)
+        formData.append('game_id', '{{ game.id }}')
+        selectedDays.forEach((day) => {
+          formData.append('available_days[]', day)
+        })
+    
+        // Make AJAX request for preview
+        fetch(`{% url 'booking:game_management:schedule_preview' %}?${formData.toString()}`)
+          .then((response) => response.json())
+          .then((data) => {
+            if (data.success) {
+              renderPreview(data)
+            } else {
+              renderError(data.error)
+            }
+          })
+          .catch((error) => {
+            renderError('Failed to generate preview: ' + error.message)
+          })
+      }
+    
+      function renderPreview(data) {
+        const stats = data.statistics
+        const slots = data.preview_slots
+    
+        let html = `
+                <!-- Statistics -->
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                    <div class="stat-card">
+                        <div class="stat-value">${stats.total_slots_14_days}</div>
+                        <div class="stat-label">Total Slots (14 days)</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">${stats.average_slots_per_day}</div>
+                        <div class="stat-label">Avg Slots/Day</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">${stats.operating_days}</div>
+                        <div class="stat-label">Operating Days</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">${stats.operating_hours_per_day}h</div>
+                        <div class="stat-label">Hours/Day</div>
+                    </div>
+                </div>
+            `
+    
+        if (slots.length > 0) {
+          html += `
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4">Next 14 Days Preview</h3>
+                    <div class="slot-grid">
+                `
+    
+          slots.forEach((day) => {
+            html += `
+                        <div class="day-card">
+                            <h4 class="font-medium text-gray-900 mb-2">${day.day_name}</h4>
+                            <p class="text-sm text-gray-600 mb-3">${day.date} (${day.slot_count} slots)</p>
+                            <div class="space-y-1">
+                    `
+    
+            day.slots.slice(0, 8).forEach((slot) => {
+              html += `<div class="slot-item">${slot.start_time} - ${slot.end_time}</div>`
+            })
+    
+            if (day.slots.length > 8) {
+              html += `<div class="text-xs text-gray-500">+${day.slots.length - 8} more slots</div>`
+            }
+    
+            html += `
+                            </div>
+                        </div>
+                    `
+          })
+    
+          html += '</div>'
+        }
+    
+        // Add revenue analysis
+        if (data.revenue_analysis) {
+          html += `
+                    <div class="revenue-analysis">
+                        <h4 class="font-medium text-green-800 mb-3">Revenue Analysis (Weekly Potential)</h4>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                `
+    
+          if (data.revenue_analysis.private_only) {
+            const privateAnalysis = data.revenue_analysis.private_only
+            html += `
+                        <div class="bg-white rounded p-3">
+                            <strong class="text-gray-900">Private Bookings Only:</strong><br>
+                            <span class="text-2xl font-bold text-green-600">₹${privateAnalysis.potential_revenue.toFixed(2)}</span><br>
+                            <span class="text-gray-600">${privateAnalysis.weekly_slots} slots × ₹${privateAnalysis.price_per_slot}</span>
+                        </div>
+                    `
+          }
+    
+          if (data.revenue_analysis.shared_only) {
+            const sharedAnalysis = data.revenue_analysis.shared_only
+            html += `
+                        <div class="bg-white rounded p-3">
+                            <strong class="text-gray-900">Shared Bookings Only:</strong><br>
+                            <span class="text-2xl font-bold text-green-600">₹${sharedAnalysis.potential_revenue.toFixed(2)}</span><br>
+                            <span class="text-gray-600">${sharedAnalysis.weekly_slots} slots × ${sharedAnalysis.capacity_per_slot} spots × ₹${sharedAnalysis.price_per_spot}</span>
+                        </div>
+                    `
+          }
+    
+          if (data.revenue_analysis.mixed_50_50) {
+            const mixedAnalysis = data.revenue_analysis.mixed_50_50
+            html += `
+                        <div class="bg-white rounded p-3">
+                            <strong class="text-gray-900">Mixed Bookings (50/50):</strong><br>
+                            <span class="text-2xl font-bold text-green-600">₹${mixedAnalysis.total_revenue.toFixed(2)}</span><br>
+                            <span class="text-gray-600">Private: ₹${mixedAnalysis.private_revenue.toFixed(2)} + Shared: ₹${mixedAnalysis.shared_revenue.toFixed(2)}</span>
+                        </div>
+                    `
+          }
+    
+          html += `
+                        </div>
+                    </div>
+                `
+        }
+    
+        // Add booking impact
+        if (data.booking_impact) {
+          html += `
+                    <div class="booking-impact">
+                        <h4 class="font-medium text-yellow-800 mb-2">
+                            <svg class="w-5 h-5 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+                            </svg>
+                            Existing Bookings Impact
+                        </h4>
+                        <p class="text-sm">${data.booking_impact.message}</p>
+                    </div>
+                `
+        }
+    
+        previewContent.innerHTML = html
+      }
+    
+      function renderError(error) {
+        previewContent.innerHTML = `
+                <div class="error-message">
+                    <div class="flex items-center">
+                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        <span class="font-medium">Preview Error</span>
+                    </div>
+                    <p class="mt-2">${error}</p>
+                </div>
+            `
+      }
+    
+      // Form submission
+      form.addEventListener('submit', function (e) {
+        // Show loading state
+        submitBtn.disabled = true
+        submitBtn.innerHTML = `
+                <svg class="animate-spin h-5 w-5 mr-2 inline" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                Updating Schedule...
+            `
+      })
+    })
+  </script>
+{% endblock %}

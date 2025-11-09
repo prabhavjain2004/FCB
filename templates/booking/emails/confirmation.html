@@ -1,0 +1,164 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Booking Confirmation - Gaming Cafe</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f4f4f4;
+        }
+        .container {
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #e94560;
+        }
+        .logo {
+            margin-bottom: 10px;
+            text-align: center;
+        }
+        .logo img {
+            max-width: 100px;
+            height: auto;
+        }
+        .booking-details {
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+        }
+        .detail-row:last-child {
+            border-bottom: none;
+        }
+        .label {
+            font-weight: bold;
+            color: #555;
+        }
+        .value {
+            color: #333;
+        }
+        .total {
+            font-size: 18px;
+            font-weight: bold;
+            color: #e94560;
+        }
+        .button {
+            display: inline-block;
+            background-color: #e94560;
+            color: white;
+            padding: 12px 24px;
+            text-decoration: none;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+            color: #666;
+            font-size: 14px;
+        }
+        .success-icon {
+            color: #28a745;
+            font-size: 48px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo">
+                <img src="{{ request.scheme }}://{{ request.get_host }}{% static 'images/tapnex_logo.png' %}" alt="TapNex Logo">
+            </div>
+            <h1 style="color: #333; margin: 0;">Booking Confirmed!</h1>
+        </div>
+        
+        <div class="success-icon">✅</div>
+        
+        <p>Hi {{ user.first_name|default:user.username }},</p>
+        
+        <p>Great news! Your gaming session has been confirmed. We're excited to see you at our gaming cafe!</p>
+        
+        <div class="booking-details">
+            <h3 style="margin-top: 0; color: #e94560;">Booking Details</h3>
+            
+            <div class="detail-row">
+                <span class="label">Booking ID:</span>
+                <span class="value">{{ booking.id }}</span>
+            </div>
+            
+            <div class="detail-row">
+                <span class="label">Gaming Station:</span>
+                <span class="value">{{ booking.gaming_station.name }} ({{ booking.gaming_station.get_station_type_display }})</span>
+            </div>
+            
+            <div class="detail-row">
+                <span class="label">Date:</span>
+                <span class="value">{{ booking.start_time|date:"l, F j, Y" }}</span>
+            </div>
+            
+            <div class="detail-row">
+                <span class="label">Time:</span>
+                <span class="value">{{ booking.start_time|date:"g:i A" }} - {{ booking.end_time|date:"g:i A" }}</span>
+            </div>
+            
+            <div class="detail-row">
+                <span class="label">Duration:</span>
+                <span class="value">{{ booking.duration_hours|floatformat:1 }} hour{{ booking.duration_hours|floatformat:1|add:"0"|length|add:"-1"|slice:"1:" }}s</span>
+            </div>
+            
+            <div class="detail-row">
+                <span class="label">Total Amount:</span>
+                <span class="value total">₹{{ booking.total_amount }}</span>
+            </div>
+        </div>
+        
+        <h3>What to Expect:</h3>
+        <ul>
+            <li>Please arrive 10 minutes before your session starts</li>
+            <li>Bring a valid ID for verification</li>
+            <li>Our staff will guide you to your gaming station</li>
+            <li>Enjoy your gaming experience!</li>
+        </ul>
+        
+        <h3>Need to Make Changes?</h3>
+        <p>If you need to modify or cancel your booking, please contact us at least 2 hours before your session starts.</p>
+        
+        <div style="text-align: center;">
+            <a href="#" class="button">View My Bookings</a>
+        </div>
+        
+        <div class="footer">
+            <p><strong>Gaming Cafe</strong><br>
+            TapNex Arena<br>
+            Phone: +91 88230 04349<br>
+            Email: info@tapnex.tech</p>
+            
+            <p>Thank you for choosing Gaming Cafe!</p>
+        </div>
+    </div>
+</body>
+</html>

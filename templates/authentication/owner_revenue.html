@@ -1,0 +1,322 @@
+{% extends 'authentication/owner_base.html' %}
+{% load static %}
+
+{% block title %}Revenue & Finance{% endblock %}
+{% block page_title %}Revenue & Finance{% endblock %}
+{% block page_subtitle %}Financial tracking and payment management{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Fix infinite scroll - prevent background from extending page */
+    .revenue-content-wrapper {
+        position: relative;
+        contain: layout style paint;
+        isolation: isolate;
+        min-height: auto;
+    }
+    
+    .hero-bg {
+        position: fixed;
+        top: 4rem;
+        left: 0;
+        right: 0;
+        height: 100vh;
+        overflow: hidden;
+        z-index: -1;
+        pointer-events: none;
+        contain: strict;
+    }
+    
+    .gradient-orb {
+        position: absolute;
+        border-radius: 50%;
+        filter: blur(100px);
+        opacity: 0.15;
+        /* REMOVED ANIMATION - this was causing infinite scroll */
+        will-change: auto;
+        transform: translateZ(0);
+        backface-visibility: hidden;
+    }
+    
+    .orb-1 {
+        width: 400px;
+        height: 400px;
+        background: radial-gradient(circle, rgba(102, 126, 234, 0.4) 0%, transparent 70%);
+        top: 10%;
+        right: 10%;
+    }
+    
+    .orb-2 {
+        width: 350px;
+        height: 350px;
+        background: radial-gradient(circle, rgba(168, 85, 247, 0.3) 0%, transparent 70%);
+        bottom: 10%;
+        left: 10%;
+    }
+    
+    .grid-pattern {
+        background-image: 
+            linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+        background-size: 50px 50px;
+        position: absolute;
+        inset: 0;
+        z-index: 0;
+    }
+    
+    @media (max-width: 768px) {
+        .orb-1, .orb-2 {
+            width: 250px;
+            height: 250px;
+            filter: blur(60px);
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Background Elements (Fixed Position) -->
+<div class="hero-bg">
+    <div class="gradient-orb orb-1"></div>
+    <div class="gradient-orb orb-2"></div>
+    <div class="grid-pattern"></div>
+</div>
+
+<div class="revenue-content-wrapper">
+    <!-- Period Filter -->
+    <div class="owner-card mb-6 relative z-10 animate-fade-in-up">
+        <form method="get" class="flex flex-col sm:flex-row items-end gap-4">
+            <div class="flex-1 w-full">
+                <label class="block text-sm font-medium text-gray-300 mb-2">Time Period</label>
+                <select name="period" class="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                    <option value="today" {% if period == 'today' %}selected{% endif %}>Today</option>
+                    <option value="week" {% if period == 'week' %}selected{% endif %}>This Week</option>
+                    <option value="month" {% if period == 'month' %}selected{% endif %}>This Month</option>
+                    <option value="year" {% if period == 'year' %}selected{% endif %}>This Year</option>
+                </select>
+            </div>
+            <button type="submit" class="btn btn-primary w-full sm:w-auto">
+                <i class="bi bi-funnel"></i> Apply
+            </button>
+        </form>
+        <p class="text-sm text-gray-400 mt-3">
+            Showing data from {{ start_date|date:"M d, Y" }} to {{ end_date|date:"M d, Y" }}
+        </p>
+    </div>
+
+    <!-- Revenue Summary -->
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8 relative z-10">
+        <!-- Total Revenue (Owner's Earnings) -->
+        <div class="stat-card animate-fade-in-up" style="animation-delay: 0.1s; background: linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(5, 150, 105, 0.2)); border-color: rgba(16, 185, 129, 0.3);">
+            <p class="text-gray-300 text-sm mb-2 font-medium">Total Revenue</p>
+            <p class="text-4xl font-black text-green-400 mb-2" style="font-family: 'Orbitron', sans-serif;">₹{{ revenue_analytics.totals.gross_revenue|floatformat:2 }}</p>
+            <p class="text-xs text-gray-400">Your earnings after commission</p>
+        </div>
+
+        <!-- Total Bookings -->
+        <div class="stat-card animate-fade-in-up" style="animation-delay: 0.2s; background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(37, 99, 235, 0.2)); border-color: rgba(59, 130, 246, 0.3);">
+            <p class="text-gray-300 text-sm mb-2 font-medium">Total Bookings</p>
+            <p class="text-4xl font-black text-blue-400 mb-2" style="font-family: 'Orbitron', sans-serif;">{{ revenue_analytics.totals.total_bookings }}</p>
+            <p class="text-xs text-gray-400">Completed bookings</p>
+        </div>
+
+        <!-- Average Booking Value -->
+        <div class="stat-card animate-fade-in-up" style="animation-delay: 0.3s; background: linear-gradient(135deg, rgba(168, 85, 247, 0.2), rgba(147, 51, 234, 0.2)); border-color: rgba(168, 85, 247, 0.3);">
+            <p class="text-gray-300 text-sm mb-2 font-medium">Avg. Booking Value</p>
+            <p class="text-4xl font-black text-purple-400 mb-2" style="font-family: 'Orbitron', sans-serif;">
+                {% if revenue_analytics.totals.total_bookings > 0 %}
+                    ₹{% widthratio revenue_analytics.totals.gross_revenue 1 revenue_analytics.totals.total_bookings %}
+                {% else %}
+                    ₹0
+                {% endif %}
+            </p>
+            <p class="text-xs text-gray-400">Per booking</p>
+        </div>
+
+        <!-- Commission & Platform Fee Info -->
+        <div class="stat-card animate-fade-in-up" style="animation-delay: 0.4s; background: linear-gradient(135deg, rgba(107, 114, 128, 0.2), rgba(75, 85, 99, 0.2)); border-color: rgba(107, 114, 128, 0.3);">
+            <p class="text-gray-300 text-sm mb-2 font-medium">Platform Rates</p>
+            <div class="space-y-1">
+                <p class="text-lg font-bold text-gray-300">Commission: <span class="text-yellow-400">{{ revenue_analytics.settings.commission_rate }}%</span></p>
+                <p class="text-lg font-bold text-gray-300">
+                    Platform Fee: 
+                    <span class="text-yellow-400">
+                        {% if revenue_analytics.settings.platform_fee_type == 'PERCENT' %}
+                            {{ revenue_analytics.settings.platform_fee }}%
+                        {% else %}
+                            ₹{{ revenue_analytics.settings.platform_fee }}
+                        {% endif %}
+                    </span>
+                </p>
+            </div>
+            <p class="text-xs text-gray-400 mt-1">Info only</p>
+        </div>
+    </div>
+
+    <!-- Booking Type Breakdown -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8 relative z-10">
+        <div class="owner-card animate-fade-in-up" style="animation-delay: 0.5s;">
+            <h3 class="text-xl font-bold text-white mb-6">Booking Type Breakdown</h3>
+            <div class="space-y-4">
+                <div class="flex items-center justify-between p-4 rounded-lg" style="background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.3);">
+                    <div>
+                        <p class="text-sm text-gray-300">Private Bookings</p>
+                        <p class="text-2xl font-black text-blue-400">{{ revenue_analytics.booking_breakdown.private_bookings }}</p>
+                    </div>
+                    <div class="text-right">
+                        <p class="text-sm text-gray-400">Revenue</p>
+                        <p class="text-xl font-bold text-green-400">₹{{ revenue_analytics.booking_breakdown.private_revenue|floatformat:2 }}</p>
+                    </div>
+                </div>
+                <div class="flex items-center justify-between p-4 rounded-lg" style="background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3);">
+                    <div>
+                        <p class="text-sm text-gray-300">Shared Bookings</p>
+                        <p class="text-2xl font-black text-green-400">{{ revenue_analytics.booking_breakdown.shared_bookings }}</p>
+                    </div>
+                    <div class="text-right">
+                        <p class="text-sm text-gray-400">Revenue</p>
+                        <p class="text-xl font-bold text-green-400">₹{{ revenue_analytics.booking_breakdown.shared_revenue|floatformat:2 }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Revenue Trend Chart -->
+        <div class="owner-card animate-fade-in-up" style="animation-delay: 0.6s;">
+            <h3 class="text-xl font-bold text-white mb-6">Revenue Trend</h3>
+            <div style="position: relative; height: 250px; width: 100%;">
+                <canvas id="revenueTrendChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Revenue by Game - Full Width Table -->
+    <div class="owner-card mb-8 relative z-10 animate-fade-in-up" style="animation-delay: 0.7s;">
+        <h3 class="text-xl font-bold text-white mb-6">Revenue by Game</h3>
+        <div class="overflow-x-auto">
+            <table class="w-full">
+                <thead>
+                    <tr class="border-b border-white/10">
+                        <th class="text-left py-3 px-4 text-sm font-semibold text-gray-300">Game</th>
+                        <th class="text-center py-3 px-4 text-sm font-semibold text-gray-300">Total Bookings</th>
+                        <th class="text-center py-3 px-4 text-sm font-semibold text-gray-300">Private</th>
+                        <th class="text-center py-3 px-4 text-sm font-semibold text-gray-300">Shared</th>
+                        <th class="text-right py-3 px-4 text-sm font-semibold text-gray-300">Total Revenue</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for game_name, stats in game_breakdown %}
+                    <tr class="border-b border-white/5 hover:bg-white/5 transition-colors">
+                        <td class="py-3 px-4 text-white font-medium">{{ game_name }}</td>
+                        <td class="py-3 px-4 text-center text-gray-300">{{ stats.bookings }}</td>
+                        <td class="py-3 px-4 text-center">
+                            <span class="text-blue-400">{{ stats.private_bookings }}</span>
+                            <span class="text-xs text-gray-500">(₹{{ stats.private_revenue|floatformat:2 }})</span>
+                        </td>
+                        <td class="py-3 px-4 text-center">
+                            <span class="text-green-400">{{ stats.shared_bookings }}</span>
+                            <span class="text-xs text-gray-500">(₹{{ stats.shared_revenue|floatformat:2 }})</span>
+                        </td>
+                        <td class="py-3 px-4 text-right font-bold text-green-400">₹{{ stats.revenue|floatformat:2 }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="5" class="py-8 text-center text-gray-400">No game revenue data available</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    // Wait for DOM to be fully loaded
+    document.addEventListener('DOMContentLoaded', function() {
+        const ctx = document.getElementById('revenueTrendChart');
+        if (!ctx) return;
+        
+        // Parse chart data from backend
+        const chartData = {{ daily_chart_data|safe }};
+        
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: chartData.labels,
+                datasets: [{
+                    label: 'Revenue (₹)',
+                    data: chartData.revenue,
+                    borderColor: 'rgb(16, 185, 129)',
+                    backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                    tension: 0.4,
+                    fill: true,
+                    borderWidth: 3,
+                    pointRadius: 4,
+                    pointHoverRadius: 6,
+                    pointBackgroundColor: 'rgb(16, 185, 129)',
+                    pointBorderColor: '#fff',
+                    pointBorderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                resizeDelay: 200,
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                        padding: 12,
+                        titleColor: '#fff',
+                        bodyColor: '#fff',
+                        borderColor: 'rgba(16, 185, 129, 0.5)',
+                        borderWidth: 1,
+                        callbacks: {
+                            label: function(context) {
+                                return 'Revenue: ₹' + context.parsed.y.toFixed(2);
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            callback: function(value) {
+                                return '₹' + value.toFixed(0);
+                            },
+                            color: 'rgba(255, 255, 255, 0.7)',
+                            font: {
+                                size: 11
+                            }
+                        },
+                        grid: {
+                            color: 'rgba(255, 255, 255, 0.1)',
+                            drawBorder: false
+                        }
+                    },
+                    x: {
+                        ticks: {
+                            color: 'rgba(255, 255, 255, 0.7)',
+                            font: {
+                                size: 11
+                            }
+                        },
+                        grid: {
+                            color: 'rgba(255, 255, 255, 0.05)',
+                            drawBorder: false
+                        }
+                    }
+                }
+            }
+        });
+    });
+</script>
+{% endblock %}

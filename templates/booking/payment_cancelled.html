@@ -1,0 +1,372 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}
+  Payment Cancelled - TapNex Arena
+{% endblock %}
+
+{% block extra_css %}
+  <style>
+    /* Enhanced Animations */
+    @keyframes float {
+      0%,
+      100% {
+        transform: translateY(0px);
+      }
+      50% {
+        transform: translateY(-10px);
+      }
+    }
+    
+    .float-animation {
+      animation: float 3s ease-in-out infinite;
+    }
+    
+    @keyframes shimmer {
+      0% {
+        background-position: -1000px 0;
+      }
+      100% {
+        background-position: 1000px 0;
+      }
+    }
+    
+    .shimmer-effect {
+      background: linear-gradient(90deg, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.1) 50%, rgba(255, 255, 255, 0) 100%);
+      background-size: 1000px 100%;
+      animation: shimmer 2s infinite;
+    }
+    
+    /* Hero Background with Orbs */
+    .hero-bg {
+      position: absolute;
+      inset: 0;
+      overflow: hidden;
+      z-index: 0;
+      pointer-events: none;
+    }
+    
+    .gradient-orb {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(100px);
+      opacity: 0.3;
+      animation: floatOrb 20s ease-in-out infinite;
+    }
+    
+    .orb-1 {
+      width: 500px;
+      height: 500px;
+      background: radial-gradient(circle, rgba(249, 115, 22, 0.4) 0%, transparent 70%);
+      top: -150px;
+      right: -150px;
+      animation-delay: 0s;
+    }
+    
+    .orb-2 {
+      width: 400px;
+      height: 400px;
+      background: radial-gradient(circle, rgba(239, 68, 68, 0.3) 0%, transparent 70%);
+      bottom: -100px;
+      left: -100px;
+      animation-delay: 7s;
+    }
+    
+    @keyframes floatOrb {
+      0%,
+      100% {
+        transform: translate(0, 0) scale(1);
+      }
+      33% {
+        transform: translate(30px, -30px) scale(1.1);
+      }
+      66% {
+        transform: translate(-30px, 30px) scale(0.9);
+      }
+    }
+    
+    /* Grid Pattern */
+    .grid-pattern {
+      background-image: linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+      background-size: 50px 50px;
+      position: absolute;
+      inset: 0;
+      z-index: 0;
+    }
+    
+    /* Card Hover Glow */
+    .card-glow {
+      position: relative;
+    }
+    
+    .card-glow::before {
+      content: '';
+      position: absolute;
+      inset: -2px;
+      border-radius: inherit;
+      padding: 2px;
+      background: linear-gradient(135deg, #f97316, #ef4444);
+      -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      -webkit-mask-composite: xor;
+      mask-composite: exclude;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+    
+    .card-glow:hover::before {
+      opacity: 0.5;
+    }
+    
+    /* Info Box Styles */
+    .info-box {
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .info-box::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.05), transparent);
+      transition: left 0.5s ease;
+    }
+    
+    .info-box:hover::before {
+      left: 100%;
+    }
+    
+    /* Hover Glow for Buttons */
+    .hover-glow {
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .hover-glow::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 0;
+      height: 0;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.2);
+      transform: translate(-50%, -50%);
+      transition: width 0.6s, height 0.6s;
+    }
+    
+    .hover-glow:hover::after {
+      width: 300px;
+      height: 300px;
+    }
+    
+    /* Warning pulse animation */
+    .warning-pulse {
+      animation: warningPulse 2s ease-in-out infinite;
+    }
+    
+    @keyframes warningPulse {
+      0%,
+      100% {
+        transform: scale(1);
+      }
+      50% {
+        transform: scale(1.05);
+      }
+    }
+    
+    /* Responsive Adjustments */
+    @media (max-width: 768px) {
+      .hero-title {
+        font-size: 2.5rem;
+      }
+
+      /* Slow down animations on mobile */
+      .float-animation {
+        animation: float 8s cubic-bezier(0.4, 0, 0.6, 1) infinite !important;
+      }
+
+      .gradient-orb {
+        animation: floatOrb 40s cubic-bezier(0.4, 0, 0.6, 1) infinite !important;
+      }
+
+      .shimmer-effect {
+        animation: shimmer 4s cubic-bezier(0.4, 0, 0.6, 1) infinite !important;
+      }
+
+      @keyframes float {
+        0%, 100% { transform: translateY(0px); }
+        50% { transform: translateY(-5px); }
+      }
+    }
+    
+    /* Button Hover Effects */
+    button:hover {
+      transform: translateY(-2px);
+    }
+    
+    button:active {
+      transform: translateY(0);
+    }
+  </style>
+{% endblock %}
+
+{% block content %}
+  <div class="min-h-screen py-12 relative" style="background: #111827;">
+    <!-- Animated Background -->
+    <div class="hero-bg">
+      <div class="gradient-orb orb-1"></div>
+      <div class="gradient-orb orb-2"></div>
+      <div class="grid-pattern"></div>
+    </div>
+
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+      <!-- Main Card -->
+      <div class="card-glow animate-fade-in-up" style="background: rgba(30, 41, 59, 0.5); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 1.5rem; overflow: hidden;">
+        <!-- Header Section with Warning Icon -->
+        <div class="relative overflow-hidden px-8 py-16 text-center" style="background: linear-gradient(135deg, rgba(249, 115, 22, 0.3), rgba(239, 68, 68, 0.2)); border-bottom: 1px solid rgba(255, 255, 255, 0.1);">
+          <div class="shimmer-effect absolute inset-0"></div>
+          <div class="relative z-10">
+            <!-- Warning Icon -->
+            <div class="w-32 h-32 mx-auto mb-6 rounded-full flex items-center justify-center float-animation warning-pulse" style="background: rgba(249, 115, 22, 0.2); border: 3px solid rgba(249, 115, 22, 0.4);">
+              <i class="bi bi-exclamation-triangle-fill text-orange-400" style="font-size: 4rem;"></i>
+            </div>
+
+            <!-- Title -->
+            <h1 class="hero-title text-5xl sm:text-6xl font-black text-white mb-4" style="font-family: 'Orbitron', sans-serif;">Payment <span style="background: linear-gradient(135deg, #f97316, #ef4444); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">Cancelled</span></h1>
+
+            <p class="text-orange-200 text-xl font-medium">Your booking has not been confirmed</p>
+          </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="px-8 py-12">
+          <!-- Message Section -->
+          <div class="text-center mb-10">
+            <p class="text-gray-300 text-lg mb-6 leading-relaxed">You have cancelled the payment process. Your booking has not been confirmed and the slot is still available for others.</p>
+
+            <!-- Important Information Alert -->
+            <div class="info-box rounded-2xl p-6 border-2 text-left max-w-3xl mx-auto" style="background: rgba(249, 115, 22, 0.1); border-color: rgba(249, 115, 22, 0.3); backdrop-filter: blur(10px);">
+              <div class="flex items-start gap-4">
+                <div class="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0" style="background: rgba(249, 115, 22, 0.2);">
+                  <i class="bi bi-info-circle-fill text-2xl" style="color: #fb923c;"></i>
+                </div>
+                <div>
+                  <p class="text-orange-300 font-bold text-lg mb-2">Important Information</p>
+                  <p class="text-orange-200 leading-relaxed">Your booking slot will be automatically cancelled and released back to the available pool. No charges have been made to your account.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {% if booking %}
+            <!-- Booking Details Card -->
+            <div class="card-glow mb-10" style="background: rgba(30, 41, 59, 0.5); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 1.5rem; padding: 2rem;">
+              <div class="flex items-center gap-3 mb-6">
+                <div class="w-10 h-10 rounded-xl flex items-center justify-center" style="background: linear-gradient(135deg, #ef4444, #dc2626);">
+                  <i class="bi bi-x-octagon-fill text-white text-xl"></i>
+                </div>
+                <h2 class="text-2xl font-black text-white">Cancelled Booking Details</h2>
+              </div>
+
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                <div class="info-box rounded-2xl p-5" style="background: rgba(99, 102, 241, 0.1); border: 1px solid rgba(99, 102, 241, 0.2); backdrop-filter: blur(10px);">
+                  <div class="flex items-center gap-3 mb-3">
+                    <div class="w-10 h-10 rounded-xl flex items-center justify-center" style="background: rgba(99, 102, 241, 0.2);">
+                      <i class="bi bi-controller text-xl" style="color: #818cf8;"></i>
+                    </div>
+                    <span class="text-sm font-semibold uppercase tracking-wide" style="color: #9ca3af;">Game</span>
+                  </div>
+                  <p class="text-white font-bold text-xl">{{ booking.game.name }}</p>
+                </div>
+
+                <div class="info-box rounded-2xl p-5" style="background: rgba(168, 85, 247, 0.1); border: 1px solid rgba(168, 85, 247, 0.2); backdrop-filter: blur(10px);">
+                  <div class="flex items-center gap-3 mb-3">
+                    <div class="w-10 h-10 rounded-xl flex items-center justify-center" style="background: rgba(168, 85, 247, 0.2);">
+                      <i class="bi bi-tag-fill text-xl" style="color: #c084fc;"></i>
+                    </div>
+                    <span class="text-sm font-semibold uppercase tracking-wide" style="color: #9ca3af;">Booking Type</span>
+                  </div>
+                  <p class="text-white font-bold text-xl">{{ booking.get_booking_type_display }}</p>
+                </div>
+
+                <div class="info-box rounded-2xl p-5" style="background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.2); backdrop-filter: blur(10px);">
+                  <div class="flex items-center gap-3 mb-3">
+                    <div class="w-10 h-10 rounded-xl flex items-center justify-center" style="background: rgba(59, 130, 246, 0.2);">
+                      <i class="bi bi-calendar-event text-xl" style="color: #60a5fa;"></i>
+                    </div>
+                    <span class="text-sm font-semibold uppercase tracking-wide" style="color: #9ca3af;">Date & Time</span>
+                  </div>
+                  <p class="text-white font-bold text-lg">{{ booking.game_slot.date|date:'M d, Y' }}</p>
+                  <p class="text-base" style="color: #d1d5db;">{{ booking.game_slot.start_time|time:'h:i A' }}</p>
+                </div>
+
+                <div class="info-box rounded-2xl p-5" style="background: rgba(34, 197, 94, 0.1); border: 1px solid rgba(34, 197, 94, 0.2); backdrop-filter: blur(10px);">
+                  <div class="flex items-center gap-3 mb-3">
+                    <div class="w-10 h-10 rounded-xl flex items-center justify-center" style="background: rgba(34, 197, 94, 0.2);">
+                      <i class="bi bi-currency-rupee text-xl" style="color: #4ade80;"></i>
+                    </div>
+                    <span class="text-sm font-semibold uppercase tracking-wide" style="color: #9ca3af;">Amount</span>
+                  </div>
+                  <p class="text-white font-black text-2xl" style="font-family: 'Orbitron', sans-serif;">₹{{ booking.total_amount|floatformat:2 }}</p>
+                </div>
+              </div>
+            </div>
+          {% endif %}
+
+          <!-- What Happens Next Section -->
+          <div class="mb-10">
+            <h3 class="text-2xl font-black text-white mb-6 flex items-center gap-3">
+              <div class="w-10 h-10 rounded-xl flex items-center justify-center" style="background: linear-gradient(135deg, #3b82f6, #2563eb);">
+                <i class="bi bi-question-circle-fill text-white"></i>
+              </div>What happens next?
+            </h3>
+            <div class="space-y-4">
+              <div class="info-box rounded-2xl p-5 flex items-start gap-4" style="background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.2); backdrop-filter: blur(10px);">
+                <div class="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0" style="background: rgba(59, 130, 246, 0.3);">
+                  <i class="bi bi-check-circle-fill text-xl" style="color: #60a5fa;"></i>
+                </div>
+                <p class="text-gray-300 text-base leading-relaxed pt-1">Your booking will be automatically cancelled within a few minutes</p>
+              </div>
+
+              <div class="info-box rounded-2xl p-5 flex items-start gap-4" style="background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.2); backdrop-filter: blur(10px);">
+                <div class="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0" style="background: rgba(59, 130, 246, 0.3);">
+                  <i class="bi bi-check-circle-fill text-xl" style="color: #60a5fa;"></i>
+                </div>
+                <p class="text-gray-300 text-base leading-relaxed pt-1">No charges have been made to your payment method</p>
+              </div>
+
+              <div class="info-box rounded-2xl p-5 flex items-start gap-4" style="background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.2); backdrop-filter: blur(10px);">
+                <div class="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0" style="background: rgba(59, 130, 246, 0.3);">
+                  <i class="bi bi-check-circle-fill text-xl" style="color: #60a5fa;"></i>
+                </div>
+                <p class="text-gray-300 text-base leading-relaxed pt-1">You can book again at any time if the slot is still available</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Action Buttons -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
+            <a href="{% url 'booking:game_detail' game_id=booking.game.id %}" class="hover-glow px-8 py-5 rounded-xl font-bold text-white text-center transition-all text-lg relative z-10" style="background: linear-gradient(135deg, #667eea, #a855f7); cursor: pointer; text-decoration: none; display: block;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 20px 40px rgba(102, 126, 234, 0.4)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 10px 25px rgba(102, 126, 234, 0.3)'"><i class="bi bi-plus-circle-fill mr-2"></i>Book Another Game</a>
+
+            <a href="{% url 'booking:my_bookings' %}" class="px-8 py-5 rounded-xl font-bold text-white text-center transition-all text-lg relative z-10" style="background: rgba(255, 255, 255, 0.1); border: 2px solid rgba(255, 255, 255, 0.2); cursor: pointer; text-decoration: none; display: block;" onmouseover="this.style.background='rgba(255, 255, 255, 0.2)'; this.style.borderColor='rgba(255, 255, 255, 0.3)'" onmouseout="this.style.background='rgba(255, 255, 255, 0.1)'; this.style.borderColor='rgba(255, 255, 255, 0.2)'"><i class="bi bi-list-ul mr-2"></i>View My Bookings</a>
+          </div>
+
+          <!-- Help Section -->
+          <div class="text-center">
+            <p class="text-gray-400 mb-3">Need help or have questions?</p>
+            <a href="{% url 'contact' %}" class="inline-flex items-center gap-2 px-6 py-3 rounded-xl font-semibold transition-all relative z-10" style="background: rgba(59, 130, 246, 0.2); border: 1px solid rgba(59, 130, 246, 0.3); color: #60a5fa; cursor: pointer; text-decoration: none;" onmouseover="this.style.background='rgba(59, 130, 246, 0.3)'" onmouseout="this.style.background='rgba(59, 130, 246, 0.2)'">
+              <i class="bi bi-headset"></i>
+              Contact Support
+              <i class="bi bi-arrow-right"></i>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  {% csrf_token %}
+{% endblock %}

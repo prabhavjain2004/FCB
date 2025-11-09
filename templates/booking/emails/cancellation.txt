@@ -1,0 +1,32 @@
+GAMING CAFE - BOOKING CANCELLED
+
+Hi {{ user.first_name|default:user.username }},
+
+Your gaming session booking has been cancelled as requested. We're sorry to see you go, but we hope to serve you again soon!
+
+CANCELLED BOOKING DETAILS:
+=========================
+Booking ID: {{ booking.id }}
+Gaming Station: {{ booking.gaming_station.name }} ({{ booking.gaming_station.get_station_type_display }})
+Date: {{ booking.start_time|date:"l, F j, Y" }}
+Time: {{ booking.start_time|date:"g:i A" }} - {{ booking.end_time|date:"g:i A" }}
+
+REFUND INFORMATION:
+==================
+If you paid for this booking, your refund will be processed within 3-5 business days to your original payment method.
+
+BOOK AGAIN:
+===========
+We'd love to have you back! You can make a new booking anytime through our website.
+
+CONTACT INFORMATION:
+===================
+Gaming Cafe
+123 Gaming Street, City
+Phone: (555) 123-4567
+Email: info@gamingcafe.com
+
+Thank you for choosing Gaming Cafe!
+
+---
+This is an automated message. Please do not reply to this email.
