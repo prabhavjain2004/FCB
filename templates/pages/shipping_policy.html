@@ -587,6 +587,47 @@
             </div>
           </div>
 
+          <!-- Pricing & Fees -->
+          <div class="shipping-section" data-scroll-reveal>
+            <div class="section-icon" style="background: linear-gradient(135deg, #f59e0b, #ef4444);">
+              <i class="bi bi-currency-rupee"></i>
+            </div>
+            <h3 class="text-white mb-4">Pricing & Platform Fees</h3>
+            <p class="text-light-gray mb-4" style="font-size: 1.05rem;">Important information about pricing and applicable fees:</p>
+            
+            <div class="info-box mb-4">
+              <div class="position-relative">
+                <h5 class="text-white mb-3">
+                  <i class="bi bi-info-circle text-cyan me-2"></i>
+                  Platform Fee Notice
+                </h5>
+                <ul class="list-unstyled mb-0">
+                  <li class="mb-3">
+                    <i class="bi bi-check-circle text-cyan me-2"></i>
+                    <span class="text-light-gray">A <strong class="text-white">platform fee may be applicable</strong> on bookings for service maintenance, technology infrastructure, and operational costs</span>
+                  </li>
+                  <li class="mb-3">
+                    <i class="bi bi-check-circle text-cyan me-2"></i>
+                    <span class="text-light-gray">The platform fee will be <strong class="text-white">clearly displayed during checkout</strong> before payment confirmation</span>
+                  </li>
+                  <li class="mb-3">
+                    <i class="bi bi-check-circle text-cyan me-2"></i>
+                    <span class="text-light-gray">All prices are shown in <strong class="text-white">Indian Rupees (₹)</strong> and include applicable taxes</span>
+                  </li>
+                  <li class="mb-0">
+                    <i class="bi bi-exclamation-triangle text-danger me-2"></i>
+                    <span class="text-light-gray"><strong class="text-white">Platform fees are non-refundable</strong> under all circumstances, even if the booking is cancelled</span>
+                  </li>
+                </ul>
+              </div>
+            </div>
+            
+            <p class="text-light-gray mb-0" style="font-size: 0.95rem;">
+              <i class="bi bi-shield-check text-cyan me-2"></i>
+              All payments are processed securely through Razorpay. For detailed refund terms, please refer to our <a href="{% url 'refund_policy' %}" class="text-cyan text-decoration-none hover-glow">Refund & Cancellation Policy</a>.
+            </p>
+          </div>
+
           <!-- Back to Home -->
           <div class="text-center mt-5" data-scroll-reveal>
             <a href="{% url 'home' %}" class="btn btn-outline-light btn-lg" style="border-width: 2px; padding: 0.75rem 2rem;"><i class="bi bi-arrow-left me-2"></i>Back to Home</a>
