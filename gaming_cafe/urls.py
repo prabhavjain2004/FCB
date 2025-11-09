@@ -19,6 +19,7 @@ Including another URLconf
 from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
+from django.contrib.sitemaps.views import sitemap
 from authentication.views import home_view
 from authentication.policy_views import (
     privacy_policy_view,
@@ -29,6 +30,14 @@ from authentication.policy_views import (
     shipping_policy_view
 )
 from django.views.generic import TemplateView, RedirectView
+from .sitemaps import StaticViewSitemap, GamesSitemap
+from .views import robots_txt
+
+# Sitemap configuration
+sitemaps = {
+    'static': StaticViewSitemap,
+    'games': GamesSitemap,
+}
 
 urlpatterns = [
     # Django Admin is disabled - use /accounts/tapnex/dashboard/ instead
@@ -54,6 +63,10 @@ urlpatterns = [
     path('shipping-policy/', shipping_policy_view, name='shipping_policy'),
     path('contact/', contact_view, name='contact'),
     path('about/', about_view, name='about'),
+    
+    # SEO files
+    path('sitemap.xml', sitemap, {'sitemaps': sitemaps}, name='django.contrib.sitemaps.views.sitemap'),
+    path('robots.txt', robots_txt, name='robots_txt'),
 ]
 
 # Custom error handlers

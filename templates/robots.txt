@@ -1,0 +1,28 @@
+User-agent: *
+Allow: /
+Allow: /about/
+Allow: /contact/
+Allow: /privacy/
+Allow: /terms/
+Allow: /refund-policy/
+Allow: /shipping-policy/
+Allow: /booking/games/
+
+# Disallow admin and dashboard pages
+Disallow: /accounts/tapnex/
+Disallow: /accounts/owner/
+Disallow: /accounts/customer/dashboard/
+Disallow: /accounts/cafe-owner/
+Disallow: /api/
+Disallow: /booking/my-bookings/
+Disallow: /booking/checkout/
+Disallow: /booking/payment/
+Disallow: /booking/booking-confirmation/
+
+# Disallow authentication pages
+Disallow: /accounts/login/
+Disallow: /accounts/logout/
+Disallow: /accounts/signup/
+
+# Sitemap location
+Sitemap: {{ request.scheme }}://{{ request.get_host }}/sitemap.xml

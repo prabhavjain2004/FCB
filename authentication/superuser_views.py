@@ -654,7 +654,7 @@ def superuser_password_reset(request):
         update_session_auth_hash(request, request.user)
         
         messages.success(request, '✅ Password changed successfully!')
-        return redirect('authentication:superuser_dashboard')
+        return redirect('authentication:tapnex_dashboard')
     
     response = render(request, 'authentication/superuser_password_reset.html')
     # Disable all caching
