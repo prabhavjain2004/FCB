@@ -131,6 +131,8 @@ def profile_redirect_view(request):
         return redirect('authentication:tapnex_dashboard')
     elif hasattr(user, 'cafe_owner_profile'):
         return redirect('/owner/dashboard/')
+    elif hasattr(user, 'cafe_staff_profile'):
+        return redirect('authentication:staff_dashboard')
     elif hasattr(user, 'customer_profile'):
         return redirect('/customer/dashboard/')
     else:

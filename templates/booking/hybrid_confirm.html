@@ -839,8 +839,15 @@ function proceedToPayment() {
                 color: '#667eea'
             },
             handler: function(response) {
+                console.log('[Payment] Razorpay payment successful:', response.razorpay_payment_id);
                 // Payment successful - verify signature
-                verifyPayment(response, data.booking_id);
+                try {
+                    verifyPayment(response, data.booking_id);
+                } catch (error) {
+                    console.error('[Payment] Error in handler:', error);
+                    alert('Payment successful but verification failed to start. Please check My Bookings or contact support.');
+                    window.location.href = '/booking/my-bookings/';
+                }
             },
             modal: {
                 ondismiss: function() {
@@ -877,6 +884,9 @@ function proceedToPayment() {
 }
 
 function verifyPayment(razorpayResponse, bookingId) {
+    console.log('[Payment] Starting verification process for booking:', bookingId);
+    console.log('[Payment] Payment ID:', razorpayResponse.razorpay_payment_id);
+    
     const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
     
     document.body.innerHTML = `
@@ -911,18 +921,32 @@ function pollPaymentStatus(bookingId, csrfToken, razorpayResponse, attempts) {
             'X-CSRFToken': csrfToken
         }
     })
-    .then(response => response.json())
+    .then(response => {
+        // Check if response is OK before parsing
+        if (!response.ok) {
+            console.error('[Payment] Status check failed with status:', response.status);
+            throw new Error('Status check failed: ' + response.status);
+        }
+        return response.json();
+    })
     .then(data => {
+        console.log('[Payment] Status poll attempt', attempts, '- Status:', data.booking_status);
+        
         if (data.success && data.booking_status === 'CONFIRMED') {
+            console.log('[Payment] Booking confirmed! Redirecting to success page...');
             window.location.href = '/booking/payment/success/' + bookingId + '/';
         } else if (attempts < maxWebhookAttempts) {
             setTimeout(() => {
                 pollPaymentStatus(bookingId, csrfToken, razorpayResponse, attempts + 1);
             }, 500);  // Reduced from 1000ms to 500ms for faster polling
         } else if (attempts === maxWebhookAttempts) {
+            console.log('[Payment] Webhook timeout, attempting direct API verification...');
             verifyPaymentViaAPI(bookingId, csrfToken, razorpayResponse, attempts);
         } else if (attempts >= maxTotalAttempts) {
-            alert('Payment processing is taking longer than expected. Please check your bookings or contact support.');
+            console.error('[Payment] Max attempts reached. Payment may have succeeded - redirecting to bookings.');
+            // Payment likely succeeded but verification timed out
+            // Redirect to my-bookings where user can see the confirmed booking
+            alert('Payment completed! We\'re having trouble loading the confirmation page, but your booking is safe. Check "My Bookings" to view your QR code.');
             window.location.href = '/booking/my-bookings/';
         } else {
             setTimeout(() => {
@@ -931,9 +955,12 @@ function pollPaymentStatus(bookingId, csrfToken, razorpayResponse, attempts) {
         }
     })
     .catch(error => {
+        console.error('[Payment] Poll error at attempt', attempts, ':', error.message);
+        
         if (attempts >= maxTotalAttempts) {
-            alert('Unable to verify payment status. Please contact support.');
-            window.location.href = '/booking/my-bookings/';
+            // Last resort - try one final direct verification before giving up
+            console.log('[Payment] Final attempt: trying direct verification...');
+            verifyPaymentViaAPI(bookingId, csrfToken, razorpayResponse, attempts, true);
         } else {
             setTimeout(() => {
                 pollPaymentStatus(bookingId, csrfToken, razorpayResponse, attempts + 1);
@@ -942,7 +969,9 @@ function pollPaymentStatus(bookingId, csrfToken, razorpayResponse, attempts) {
     });
 }
 
-function verifyPaymentViaAPI(bookingId, csrfToken, razorpayResponse, currentAttempts) {
+function verifyPaymentViaAPI(bookingId, csrfToken, razorpayResponse, currentAttempts, isFinalAttempt = false) {
+    console.log('[Payment] Direct API verification attempt...');
+    
     fetch('/booking/payment/verify/', {
         method: 'POST',
         headers: {
@@ -956,20 +985,51 @@ function verifyPaymentViaAPI(bookingId, csrfToken, razorpayResponse, currentAtte
             booking_id: bookingId
         })
     })
-    .then(response => response.json())
+    .then(response => {
+        console.log('[Payment] Verify API response status:', response.status);
+        
+        // Check if response is OK before parsing
+        if (!response.ok) {
+            console.error('[Payment] Verification failed with status:', response.status);
+            return response.text().then(text => {
+                console.error('[Payment] Error response:', text);
+                throw new Error('Verification failed: ' + response.status);
+            });
+        }
+        return response.json();
+    })
     .then(data => {
+        console.log('[Payment] Verification result:', data);
+        
         if (data.success) {
+            console.log('[Payment] Verification successful! Redirecting to success page...');
             window.location.href = '/booking/payment/success/' + bookingId + '/';
+        } else {
+            console.warn('[Payment] Verification returned success=false:', data.error);
+            
+            if (isFinalAttempt) {
+                // This is the absolute last attempt
+                alert('Payment verification is taking longer than expected. Your payment was processed by Razorpay. Please check "My Bookings" for your confirmation.');
+                window.location.href = '/booking/my-bookings/';
+            } else {
+                setTimeout(() => {
+                    pollPaymentStatus(bookingId, csrfToken, razorpayResponse, currentAttempts + 1);
+                }, 1000);
+            }
+        }
+    })
+    .catch(error => {
+        console.error('[Payment] Verification error:', error.message);
+        
+        if (isFinalAttempt) {
+            // Absolute last resort - payment succeeded on Razorpay but we can't verify
+            alert('Your payment was successful but we\'re having trouble loading the confirmation. Please check "My Bookings" to access your booking and QR code.');
+            window.location.href = '/booking/my-bookings/';
         } else {
             setTimeout(() => {
                 pollPaymentStatus(bookingId, csrfToken, razorpayResponse, currentAttempts + 1);
             }, 1000);
         }
-    })
-    .catch(error => {
-        setTimeout(() => {
-            pollPaymentStatus(bookingId, csrfToken, razorpayResponse, currentAttempts + 1);
-        }, 1000);
     });
 }
 

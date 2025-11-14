@@ -175,3 +175,52 @@ def tapnex_superuser_required(view_func):
             else:
                 return redirect('/')
     return _wrapped_view
+
+
+def cafe_staff_required(view_func):
+    """
+    Decorator that requires the user to be an active cafe staff member.
+    """
+    @wraps(view_func)
+    @login_required
+    def _wrapped_view(request, *args, **kwargs):
+        if hasattr(request.user, 'cafe_staff_profile') and request.user.cafe_staff_profile.is_active:
+            return view_func(request, *args, **kwargs)
+        else:
+            messages.error(request, 'Access denied. This area is for cafe staff only.')
+            # Redirect based on user type
+            if hasattr(request.user, 'cafe_owner_profile'):
+                return redirect('authentication:cafe_owner_dashboard')
+            elif hasattr(request.user, 'customer_profile'):
+                return redirect('authentication:customer_dashboard')
+            elif request.user.is_superuser:
+                return redirect('authentication:tapnex_dashboard')
+            else:
+                return redirect('authentication:cafe_owner_login')
+    return _wrapped_view
+
+
+def cafe_owner_or_staff_required(view_func):
+    """
+    Decorator that requires the user to be either a cafe owner or an active staff member.
+    Used for QR scanning and booking verification.
+    """
+    @wraps(view_func)
+    @login_required
+    def _wrapped_view(request, *args, **kwargs):
+        # Check if user is cafe owner
+        if hasattr(request.user, 'cafe_owner_profile'):
+            return view_func(request, *args, **kwargs)
+        # Check if user is active staff
+        elif hasattr(request.user, 'cafe_staff_profile') and request.user.cafe_staff_profile.is_active:
+            return view_func(request, *args, **kwargs)
+        else:
+            messages.error(request, 'Access denied. This area is for cafe owners and staff only.')
+            # Redirect based on user type
+            if hasattr(request.user, 'customer_profile'):
+                return redirect('authentication:customer_dashboard')
+            elif request.user.is_superuser:
+                return redirect('authentication:tapnex_dashboard')
+            else:
+                return redirect('authentication:cafe_owner_login')
+    return _wrapped_view

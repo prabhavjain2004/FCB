@@ -66,6 +66,21 @@ class CafeOwner(models.Model):
         verbose_name_plural = "Cafe Owners"
 
 
+class CafeStaff(models.Model):
+    """Cafe staff model for staff members who can scan QR and view bookings"""
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='cafe_staff_profile')
+    cafe_owner = models.ForeignKey(CafeOwner, on_delete=models.CASCADE, related_name='staff_members')
+    is_active = models.BooleanField(default=True, help_text="Whether staff member is active")
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    def __str__(self):
+        return f"Staff: {self.user.get_full_name() or self.user.username} - {self.cafe_owner.cafe_name}"
+    
+    class Meta:
+        verbose_name = "Cafe Staff"
+        verbose_name_plural = "Cafe Staff"
+
+
 class TapNexSuperuser(models.Model):
     """TapNex Technologies superuser for SaaS management"""
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='tapnex_superuser_profile')

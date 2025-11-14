@@ -12,7 +12,7 @@ from django.views.decorators.http import require_http_methods
 from django.contrib.auth.decorators import login_required
 from django.utils import timezone
 from django.db.models import Q
-from authentication.decorators import cafe_owner_required
+from authentication.decorators import cafe_owner_or_staff_required
 from .models import Booking
 from .qr_service_enhanced import QRCodeServiceEnhanced
 from .models_qr_verification_audit import QRVerificationAttempt
@@ -72,7 +72,7 @@ def prepare_booking_data(booking, include_sensitive=True):
     return data
 
 
-@cafe_owner_required
+@cafe_owner_or_staff_required
 def qr_scanner_view(request):
     """QR Scanner interface for owner/staff to verify bookings"""
     context = {
@@ -81,7 +81,7 @@ def qr_scanner_view(request):
     return render(request, 'booking/qr_scanner.html', context)
 
 
-@cafe_owner_required
+@cafe_owner_or_staff_required
 @require_http_methods(["POST"])
 def verify_booking_qr(request):
     """
@@ -170,7 +170,7 @@ def verify_booking_qr(request):
         }, status=500)
 
 
-@cafe_owner_required
+@cafe_owner_or_staff_required
 @require_http_methods(["POST"])
 def verify_booking_manual(request, booking_id):
     """
@@ -238,7 +238,7 @@ def verify_booking_manual(request, booking_id):
         }, status=500)
 
 
-@cafe_owner_required
+@cafe_owner_or_staff_required
 @require_http_methods(["POST"])
 def complete_booking(request, booking_id):
     """
@@ -290,7 +290,7 @@ def complete_booking(request, booking_id):
         }, status=500)
 
 
-@cafe_owner_required
+@cafe_owner_or_staff_required
 def active_bookings_view(request):
     """View all currently active/verified bookings for the day"""
     today = timezone.now().date()
@@ -325,7 +325,7 @@ def active_bookings_view(request):
     return render(request, 'booking/active_bookings.html', context)
 
 
-@cafe_owner_required
+@cafe_owner_or_staff_required
 def verification_audit_log(request):
     """View verification audit log for security monitoring"""
     from datetime import timedelta

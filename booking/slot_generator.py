@@ -99,8 +99,8 @@ class SlotGenerator:
             logger.warning(f"Skipping slot generation for past date: {target_date}")
             return 0
         
-        # Validate game schedule
-        if game.opening_time >= game.closing_time:
+        # Validate game schedule (allow midnight 00:00 as closing time)
+        if game.opening_time >= game.closing_time and game.closing_time != time(0, 0):
             raise ValidationError(f"Invalid schedule for {game.name}: opening time must be before closing time")
         
         if game.slot_duration_minutes <= 0:
@@ -121,20 +121,34 @@ class SlotGenerator:
         availabilities_to_create = []
         current_time = game.opening_time
         
-        while current_time < game.closing_time:
+        # Check if this is an overnight schedule (closing at midnight)
+        is_overnight = game.closing_time == time(0, 0)
+        
+        while current_time < game.closing_time or (is_overnight and current_time >= game.opening_time):
             # Calculate end time for this slot
             start_datetime = datetime.combine(target_date, current_time)
             end_datetime = start_datetime + timedelta(minutes=game.slot_duration_minutes)
             end_time = end_datetime.time()
             
-            # Don't create slot if it goes beyond closing time
-            if end_time > game.closing_time:
-                logger.debug(f"Slot {current_time}-{end_time} extends beyond closing time for {game.name}")
-                break
+            # Handle overnight schedules - allow slots to end at midnight (00:00)
+            if is_overnight:
+                # For overnight schedules, create slots until we reach midnight
+                if end_time == time(0, 0):
+                    # This slot ends exactly at midnight - allow it and then stop
+                    pass
+                elif end_time < current_time:
+                    # Slot wraps past midnight - stop here
+                    logger.debug(f"Slot {current_time}-{end_time} extends past midnight for {game.name}")
+                    break
+            else:
+                # Normal same-day schedule
+                if end_time > game.closing_time:
+                    logger.debug(f"Slot {current_time}-{end_time} extends beyond closing time for {game.name}")
+                    break
             
             # CRITICAL FIX: Check for time wraparound (when slot crosses midnight)
-            # If end_time < current_time, it means we've crossed into the next day
-            if end_time < current_time:
+            # If end_time < current_time AND we're not in overnight mode, stop
+            if end_time < current_time and not is_overnight:
                 logger.debug(f"Slot {current_time}-{end_time} wraps around midnight, stopping generation for {game.name}")
                 break
             
@@ -150,6 +164,10 @@ class SlotGenerator:
             
             # Move to next slot time
             current_time = end_time
+            
+            # For overnight schedules, stop after creating the midnight slot
+            if is_overnight and end_time == time(0, 0):
+                break
         
         # BULK CREATE - Much faster than individual creates!
         if slots_to_create:
@@ -330,13 +348,18 @@ class SlotGenerator:
         if target_date < date.today():
             errors.append("Cannot create slots for past dates")
         
-        # Validate times
-        if start_time >= end_time:
-            errors.append("Start time must be before end time")
+        # Validate times (allow end_time of 00:00 for midnight slots)
+        if start_time >= end_time and end_time != time(0, 0):
+            errors.append("Start time must be before end time (use 00:00 for slots ending at midnight)")
         
         # Calculate duration
         start_datetime = datetime.combine(target_date, start_time)
         end_datetime = datetime.combine(target_date, end_time)
+        
+        # Handle midnight end time (add a day)
+        if end_time == time(0, 0) and start_time > end_time:
+            end_datetime = end_datetime + timedelta(days=1)
+        
         duration_minutes = (end_datetime - start_datetime).total_seconds() / 60
         
         if duration_minutes <= 0:

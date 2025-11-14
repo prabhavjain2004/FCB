@@ -25,7 +25,7 @@ from booking.models import Booking, Game, GameSlot
 
 
 class SuperuserLoginView(LoginView):
-    """Custom login view for TapNex superusers and Cafe Owners (Staff Login)"""
+    """Custom login view for TapNex superusers, Cafe Owners, and Staff (Staff Login)"""
     template_name = 'authentication/superuser_login.html'
     redirect_authenticated_user = True
     
@@ -45,8 +45,17 @@ class SuperuserLoginView(LoginView):
         # Check if user is cafe owner
         elif hasattr(self.request.user, 'cafe_owner_profile'):
             return '/accounts/owner/dashboard/'
+        # Check if user is cafe staff
+        elif hasattr(self.request.user, 'cafe_staff_profile'):
+            if self.request.user.cafe_staff_profile.is_active:
+                return '/accounts/staff/dashboard/'
+            else:
+                messages.error(self.request, 'Your staff account is inactive. Please contact your cafe owner.')
+                from django.contrib.auth import logout
+                logout(self.request)
+                return '/accounts/cafe-owner/login/'
         else:
-            messages.error(self.request, 'Access denied. This login is for TapNex administrators and cafe owners only.')
+            messages.error(self.request, 'Access denied. This login is for TapNex administrators, cafe owners, and staff only.')
             from django.contrib.auth import logout
             logout(self.request)
             return '/accounts/cafe-owner/login/'

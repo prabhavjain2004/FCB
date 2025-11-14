@@ -3,6 +3,7 @@ from . import views
 from . import dashboard_views
 from . import tapnex_views
 from . import superuser_views
+from . import staff_views
 
 app_name = 'authentication'
 
@@ -12,7 +13,7 @@ urlpatterns = [
     path('login/email/', views.customer_email_login_view, name='customer_email_login'),
     
     # Cafe owner authentication
-    path('cafe-owner/login/', superuser_views.SuperuserLoginView.as_view(), name='cafe_owner_login'),  # Now handles superuser login
+    path('cafe-owner/login/', superuser_views.SuperuserLoginView.as_view(), name='cafe_owner_login'),  # Now handles superuser, owner, and staff login
     path('cafe-owner/register/', views.CafeOwnerRegistrationView.as_view(), name='cafe_owner_register'),
     
     # Common authentication
@@ -23,6 +24,7 @@ urlpatterns = [
     # Dashboards
     path('customer/dashboard/', dashboard_views.customer_dashboard, name='customer_dashboard'),
     path('owner/dashboard/', dashboard_views.cafe_owner_dashboard, name='cafe_owner_dashboard'),
+    path('staff/dashboard/', staff_views.staff_dashboard, name='staff_dashboard'),
     
     # Owner Dashboard Sections
     path('owner/overview/', dashboard_views.owner_overview, name='owner_overview'),
@@ -31,6 +33,12 @@ urlpatterns = [
     path('owner/customers/', dashboard_views.owner_customers, name='owner_customers'),
     path('owner/revenue/', dashboard_views.owner_revenue, name='owner_revenue'),
     path('owner/reports/', dashboard_views.owner_reports, name='owner_reports'),
+    
+    # Staff Management (Owner only)
+    path('owner/staff/', staff_views.manage_staff, name='manage_staff'),
+    path('owner/staff/create/', staff_views.create_staff, name='create_staff'),
+    path('owner/staff/<int:staff_id>/edit/', staff_views.edit_staff, name='edit_staff'),
+    path('owner/staff/<int:staff_id>/delete/', staff_views.delete_staff, name='delete_staff'),
     
     # TapNex Superuser Dashboard (Main Custom Admin)
     path('tapnex/dashboard/', superuser_views.superuser_dashboard, name='tapnex_dashboard'),

@@ -57,8 +57,16 @@ class TelegramNotificationService:
         Returns:
             bool: True if sent successfully, False otherwise
         """
-        if not self.enabled or not self.bot_token or not self.chat_id:
-            logger.warning("Telegram notifications disabled or not configured")
+        if not self.enabled:
+            logger.warning("Telegram notifications are disabled in settings")
+            return False
+            
+        if not self.bot_token:
+            logger.warning("Telegram bot token not configured")
+            return False
+            
+        if not self.chat_id:
+            logger.warning("Telegram chat ID not configured")
             return False
         
         url = f"https://api.telegram.org/bot{self.bot_token}/sendMessage"
@@ -71,16 +79,25 @@ class TelegramNotificationService:
         
         for attempt in range(retry_count):
             try:
+                logger.debug(f"Telegram send attempt {attempt + 1}/{retry_count} to chat {self.chat_id}")
                 response = requests.post(url, json=payload, timeout=10)
                 
                 if response.status_code == 200:
                     logger.info(f"Telegram notification sent successfully to {self.chat_id}")
                     return True
                 else:
-                    logger.warning(f"Telegram API error (attempt {attempt + 1}/{retry_count}): {response.text}")
+                    error_data = response.json() if response.text else {}
+                    error_msg = error_data.get('description', response.text)
+                    logger.warning(f"Telegram API error (attempt {attempt + 1}/{retry_count}): Status {response.status_code}, Error: {error_msg}")
                     
+            except requests.exceptions.Timeout as e:
+                logger.error(f"Telegram request timeout (attempt {attempt + 1}/{retry_count}): {e}")
+            except requests.exceptions.ConnectionError as e:
+                logger.error(f"Telegram connection error (attempt {attempt + 1}/{retry_count}): {e}")
             except requests.exceptions.RequestException as e:
                 logger.error(f"Telegram request failed (attempt {attempt + 1}/{retry_count}): {e}")
+            except Exception as e:
+                logger.error(f"Unexpected error sending Telegram (attempt {attempt + 1}/{retry_count}): {e}", exc_info=True)
         
         logger.error(f"Failed to send Telegram notification after {retry_count} attempts")
         return False

@@ -376,6 +376,11 @@
                         <i class="bi bi-people"></i>
                         <span>Customers</span>
                     </a>
+                    <a href="{% url 'authentication:manage_staff' %}" 
+                       class="nav-btn {% if request.resolver_match.url_name == 'manage_staff' %}nav-btn-active{% endif %}">
+                        <i class="bi bi-person-badge"></i>
+                        <span>Staff</span>
+                    </a>
                     <a href="{% url 'authentication:owner_revenue' %}" 
                        class="nav-btn {% if request.resolver_match.url_name == 'owner_revenue' %}nav-btn-active{% endif %}">
                         <i class="bi bi-currency-rupee"></i>
@@ -477,6 +482,11 @@
                        class="flex items-center gap-3 text-gray-300 hover:text-white hover:bg-white/10 px-4 py-3.5 rounded-xl transition-all font-medium {% if request.resolver_match.url_name == 'owner_customers' %}bg-white/10 text-white{% endif %}">
                         <i class="bi bi-people text-lg text-pink-400"></i>
                         <span>Customers</span>
+                    </a>
+                    <a href="{% url 'authentication:manage_staff' %}" 
+                       class="flex items-center gap-3 text-gray-300 hover:text-white hover:bg-white/10 px-4 py-3.5 rounded-xl transition-all font-medium {% if request.resolver_match.url_name == 'manage_staff' %}bg-white/10 text-white{% endif %}">
+                        <i class="bi bi-person-badge text-lg text-cyan-400"></i>
+                        <span>Staff</span>
                     </a>
                     <a href="{% url 'authentication:owner_revenue' %}" 
                        class="flex items-center gap-3 text-gray-300 hover:text-white hover:bg-white/10 px-4 py-3.5 rounded-xl transition-all font-medium {% if request.resolver_match.url_name == 'owner_revenue' %}bg-white/10 text-white{% endif %}">

@@ -181,23 +181,21 @@ def verify_razorpay_payment(request):
             booking.payment_status = 'PAID'
             booking.status = 'CONFIRMED'
             
-            # Check and set notification flag atomically
+            # Check if this is first verification (for notifications)
             should_notify = not booking.owner_notified
-            if should_notify:
-                booking.owner_notified = True
             
             booking.save(update_fields=[
                 'razorpay_payment_id',
                 'razorpay_signature',
                 'payment_status',
-                'status',
-                'owner_notified'
+                'status'
             ])
         
         logger.info(f"Payment verified successfully for booking {booking_id}")
         
         # Ensure verification token exists (no file generation)
         QRCodeService.generate_qr_code(booking)
+        logger.info(f"Verification token ensured for booking {booking_id}")
         logger.info(f"Verification token ensured for booking {booking_id}")
         
         # Create transfer to owner if not done during order creation
@@ -240,11 +238,19 @@ def verify_razorpay_payment(request):
         if should_notify:
             try:
                 from booking.telegram_service import telegram_service
-                telegram_service.send_new_booking_notification(booking)
-                logger.info(f"Telegram notification sent for booking {booking_id}")
+                notification_sent = telegram_service.send_new_booking_notification(booking)
+                
+                if notification_sent:
+                    # Only mark as notified if actually sent successfully
+                    booking.owner_notified = True
+                    booking.save(update_fields=['owner_notified'])
+                    logger.info(f"Telegram notification sent successfully for booking {booking_id}")
+                else:
+                    logger.warning(f"Telegram notification failed for booking {booking_id} - will retry on next verification attempt")
+                    
             except Exception as e:
-                logger.error(f"Failed to send Telegram notification for booking {booking_id}: {e}")
-                # Don't fail the payment if notification fails
+                logger.error(f"Exception sending Telegram notification for booking {booking_id}: {e}", exc_info=True)
+                # Don't set owner_notified flag so it can retry later
         else:
             logger.info(f"Telegram notification already sent for booking {booking_id}")
         
@@ -267,7 +273,7 @@ def verify_razorpay_payment(request):
         })
         
     except Exception as e:
-        logger.error(f"Error verifying payment: {str(e)}")
+        logger.error(f"Error verifying payment for booking {booking_id if 'booking_id' in locals() else 'unknown'}: {str(e)}", exc_info=True)
         return JsonResponse({
             'success': False,
             'error': 'Internal server error'
@@ -387,42 +393,45 @@ def handle_payment_captured(payment_entity):
                 logger.warning(f"Booking not found for order {order_id}")
                 return
             
+            # Check if notification should be sent (before updating)
+            should_notify = not booking.owner_notified
+            
             # Update booking
             booking.razorpay_payment_id = payment_id
             booking.payment_status = 'PAID'
             booking.status = 'CONFIRMED'
             
-            # Check and send notification (atomically)
-            if not booking.owner_notified:
-                booking.owner_notified = True  # Set BEFORE save to prevent race
-                booking.save(update_fields=[
-                    'razorpay_payment_id',
-                    'payment_status',
-                    'status',
-                    'owner_notified'
-                ])
+            booking.save(update_fields=[
+                'razorpay_payment_id',
+                'payment_status',
+                'status'
+            ])
                 
-                logger.info(f"Payment captured for booking {booking.id}")
+        logger.info(f"Payment captured for booking {booking.id} via webhook")
+        
+        # Ensure verification token exists
+        if not booking.verification_token:
+            QRCodeService.generate_qr_code(booking)
+            logger.info(f"Verification token ensured for booking {booking.id} via webhook")
+        
+        # Send notification (outside transaction to avoid blocking)
+        if should_notify:
+            try:
+                from booking.telegram_service import telegram_service
+                notification_sent = telegram_service.send_new_booking_notification(booking)
                 
-                # Ensure verification token exists
-                if not booking.verification_token:
-                    QRCodeService.generate_qr_code(booking)
-                    logger.info(f"Verification token ensured for booking {booking.id} via webhook")
-                
-                # Send notification AFTER database lock is released
-                try:
-                    from booking.telegram_service import telegram_service
-                    telegram_service.send_new_booking_notification(booking)
-                    logger.info(f"Telegram notification sent for booking {booking.id}")
-                except Exception as e:
-                    logger.error(f"Failed to send Telegram notification for booking {booking.id}: {e}")
-            else:
-                booking.save(update_fields=[
-                    'razorpay_payment_id',
-                    'payment_status',
-                    'status'
-                ])
-                logger.info(f"Payment captured for booking {booking.id} - notification already sent")
+                if notification_sent:
+                    # Only mark as notified if actually sent successfully
+                    booking.owner_notified = True
+                    booking.save(update_fields=['owner_notified'])
+                    logger.info(f"Telegram notification sent successfully for booking {booking.id} via webhook")
+                else:
+                    logger.warning(f"Telegram notification failed for booking {booking.id} via webhook - will retry later")
+                    
+            except Exception as e:
+                logger.error(f"Exception sending Telegram notification for booking {booking.id} via webhook: {e}", exc_info=True)
+        else:
+            logger.info(f"Telegram notification already sent for booking {booking.id}")
         
     except Exception as e:
         logger.error(f"Error handling payment.captured: {str(e)}")
@@ -660,10 +669,12 @@ def payment_success(request, booking_id):
             messages.error(request, 'Payment verification required. Please complete the payment first.')
             return redirect('booking:hybrid_booking_confirm', booking_id=booking_id)
         
-        # ADDITIONAL SECURITY: Check if payment was verified within last 10 minutes
+        # ADDITIONAL SECURITY: Check if payment was verified within last 30 minutes
+        # Increased from 10 to 30 minutes to handle network delays and slow verification
         # This prevents old confirmed bookings from being accessed via this URL
-        if booking.updated_at and (timezone.now() - booking.updated_at).total_seconds() > 600:
-            # If updated more than 10 minutes ago, redirect to my bookings
+        if booking.updated_at and (timezone.now() - booking.updated_at).total_seconds() > 1800:
+            logger.info(f"Success page access for old booking {booking_id} - redirecting to my bookings")
+            # If updated more than 30 minutes ago, redirect to my bookings
             return redirect('booking:my_bookings')
         
         # Ensure verification token exists
@@ -673,6 +684,8 @@ def payment_success(request, booking_id):
             booking.refresh_from_db()
             logger.info(f"Verification token ensured for booking {booking_id}")
         
+        logger.info(f"User successfully reached payment success page for booking {booking_id}")
+        
         context = {
             'booking': booking,
         }
@@ -680,7 +693,7 @@ def payment_success(request, booking_id):
         return render(request, 'booking/success.html', context)
         
     except Exception as e:
-        logger.error(f"Error in payment_success view: {str(e)}")
+        logger.error(f"Error in payment_success view for booking {booking_id}: {str(e)}", exc_info=True)
         messages.error(request, 'Unable to display booking confirmation')
         return redirect('booking:my_bookings')
 
@@ -738,7 +751,7 @@ def check_payment_status(request, booking_id):
         })
         
     except Exception as e:
-        logger.error(f"Error checking payment status: {str(e)}")
+        logger.error(f"Error checking payment status for booking {booking_id if 'booking_id' in locals() else 'unknown'}: {str(e)}", exc_info=True)
         return JsonResponse({
             'success': False,
             'error': 'Internal server error'

@@ -117,8 +117,10 @@ class GameCreationForm(forms.ModelForm):
         closing_time = self.cleaned_data.get('closing_time')
         
         if opening_time and closing_time:
-            if closing_time <= opening_time:
-                raise ValidationError("Closing time must be after opening time")
+            # Allow midnight (00:00) as valid closing time for overnight schedules
+            # This enables schedules like 17:00 (5 PM) to 00:00 (midnight)
+            if closing_time <= opening_time and closing_time != time(0, 0):
+                raise ValidationError("Closing time must be after opening time (use 00:00 for midnight)")
         
         return closing_time
     
@@ -132,6 +134,12 @@ class GameCreationForm(forms.ModelForm):
             # Calculate total operating hours
             opening_datetime = datetime.combine(datetime.today(), opening_time)
             closing_datetime = datetime.combine(datetime.today(), closing_time)
+            
+            # Handle overnight schedules (closing time is 00:00 or next day)
+            if closing_time <= opening_time and closing_time == time(0, 0):
+                # Add a day to closing time for midnight schedules
+                closing_datetime = closing_datetime + timedelta(days=1)
+            
             total_minutes = (closing_datetime - opening_datetime).total_seconds() / 60
             
             if duration > total_minutes:

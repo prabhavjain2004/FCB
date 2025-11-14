@@ -85,9 +85,9 @@ class Game(models.Model):
         if self.booking_type == 'SINGLE':
             self.shared_price = None
         
-        # Validate time range
-        if self.closing_time <= self.opening_time:
-            raise ValidationError("Closing time must be after opening time")
+        # Validate time range (allow 00:00 midnight as valid closing time)
+        if self.closing_time <= self.opening_time and self.closing_time != time(0, 0):
+            raise ValidationError("Closing time must be after opening time (use 00:00 for midnight)")
     
     def save(self, *args, **kwargs):
         """Override save to generate slots after game creation/update"""
