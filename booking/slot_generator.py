@@ -19,6 +19,41 @@ class SlotGenerator:
     """Enhanced utility class for generating game time slots"""
     
     @staticmethod
+    def ensure_slots_for_date(game, target_date):
+        """
+        Ensure slots exist for a specific date - generates if missing (ON-DEMAND)
+        This is called when a user requests slots for a specific date
+        
+        Args:
+            game: Game instance
+            target_date: Date to ensure slots for
+            
+        Returns:
+            bool: True if slots exist or were created, False on error
+        """
+        # Check if slots already exist for this date
+        existing_slots = GameSlot.objects.filter(
+            game=game,
+            date=target_date,
+            is_active=True
+        ).exists()
+        
+        if existing_slots:
+            return True  # Slots already exist
+        
+        # Generate slots for this specific date
+        try:
+            logger.info(f"🎯 On-demand: Generating slots for {game.name} on {target_date}")
+            created = SlotGenerator._generate_slots_for_date(game, target_date)
+            if created > 0:
+                logger.info(f"✅ On-demand: Created {created} slots for {game.name} on {target_date}")
+                return True
+            return False
+        except Exception as e:
+            logger.error(f"❌ On-demand generation failed for {game.name} on {target_date}: {e}")
+            return False
+    
+    @staticmethod
     def generate_slots_for_game(game, start_date, end_date):
         """
         Generate time slots for a game based on its schedule settings
@@ -645,7 +680,7 @@ class SlotGenerator:
         }
     
     @staticmethod
-    def regenerate_slots_for_game(game, preserve_bookings=True, days_ahead=30):
+    def regenerate_slots_for_game(game, preserve_bookings=True, days_ahead=2):
         """
         Regenerate all slots for a game (useful when schedule changes)
         
@@ -717,7 +752,7 @@ class SlotGenerator:
             raise ValidationError(error_msg)
     
     @staticmethod
-    def daily_slot_generation(days_ahead=30):
+    def daily_slot_generation(days_ahead=2):
         """
         Daily task to generate slots for all active games
         Should be run as a scheduled task (e.g., Django management command)

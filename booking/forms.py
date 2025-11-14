@@ -212,11 +212,11 @@ class GameUpdateForm(GameCreationForm):
         required=False,
         initial=False,
         widget=forms.CheckboxInput(attrs={
-            'class': 'h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded'
+            'class': 'h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded-300'
         }),
-        help_text="Check this to manually regenerate time slots. "
+        help_text="Check this to manually regenerate time slots for the next 2 days. "
                   "Slots will auto-regenerate if schedule settings change. "
-                  "Existing bookings will be preserved."
+                  "Additional dates will be generated on-demand when users browse them."
     )
     
     def __init__(self, *args, **kwargs):
@@ -263,8 +263,20 @@ class GameUpdateForm(GameCreationForm):
             regenerate_auto = self._schedule_changed()
             
             if regenerate_manual or regenerate_auto:
-                # Regenerate slots while preserving existing bookings
-                instance.generate_slots()
+                # 🗑️ DELETE old empty slots before regenerating (cleanup for schedule changes)
+                from datetime import date, timedelta
+                from .models import GameSlot
+                
+                # Delete all empty future slots (preserve booked ones)
+                GameSlot.objects.filter(
+                    game=instance,
+                    date__gte=date.today(),
+                    bookings__isnull=True,
+                    is_custom=False
+                ).delete()
+                
+                # Regenerate slots for next 2 days
+                instance.generate_slots(days_ahead=2)
             elif capacity_changed:
                 # If only capacity changed, update existing slot availabilities
                 self._update_slot_capacities(instance)

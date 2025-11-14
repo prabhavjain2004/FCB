@@ -17,7 +17,7 @@ class AutoSlotGenerator:
     """Automatically generate slots in the background"""
     
     CACHE_KEY_PREFIX = 'last_slot_check_'
-    DAYS_TO_MAINTAIN = 7  # Always maintain 7 days of slots ahead
+    DAYS_TO_MAINTAIN = 2  # Always maintain 2 days of slots ahead
     CHECK_INTERVAL = 3600  # Check once per hour (in seconds)
     
     @classmethod

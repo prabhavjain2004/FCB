@@ -477,6 +477,7 @@ class BookingService:
     def get_available_slots(game, date_from=None, date_to=None):
         """
         Get available slots for a game within a date range
+        ON-DEMAND: Automatically generates slots if they don't exist for requested dates
         
         Args:
             game: Game instance
@@ -487,11 +488,18 @@ class BookingService:
             QuerySet of available GameSlots with availability info
         """
         from datetime import date, timedelta
+        from .slot_generator import SlotGenerator
         
         if not date_from:
             date_from = date.today()
         if not date_to:
             date_to = date_from + timedelta(days=7)
+        
+        # 🎯 ON-DEMAND GENERATION: Ensure slots exist for the requested date range
+        current_date = date_from
+        while current_date <= date_to:
+            SlotGenerator.ensure_slots_for_date(game, current_date)
+            current_date += timedelta(days=1)
         
         # Get slots in date range
         slots = GameSlot.objects.filter(
